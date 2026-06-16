@@ -1,10 +1,33 @@
-.DS_Store
-.venv/
-__pycache__/
-.ipynb_checkpoints/
+# Local knowledge/docs
+llm-wiki/
+*.pdf
+AGENTS.md
+PRACTICAL_TRAINING_CYCLE.md
+PROJECT_FOLDER_AND_TRAINING_SCHEMA.md
+PROJECT_GUIDE.md
+PROJECT_STATE_AND_SOLUTION.md
+
 .llm-wiki-work/
-/llm-wiki/
-/celeba/
-/celeba.zip.download/
-data/celeba/images/*
-!data/celeba/images/.gitkeep
+.obsidian/
+tools/
+llm-wiki/
+dataset/
+celeba/
+celeba.zip.download/
+*.pdf
+*.pyc
+__pycache__/
+
+# Local datasets
+celeba/
+celeba.zip.download/
+dataset/
+cluster/data/celeba.zip
+cluster/data/celeba/img_align_celeba/
+
+# Generated/cache
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+.ipynb_checkpoints/
