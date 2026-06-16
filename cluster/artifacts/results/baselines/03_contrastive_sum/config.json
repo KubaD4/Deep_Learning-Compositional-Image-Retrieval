@@ -1,0 +1,9 @@
+{
+  "model_id": "openai/clip-vit-base-patch32",
+  "method": "contrastive_sum",
+  "top_ks": [
+    1,
+    5,
+    10
+  ]
+}
