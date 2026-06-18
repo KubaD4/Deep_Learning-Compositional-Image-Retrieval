@@ -1,0 +1,73 @@
+aggregation,metric,method,score,rank,best_baseline_method,absolute_delta_vs_best_baseline,absolute_delta_vs_direct_sum
+macro,Recall@1,Direct sum,0.0239667092673861,6,Contrastive sequential,-0.016669182176546598,0.0
+macro,Recall@1,Direct sequential,0.0280702691117029,5,Contrastive sequential,-0.012565622332229798,0.0041035598443168
+macro,Recall@1,Contrastive sum,0.0391165430965526,3,Contrastive sequential,-0.0015193483473800937,0.015149833829166504
+macro,Recall@1,Contrastive sequential,0.0406358914439327,1,Contrastive sequential,0.0,0.016669182176546598
+macro,Recall@1,Adaptive tangent sequential,0.0406052286267497,2,Contrastive sequential,-3.066281718299563e-05,0.016638519359363602
+macro,Recall@1,Learned gate,0.0346363345822247,4,Contrastive sequential,-0.005999556861708,0.010669625314838598
+macro,Recall@5,Direct sum,0.0718274033877898,6,Contrastive sequential,-0.0519821784210924,0.0
+macro,Recall@5,Direct sequential,0.0732718277811792,5,Contrastive sequential,-0.050537754027703,0.001444424393389404
+macro,Recall@5,Contrastive sum,0.1203871699842344,3,Contrastive sequential,-0.0034224118246477947,0.048559766596444606
+macro,Recall@5,Contrastive sequential,0.1238095818088822,1,Contrastive sequential,0.0,0.0519821784210924
+macro,Recall@5,Adaptive tangent sequential,0.1235346889432326,2,Contrastive sequential,-0.0002748928656495925,0.05170728555544281
+macro,Recall@5,Learned gate,0.1109263649628387,4,Contrastive sequential,-0.012883216846043502,0.0390989615750489
+macro,Recall@10,Direct sum,0.1084242092702599,6,Contrastive sequential,-0.0786515698207463,0.0
+macro,Recall@10,Direct sequential,0.1120602207326044,5,Contrastive sequential,-0.0750155583584018,0.0036360114623444906
+macro,Recall@10,Contrastive sum,0.170739441538459,3,Contrastive sequential,-0.01633633755254721,0.062315232268199086
+macro,Recall@10,Contrastive sequential,0.1870757790910062,1,Contrastive sequential,0.0,0.0786515698207463
+macro,Recall@10,Adaptive tangent sequential,0.1869269211269,2,Contrastive sequential,-0.00014885796410621377,0.07850271185664008
+macro,Recall@10,Learned gate,0.1601262148628818,4,Contrastive sequential,-0.02694956422812439,0.051702005592621905
+macro,Precision@1,Direct sum,0.0239667092673861,6,Contrastive sequential,-0.016669182176546598,0.0
+macro,Precision@1,Direct sequential,0.0280702691117029,5,Contrastive sequential,-0.012565622332229798,0.0041035598443168
+macro,Precision@1,Contrastive sum,0.0391165430965526,3,Contrastive sequential,-0.0015193483473800937,0.015149833829166504
+macro,Precision@1,Contrastive sequential,0.0406358914439327,1,Contrastive sequential,0.0,0.016669182176546598
+macro,Precision@1,Adaptive tangent sequential,0.0406052286267497,2,Contrastive sequential,-3.066281718299563e-05,0.016638519359363602
+macro,Precision@1,Learned gate,0.0346363345822247,4,Contrastive sequential,-0.005999556861708,0.010669625314838598
+macro,Precision@5,Direct sum,0.0175681307479561,6,Contrastive sequential,-0.013432561303929898,0.0
+macro,Precision@5,Direct sequential,0.0179070045179915,5,Contrastive sequential,-0.013093687533894498,0.0003388737700354
+macro,Precision@5,Contrastive sum,0.0296669903291397,3,Contrastive sequential,-0.0013337017227463,0.012098859581183598
+macro,Precision@5,Contrastive sequential,0.031000692051886,1,Contrastive sequential,0.0,0.013432561303929898
+macro,Precision@5,Adaptive tangent sequential,0.0309292179878408,2,Contrastive sequential,-7.147406404519815e-05,0.0133610872398847
+macro,Precision@5,Learned gate,0.0285540957479999,4,Contrastive sequential,-0.002446596303886099,0.010985965000043799
+macro,Precision@10,Direct sum,0.0147120343871258,6,Contrastive sequential,-0.012264074579846898,0.0
+macro,Precision@10,Direct sequential,0.0152957059322563,5,Contrastive sequential,-0.011680403034716399,0.0005836715451304989
+macro,Precision@10,Contrastive sum,0.0247404346071612,3,Contrastive sequential,-0.0022356743598115,0.010028400220035398
+macro,Precision@10,Contrastive sequential,0.0269761089669727,1,Contrastive sequential,0.0,0.012264074579846898
+macro,Precision@10,Adaptive tangent sequential,0.0268738588800076,2,Contrastive sequential,-0.00010225008696509996,0.012161824492881798
+macro,Precision@10,Learned gate,0.0237009805463546,4,Contrastive sequential,-0.003275128420618098,0.0089889461592288
+micro,Recall@1,Direct sum,0.0257170519181895,6,Contrastive sum,-0.008804308362580102,0.0
+micro,Recall@1,Direct sequential,0.0260196054701682,5,Contrastive sum,-0.008501754810601402,0.0003025535519786994
+micro,Recall@1,Contrastive sum,0.0345213602807696,1,Contrastive sum,0.0,0.008804308362580102
+micro,Recall@1,Contrastive sequential,0.0344608495703739,2,Contrastive sum,-6.051071039570033e-05,0.008743797652184401
+micro,Recall@1,Adaptive tangent sequential,0.034430594215176,3,Contrastive sum,-9.0766065593606e-05,0.008713542296986496
+micro,Recall@1,Learned gate,0.0323127193513251,4,Contrastive sum,-0.0022086409294445053,0.006595667433135596
+micro,Recall@5,Direct sum,0.0814776715478639,6,Contrastive sequential,-0.02801645891322771,0.0
+micro,Recall@5,Direct sequential,0.0827483964661745,5,Contrastive sequential,-0.0267457339949171,0.001270724918310609
+micro,Recall@5,Contrastive sum,0.1090100447779257,3,Contrastive sequential,-0.00048408568316590794,0.027532373230061802
+micro,Recall@5,Contrastive sequential,0.1094941304610916,1,Contrastive sequential,0.0,0.02801645891322771
+micro,Recall@5,Adaptive tangent sequential,0.1092520876195086,2,Contrastive sequential,-0.00024204284158300948,0.0277744160716447
+micro,Recall@5,Learned gate,0.1012949292024688,4,Contrastive sequential,-0.008199201258622807,0.019817257654604903
+micro,Recall@10,Direct sum,0.1247730848360159,6,Adaptive tangent sequential,-0.04199443301464359,0.0
+micro,Recall@10,Direct sequential,0.1263463633063052,5,Adaptive tangent sequential,-0.0404211545443543,0.001573278470289291
+micro,Recall@10,Contrastive sum,0.1664952196538787,3,Adaptive tangent sequential,-0.00027229819678079026,0.0417221348178628
+micro,Recall@10,Contrastive sequential,0.1665254750090766,2,Adaptive tangent sequential,-0.00024204284158288458,0.041752390173060705
+micro,Recall@10,Adaptive tangent sequential,0.1667675178506595,1,Adaptive tangent sequential,0.0,0.04199443301464359
+micro,Recall@10,Learned gate,0.1552099721650732,4,Adaptive tangent sequential,-0.011557545685586285,0.030436887329057305
+micro,Precision@1,Direct sum,0.0257170519181895,6,Contrastive sum,-0.008804308362580102,0.0
+micro,Precision@1,Direct sequential,0.0260196054701682,5,Contrastive sum,-0.008501754810601402,0.0003025535519786994
+micro,Precision@1,Contrastive sum,0.0345213602807696,1,Contrastive sum,0.0,0.008804308362580102
+micro,Precision@1,Contrastive sequential,0.0344608495703739,2,Contrastive sum,-6.051071039570033e-05,0.008743797652184401
+micro,Precision@1,Adaptive tangent sequential,0.034430594215176,3,Contrastive sum,-9.0766065593606e-05,0.008713542296986496
+micro,Precision@1,Learned gate,0.0323127193513251,4,Contrastive sum,-0.0022086409294445053,0.006595667433135596
+micro,Precision@5,Direct sum,0.0202650369115333,6,Contrastive sequential,-0.007527532373229999,0.0
+micro,Precision@5,Direct sequential,0.0205736415345516,5,Contrastive sequential,-0.007218927750211698,0.00030860462301830066
+micro,Precision@5,Contrastive sum,0.0276594457218927,3,Contrastive sequential,-0.0001331235628705997,0.007394408810359399
+micro,Precision@5,Contrastive sequential,0.0277925692847633,1,Contrastive sequential,0.0,0.007527532373229999
+micro,Precision@5,Adaptive tangent sequential,0.0277441607164467,2,Contrastive sequential,-4.840856831659843e-05,0.0074791238049134005
+micro,Precision@5,Learned gate,0.0262737504538302,4,Contrastive sequential,-0.0015188188309330983,0.006008713542296901
+micro,Precision@10,Direct sum,0.0176812295776351,6,Contrastive sum,-0.0065351567227398995,0.0
+micro,Precision@10,Direct sequential,0.0178627617088223,5,Contrastive sum,-0.006353624591552698,0.0001815321311872016
+micro,Precision@10,Contrastive sum,0.024216386300375,1,Contrastive sum,0.0,0.0065351567227398995
+micro,Precision@10,Contrastive sequential,0.0241831054096573,3,Contrastive sum,-3.328089071769763e-05,0.006501875832022202
+micro,Precision@10,Adaptive tangent sequential,0.024201258622776,2,Contrastive sum,-1.512767759899794e-05,0.0065200290451409015
+micro,Precision@10,Learned gate,0.0232875468958003,4,Contrastive sum,-0.0009288394045746974,0.005606317318165202

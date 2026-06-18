@@ -1,0 +1,50 @@
+[
+  {
+    "config_id": "cfg001",
+    "sampler_mode": "balanced_length",
+    "learning_rate": 0.0001,
+    "lambda_source": 0.02,
+    "residual_scale": 0.1,
+    "dropout": 0.1
+  },
+  {
+    "config_id": "cfg002",
+    "sampler_mode": "balanced_length",
+    "learning_rate": 0.0003,
+    "lambda_source": 0.02,
+    "residual_scale": 0.1,
+    "dropout": 0.1
+  },
+  {
+    "config_id": "cfg003",
+    "sampler_mode": "balanced_length",
+    "learning_rate": 0.0001,
+    "lambda_source": 0.0,
+    "residual_scale": 0.1,
+    "dropout": 0.1
+  },
+  {
+    "config_id": "cfg004",
+    "sampler_mode": "natural_length",
+    "learning_rate": 0.0001,
+    "lambda_source": 0.02,
+    "residual_scale": 0.1,
+    "dropout": 0.1
+  },
+  {
+    "config_id": "cfg005",
+    "sampler_mode": "balanced_length",
+    "learning_rate": 0.0001,
+    "lambda_source": 0.02,
+    "residual_scale": 0.2,
+    "dropout": 0.1
+  },
+  {
+    "config_id": "cfg006",
+    "sampler_mode": "balanced_length",
+    "learning_rate": 0.0001,
+    "lambda_source": 0.02,
+    "residual_scale": 0.1,
+    "dropout": 0.0
+  }
+]

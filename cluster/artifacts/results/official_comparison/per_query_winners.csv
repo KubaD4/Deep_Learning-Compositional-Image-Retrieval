@@ -1,0 +1,85 @@
+query_id,query,metric,best_method,best_score,second_method,second_score,absolute_margin
+0,+Smiling,Recall@1,Direct sum,0.0679063936481404,Direct sequential,0.0679063936481404,0.0
+0,+Smiling,Recall@5,Adaptive tangent sequential,0.1916005014625992,Contrastive sum,0.1913915587129126,0.00020894274968658033
+0,+Smiling,Recall@10,Learned gate,0.2649394066025909,Adaptive tangent sequential,0.2620142081069787,0.0029251984956122357
+0,+Smiling,Precision@1,Direct sum,0.0679063936481404,Direct sequential,0.0679063936481404,0.0
+0,+Smiling,Precision@5,Adaptive tangent sequential,0.051065608023401,Contrastive sum,0.0509820309235264,8.357709987460299e-05
+0,+Smiling,Precision@10,Learned gate,0.0430213121604673,Adaptive tangent sequential,0.0411826159632253,0.0018386961972420013
+1,+Eyeglasses,Recall@1,Learned gate,0.1020036429872495,Contrastive sum,0.0569216757741347,0.0450819672131148
+1,+Eyeglasses,Recall@5,Learned gate,0.2736794171220401,Contrastive sum,0.1671220400728597,0.10655737704918039
+1,+Eyeglasses,Recall@10,Learned gate,0.377959927140255,Contrastive sum,0.2518214936247723,0.1261384335154827
+1,+Eyeglasses,Precision@1,Learned gate,0.1020036429872495,Contrastive sum,0.0569216757741347,0.0450819672131148
+1,+Eyeglasses,Precision@5,Learned gate,0.0772313296903459,Contrastive sum,0.0410746812386159,0.03615664845173001
+1,+Eyeglasses,Precision@10,Learned gate,0.0642531876138428,Contrastive sum,0.0347905282331512,0.0294626593806916
+2,-Heavy_Makeup,Recall@1,Learned gate,0.0415953021776364,Contrastive sum,0.0288720332762417,0.012723268901394698
+2,-Heavy_Makeup,Recall@5,Learned gate,0.1242965500367017,Contrastive sum,0.1074137509175434,0.016882799119158298
+2,-Heavy_Makeup,Recall@10,Learned gate,0.1977000244678248,Contrastive sum,0.1685833129434793,0.0291167115243455
+2,-Heavy_Makeup,Precision@1,Learned gate,0.0415953021776364,Contrastive sum,0.0288720332762417,0.012723268901394698
+2,-Heavy_Makeup,Precision@5,Learned gate,0.0301443601663814,Contrastive sum,0.0240274039637878,0.006116956202593601
+2,-Heavy_Makeup,Precision@10,Learned gate,0.0266699290433078,Contrastive sum,0.0212870075850256,0.005382921458282199
+3,+Male,Recall@1,Contrastive sequential,0.0438871473354232,Contrastive sum,0.0438871473354232,0.0
+3,+Male,Recall@5,Adaptive tangent sequential,0.1529780564263322,Contrastive sum,0.1517241379310344,0.0012539184952977955
+3,+Male,Recall@10,Adaptive tangent sequential,0.2394984326018809,Contrastive sum,0.2376175548589341,0.0018808777429467904
+3,+Male,Precision@1,Contrastive sequential,0.0438871473354232,Contrastive sum,0.0438871473354232,0.0
+3,+Male,Precision@5,Adaptive tangent sequential,0.0423824451410659,Contrastive sum,0.0418808777429468,0.0005015673981191016
+3,+Male,Precision@10,Adaptive tangent sequential,0.0392476489028214,Contrastive sum,0.0390595611285268,0.00018808777429459717
+4,-Young,Recall@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
+4,-Young,Recall@5,Contrastive sequential,0.0397759103641456,Contrastive sum,0.0397759103641456,0.0
+4,-Young,Recall@10,Adaptive tangent sequential,0.0698412698412698,Contrastive sum,0.0696545284780578,0.0001867413632120063
+4,-Young,Precision@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
+4,-Young,Precision@5,Contrastive sequential,0.009859943977591,Contrastive sum,0.009859943977591,0.0
+4,-Young,Precision@10,Contrastive sequential,0.0094304388422036,Contrastive sum,0.0094304388422036,0.0
+5,+Blond_Hair,Recall@1,Contrastive sequential,0.038398244651673,Contrastive sum,0.038398244651673,0.0
+5,+Blond_Hair,Recall@5,Contrastive sequential,0.1263485097824099,Contrastive sum,0.1263485097824099,0.0
+5,+Blond_Hair,Recall@10,Contrastive sequential,0.1938197110989211,Contrastive sum,0.1938197110989211,0.0
+5,+Blond_Hair,Precision@1,Contrastive sequential,0.038398244651673,Contrastive sum,0.038398244651673,0.0
+5,+Blond_Hair,Precision@5,Contrastive sequential,0.033753885536661,Contrastive sum,0.033753885536661,0.0
+5,+Blond_Hair,Precision@10,Contrastive sequential,0.0301700493691712,Contrastive sum,0.0301700493691712,0.0
+6,+Mustache,Recall@1,Contrastive sequential,0.0963455149501661,Contrastive sum,0.0963455149501661,0.0
+6,+Mustache,Recall@5,Learned gate,0.1993355481727574,Contrastive sum,0.1827242524916943,0.016611295681063093
+6,+Mustache,Recall@10,Learned gate,0.2790697674418604,Contrastive sum,0.2524916943521594,0.026578073089701004
+6,+Mustache,Precision@1,Contrastive sequential,0.0963455149501661,Contrastive sum,0.0963455149501661,0.0
+6,+Mustache,Precision@5,Learned gate,0.0518272425249169,Contrastive sum,0.0498338870431893,0.0019933554817275975
+6,+Mustache,Precision@10,Learned gate,0.0411960132890365,Contrastive sum,0.0395348837209302,0.0016611295681063024
+7,-Young,Recall@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
+7,-Young,Recall@5,Contrastive sequential,0.0397759103641456,Contrastive sum,0.0397759103641456,0.0
+7,-Young,Recall@10,Adaptive tangent sequential,0.0698412698412698,Contrastive sum,0.0696545284780578,0.0001867413632120063
+7,-Young,Precision@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
+7,-Young,Precision@5,Contrastive sequential,0.009859943977591,Contrastive sum,0.009859943977591,0.0
+7,-Young,Precision@10,Contrastive sequential,0.0094304388422036,Contrastive sum,0.0094304388422036,0.0
+8,"+Eyeglasses, +Smiling",Recall@1,Contrastive sum,0.0522875816993464,Contrastive sequential,0.0490196078431372,0.003267973856209201
+8,"+Eyeglasses, +Smiling",Recall@5,Contrastive sequential,0.1879084967320261,Adaptive tangent sequential,0.1862745098039215,0.0016339869281045971
+8,"+Eyeglasses, +Smiling",Recall@10,Contrastive sequential,0.2712418300653594,Adaptive tangent sequential,0.2679738562091503,0.003267973856209083
+8,"+Eyeglasses, +Smiling",Precision@1,Contrastive sum,0.0522875816993464,Contrastive sequential,0.0490196078431372,0.003267973856209201
+8,"+Eyeglasses, +Smiling",Precision@5,Contrastive sequential,0.0444444444444443,Adaptive tangent sequential,0.0437908496732025,0.0006535947712418
+8,"+Eyeglasses, +Smiling",Precision@10,Learned gate,0.034640522875817,Contrastive sequential,0.0344771241830065,0.0001633986928105055
+9,"+Black_Hair, -Wavy_Hair",Recall@1,Contrastive sum,0.0388802488335925,Contrastive sequential,0.0381026438569206,0.0007776049766718973
+9,"+Black_Hair, -Wavy_Hair",Recall@5,Contrastive sum,0.1279160186625194,Contrastive sequential,0.1263608087091757,0.0015552099533436836
+9,"+Black_Hair, -Wavy_Hair",Recall@10,Contrastive sum,0.2107309486780715,Adaptive tangent sequential,0.2033437013996889,0.0073872472783825804
+9,"+Black_Hair, -Wavy_Hair",Precision@1,Contrastive sum,0.0388802488335925,Contrastive sequential,0.0381026438569206,0.0007776049766718973
+9,"+Black_Hair, -Wavy_Hair",Precision@5,Contrastive sum,0.0303265940902023,Contrastive sequential,0.0298600311041992,0.00046656298600309884
+9,"+Black_Hair, -Wavy_Hair",Precision@10,Contrastive sum,0.0286547433903577,Adaptive tangent sequential,0.0270217729393469,0.0016329704510108026
+10,"-Male, -Mustache",Recall@1,Direct sum,0.0,Direct sequential,0.0,0.0
+10,"-Male, -Mustache",Recall@5,Contrastive sequential,0.074074074074074,Contrastive sum,0.074074074074074,0.0
+10,"-Male, -Mustache",Recall@10,Contrastive sequential,0.074074074074074,Contrastive sum,0.074074074074074,0.0
+10,"-Male, -Mustache",Precision@1,Direct sum,0.0,Direct sequential,0.0,0.0
+10,"-Male, -Mustache",Precision@5,Contrastive sequential,0.0148148148148148,Contrastive sum,0.0148148148148148,0.0
+10,"-Male, -Mustache",Precision@10,Contrastive sequential,0.0111111111111111,Contrastive sum,0.0111111111111111,0.0
+11,"+Chubby, -Young",Recall@1,Contrastive sequential,0.0136986301369863,Contrastive sum,0.0136986301369863,0.0
+11,"+Chubby, -Young",Recall@5,Adaptive tangent sequential,0.0308219178082191,Contrastive sequential,0.0308219178082191,0.0
+11,"+Chubby, -Young",Recall@10,Adaptive tangent sequential,0.0496575342465753,Contrastive sequential,0.0496575342465753,0.0
+11,"+Chubby, -Young",Precision@1,Contrastive sequential,0.0136986301369863,Contrastive sum,0.0136986301369863,0.0
+11,"+Chubby, -Young",Precision@5,Adaptive tangent sequential,0.0068493150684931,Contrastive sequential,0.0068493150684931,0.0
+11,"+Chubby, -Young",Precision@10,Adaptive tangent sequential,0.0059931506849315,Contrastive sequential,0.0059931506849315,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@1,Adaptive tangent sequential,0.1139240506329113,Contrastive sequential,0.1139240506329113,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@5,Adaptive tangent sequential,0.2784810126582278,Contrastive sequential,0.2784810126582278,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@10,Adaptive tangent sequential,0.430379746835443,Contrastive sequential,0.430379746835443,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@1,Adaptive tangent sequential,0.1139240506329113,Contrastive sequential,0.1139240506329113,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@5,Adaptive tangent sequential,0.0708860759493671,Contrastive sequential,0.0708860759493671,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@10,Contrastive sequential,0.0658227848101265,Adaptive tangent sequential,0.0645569620253164,0.0012658227848101056
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@1,Direct sequential,0.0588235294117647,Direct sum,0.0294117647058823,0.029411764705882398
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@5,Learned gate,0.088235294117647,Direct sum,0.0588235294117647,0.029411764705882297
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@10,Direct sum,0.088235294117647,Direct sequential,0.088235294117647,0.0
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@1,Direct sequential,0.0588235294117647,Direct sum,0.0294117647058823,0.029411764705882398
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@5,Learned gate,0.0176470588235294,Direct sum,0.0117647058823529,0.005882352941176502
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@10,Direct sequential,0.0117647058823529,Learned gate,0.0117647058823529,0.0

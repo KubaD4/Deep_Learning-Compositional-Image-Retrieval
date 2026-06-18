@@ -1,16 +1,7 @@
-# Local knowledge/docs
-llm-wiki/
+# Local source PDFs / non-repo deliverables
 *.pdf
-AGENTS.md
-PRACTICAL_TRAINING_CYCLE.md
-PROJECT_FOLDER_AND_TRAINING_SCHEMA.md
-PROJECT_GUIDE.md
-PROJECT_STATE_AND_SOLUTION.md
 
-.llm-wiki-work/
 .obsidian/
-tools/
-llm-wiki/
 dataset/
 celeba/
 celeba.zip.download/
@@ -24,6 +15,19 @@ celeba.zip.download/
 dataset/
 cluster/data/celeba.zip
 cluster/data/celeba/img_align_celeba/
+!cluster/data/celeba/
+!cluster/data/celeba/annotations/
+!cluster/data/celeba/annotations/**
+!cluster/data/celeba/embeddings/
+!cluster/data/celeba/embeddings/**
+cluster/data/celeba/.DS_Store
+
+# Nested third-party/local tool state
+tools/**/.git/
+tools/**/.venv/
+tools/**/__pycache__/
+tools/**/*.pyc
+tools/**/.DS_Store
 
 # Generated/cache
 __pycache__/

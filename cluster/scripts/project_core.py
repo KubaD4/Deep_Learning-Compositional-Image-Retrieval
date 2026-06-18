@@ -37,6 +37,60 @@ METHOD_FOLDERS = {
 }
 
 
+def annotation_path(filename: str) -> Path:
+    """Return a CelebA annotation path across the two layouts used locally."""
+    candidates = [
+        CELEBA_DIR / filename,
+        CELEBA_DIR / "annotations" / filename,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    raise FileNotFoundError(
+        f"Missing CelebA annotation {filename}; checked "
+        + ", ".join(str(candidate) for candidate in candidates)
+    )
+
+
+def read_attribute_table() -> tuple[list[str], list[str], torch.Tensor]:
+    """Load CelebA attributes as filenames plus a {-1,+1} int8 tensor."""
+    path = annotation_path("list_attr_celeba.txt")
+    with path.open(encoding="utf-8") as handle:
+        _ = int(handle.readline().strip())
+        names = [name for name in handle.readline().split() if name]
+        filenames = []
+        rows = []
+        for line in handle:
+            parts = line.split()
+            if not parts:
+                continue
+            filenames.append(parts[0])
+            rows.append([1 if int(value) == 1 else -1 for value in parts[1:]])
+    if len(names) != 40:
+        raise RuntimeError(f"Expected 40 attributes, found {len(names)}")
+    return names, filenames, torch.tensor(rows, dtype=torch.int8)
+
+
+def read_identity_map() -> dict[str, int]:
+    path = annotation_path("identity_CelebA.txt")
+    identities = {}
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            filename, identity = line.split()
+            identities[filename] = int(identity)
+    return identities
+
+
+def read_partition_map() -> dict[str, int]:
+    path = annotation_path("list_eval_partition.txt")
+    partitions = {}
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            filename, partition = line.split()
+            partitions[filename] = int(partition)
+    return partitions
+
+
 def choose_device(requested: str = "auto") -> torch.device:
     if requested != "auto":
         device = torch.device(requested)

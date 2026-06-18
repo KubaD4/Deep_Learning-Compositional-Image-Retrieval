@@ -1,0 +1,714 @@
+                       This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                    Except for this watermark, it is identical to the accepted version;
+                              the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+        Not Only Text: Exploring Compositionality of Visual Representations
+                            in Vision-Language Models
+
+                           Davide Berasi1 Matteo Farina2 Massimiliano Mancini2
+                                     Elisa Ricci1, 2 Nicola Strisciuglio3
+                           1                              2                          3
+                               Fondazione Bruno Kessler       University of Trento       University of Twente
+
+
+
+                        Abstract
+
+Vision-Language Models (VLMs) learn a shared feature
+space for text and images, enabling the comparison of in-
+puts of different modalities. While prior works demon-
+strated that VLMs organize natural language representa-
+tions into regular structures encoding composite meanings,
+it remains unclear if compositional patterns also emerge
+in the visual embedding space. In this work, we investi-
+gate compositionality in the image domain, where the anal-
+ysis of compositional properties is challenged by noise and
+sparsity of visual data. We address these problems and
+propose a framework, called Geodesically Decomposable
+Embeddings (GDE), that approximates image representa-
+tions with geometry-aware compositional structures in the               Figure 1. Compositional structures in visual embedding space.
+latent space. We demonstrate that visual embeddings of pre-             (left) Pre-trained VLM represents visual inputs of composite
+                                                                        meanings in regular geometric shapes. The modularity of these
+trained VLMs exhibit a compositional arrangement, and
+                                                                        structures enables the separation of the primitive components and
+evaluate the effectiveness of this property in the tasks of
+                                                                        the composition of unseen combinations. (right) We evaluate
+compositional classification and group robustness. GDE                  the usefulness of these properties in compositional classification,
+achieves stronger performance in compositional classifica-              group robustness, and image generation.
+tion compared to its counterpart method that assumes lin-
+ear geometry of the latent space. Notably, it is particularly
+effective for group robustness, where we achieve higher re-             capability by developing models that imitate composi-
+sults than task-specific solutions. Our results indicate that           tional processes, e.g., solving complex tasks via sub-goals
+VLMs can automatically develop a human-like form of com-                [9, 31, 49, 61], modeling objects as compositions of their
+positional reasoning in the visual domain, making their un-             parts [13, 14, 47, 60, 62], encoding concept hierachies
+derlying processes more interpretable. Code is available                [11, 17, 33, 55], explicitly learning compositional represen-
+at https://github.com/BerasiDavide/vlm_image_                           tations [1, 18, 38, 44], or architectures [20, 24, 36, 63, 68].
+compositionality.                                                           With the rise of modern Vision-Language Models
+                                                                        (VLMs) [26, 54, 74] jointly trained on large-scale image-
+                                                                        text pairs, there has been growing interest in investigating
+1. Introduction                                                         whether these models exhibit instrinsic compositional be-
+                                                                        haviors [45, 52, 71]. In particular, Trager et al. [67] inves-
+Compositionality is the principle by which cognitive and
+                                                                        tigated latent compositional structures within the CLIP [54]
+computational systems create meaning of a complex expres-
+                                                                        text embedding space, demonstrating that composite con-
+sion by combining the meaning of its (simpler) parts [50,
+                                                                        cepts can be represented as linear combinations of embed-
+51]. Humans leverage compositionality instinctively, com-
+                                                                        ding vectors corresponding to various factors. These vec-
+bining known elements to interpret novel situations. In
+                                                                        tors, called ideal words, can be used to compose new con-
+machine intelligence, efforts were made to replicate this
+                                                                        cepts in the embedding space. Their work focuses on find-
+   Corresponding author: dberasi@fbk.eu.                                ing compositional structures in the text embedding space of
+
+
+
+                                                                 24917
+CLIP, motivated by the fact that the structured and symbolic      tion of simpler concepts to understand and reason on com-
+nature of language may facilitate the study of computational      plex ones, allowing for generalization to new unseen com-
+approaches to capture compositional meaning. However,             binations of concepts [31, 44, 60]. In computer vision,
+cognitive studies show that language itself is used to de-        early efforts focused on recognizing objects as composi-
+scribe and interpret the visual world and directly affects vi-    tion of parts [13, 14, 47, 48] and evolved into architec-
+sual perception [6]. Hence, similar to text, human visual         tures that can recognize and model objects in a composi-
+representations exhibit a compositional structure [19], made      tional fashion [60], compositional generation [49, 64, 76],
+of simpler components systematically combined. Despite            and interpretable representations [4, 63]. Compositionality
+this connection, compositional properties of visual embed-        has also lead to progress in various tasks, such as human-
+dings of VLMs have remained so far mostly unexplored.             object interaction detection, model spatial/semantic rela-
+     To fill this gap, in this paper, we introduce G EODESI -     tionships [21, 22, 28], and compositional zero-shot learn-
+CALLY D ECOMPOSABLE E MBEDDINGS (GDE), a frame-                   ing, where the goal is to recognize unseen compositions of
+work grounded in differential geometry and designed to            training primitives [37, 41–44]. While these works focus on
+investigate compositional structures of pre-trained embed-        specific applications, in this paper we aim to study whether
+dings within Riemannian manifolds (Fig.1). Visual em-             there exists an underlying compositional structure in the vi-
+beddings exhibit unique challenges not present in compo-          sual embeddings of VLMs.
+sitional analysis of text embeddings, namely data sparsity        Compositionality in VLMs. Modern Vision-Language
+in the compositional space and noise and ambiguity in im-         Models (VLMs) like CLIP [54] are trained to extract mean-
+ages. Specifically, we deal with the sparsity of composite        ingful representations from complex visual scenes guided
+concepts, as certain combinations of elementary primitives        by textual inputs without a priori imposing any form of
+may not appear in real image collections (e.g., focusing on       compositionality. In this context, a natural question is: Does
+objects and attributes, “blue dog” images are unlikely to ex-     compositional behavior emerge automatically in VLMs?
+ist). Noise and ambiguity concern additional visual cues              Previous works already showed how VLMs are more
+and information present in images, e.g. background, con-          suitable for tasks such as compositional zero-shot learn-
+text, etc., that do not correspond to the composite concepts.     ing [40, 45, 52], and how their representations allow for
+We evaluated the compositional representations computed           cross-modal compositions, such as visual editing [5, 29, 75]
+with the proposed approach in two relevant applications,          and compositional retrieval [3, 23, 27, 59]. At the same
+namely compositional classification and group robustness          time, works studied the challenges of VLMs in model com-
+(Fig. 1), considering publicly available datasets, showing        positional inputs, e.g., at the level of word order, object-
+that it better captures visual compositional structures than      attribute bindings, spatial relationships and other composi-
+the alternatives (e.g., [10]). GDE is particularly effective      tional challenges [23, 65, 66, 70].
+for group robustness, where we achieve better debiasing re-           In this paper, we study the compositional structure in the
+sults than task-specific methods. Furthermore, we show that       visual embeddings extracted from VLMs. Close to our goal
+GDE can be successfully used in combination with state-of-        is [35], studying the compositional properties of the CLIP
+the-art generative models to synthesize images of composi-        text encoder through compositional distributional seman-
+tional concepts. Our contributions are:                           tics models in synthetic test scenarios. Similarly, [67] show
+    i) We study compositional structures within visual em-        that the textual embeddings of VLMs can be well approx-
+       beddings for VLMs and demonstrate that the latent          imated by linear compositions of smaller sets of ideal vec-
+       representations of visual signals also exhibit a degree    tors. Motivated by the cross-modal alignment of VLMs, we
+       of compositionality.                                       investigate whether the embeddings of visual inputs exhibit
+   ii) We show that, unlike for text embeddings, linear struc-    an analogous compositional property. We achieve this by
+       tures are insufficient to (de)compose visual concepts;     constructing a geometry-aware decomposition framework,
+       thus, the manifold geometry must be considered.            following ideas similar to [46], where Principal Geodesic
+  iii) We propose a framework that deals with the sparsity        Analysis (PGA) [15] is applied to learn lower-dimensional
+       and noise of composite concepts in images, enabling        submanifolds of the CLIP sphere that are associated to dis-
+       the compositional analysis of visual embeddings.           tinct parts-of-speech. To the best of our knowledge, this is
+                                                                  the first work that investigates the emergence of composi-
+2. Related Work                                                   tional structures in the visual embeddings of VLMs.
+Compositionality in Vision. Compositionality is consid-           3. Method
+ered a cornerstone of perception [34], and compositional
+representations offer an effective tool to represent real-        We propose a framework to analyze the compositional prop-
+world phenomena [12]. The primary benefit of compo-               erties of image embeddings of neural encoders. We start
+sitionality is the possibility of combining the representa-       by reviewing the fundamentals of the CLIP model along
+
+
+
+                                                             24918
+with key concepts from differential geometry (Sec. 3.1).               3.2. Geodesically Decomposable Embeddings
+We then formalize the concept of geodesic decomposabil-
+                                                                       We now formalize our proposed notion of compositional
+ity (Sec. 3.2) and we discuss our methodology for dealing
+                                                                       embeddings. We consider a set of composite meanings
+with visual inputs (Sec. 3.3).
+                                                                       Z = Z1 × · · · × Zs , defined as the Cartesian product
+3.1. Preliminaries                                                     between finite lists of primitive concepts, and refer to the
+                                                                       Zi (i = 1, . . . , s) as the dimensions of Z. For example,
+Contrastive Language-Image Pretraining (CLIP) con-                     Z = {red, blue} × {car, dress, flower} combines primitives
+sists of a pre-trained image encoder ϕim : X → Rd and a                from an attribute dimension and an object dimension.
+text encoder ϕt : Y → Rd that represent multi-modal text-                  We then consider an embedding map ϕ : Z → M rep-
+visual inputs in a shared vision-language space. The latent            resenting the composite concepts as points on a manifold
+representations of an image x ∈ X and text y ∈ Y are com-              M ⊂ Rd . Intuitively, the set ϕ(Z) = {uz | z ∈ Z} is com-
+pared by cosine similarity, which is the scalar product u⊤
+                                                         x uy          positional if it has a regular structure reflecting the compos-
+of their normalized versions ux = ϕim (x)/||ϕim (x)||,                 ite nature of the inputs, i.e., if one can compose primitive
+uy = ϕt (y)/||ϕt (y)||. The weights of the encoders are                concepts within the geometric space to obtain embeddings
+trained to optimize a contrastive objective on a huge col-             of complex meanings. In this paper, we associate compo-
+lection of paired image-text samples. Since the norm of                sitionality to the notion of geodesic decomposability which
+CLIP embeddings does not carry any meaningful informa-                 accounts for the intrinsic geometry of the manifold.
+tion, spherical geometry applies to their post-hoc analysis.
+Riemannian Manifolds are geometric spaces where intrin-                Definition 1 (Geodesically decomposable embeddings). A
+sic distances can be measured. For a generic manifold                  set of embeddings ϕ(Z) = {uz | z ∈ Z} ⊂ M with in-
+M ⊂ Rd with intrinsic distance dM : M × M → [0, ∞),                    trinsic mean µ is geodesically decomposable if there exist
+we now recall the notions of exponential map and intrin-               vzi ∈ Tµ M for all zi ∈ Zi (i = 1, ..., s) such that
+sic mean. These tools permit operating with non-linear
+data, like the spherical normalized CLIP embeddings, while               uz = Expµ (vz1 + · · · + vzs )      ∀z = (z1 , . . . , zs ) (3)
+respecting their intrinsic shape. Let µ be a point on M                   Note that in a decomposable set ϕ(Z) a new valid de-
+and let Tµ M be the tangent space in µ. The exponential                composition is obtained by adding the same tangent vector
+map projects a tangent vector v ∈ Tµ M onto the mani-                  to all vzi and subtracting it from all vzj , for any i ̸= j.
+fold by moving along the geodesic segment it defines. For-             However, we can guarantee the uniqueness of the factoriza-
+mally, if γv : [0, 1] → M is the unique geodesic path                  tion by imposing a centering constraint.
+starting from γv (0) = µ with initial velocity γ̇v (0) = v,
+then Expµ (v) := γv (1). This function is locally invert-              Lemma 1. Let ϕ(Z) be a geodesically decomposable set.
+ible and its inverse is the logarithmic map Logµ = Exp−1  µ .
+                                                                       Then therePexist unique vectors vzi ∈ Tµ M for all zi ∈ Zi
+The exponential and logarithmic maps send straight lines               such that zi ∈Zi vzi = 0 for all i = 1, . . . , s and Eq. (3)
+of the tangent plane into geodesic curves of the manifold,             holds.
+and vice-versa. Moreover, they approximately preserve dis-             For an intuitive interpretation, the intrinsic mean µ of a de-
+tances between elements close to the point of tangency µ:              composable set can be seen as the context of the decomposi-
+ dM (u, u′ ) ≈ || Logµ (u) − Logµ (u′ )||,     u, u′ ∈ M (1)           tion, and each unique direction vzi represents the meaning
+                                                                       of the primitive concept zi relative to µ. These “universal
+Note that in (1) the equality holds if u = µ or u′ = µ. When           directions” are combined by addition on the tangent space
+applying the logarithmic map to a set of points {ui }N    i=1 ⊂        Tµ M. The exponential map of the resulting tangent vector
+M, the natural choice for the point of tangency µ is the               defines the geodesic segment on the manifold M from µ to
+intrinsic mean, i.e., the element of M minimizing the aver-            the corresponding composite meaning (see Fig. 2).
+age squared distance to the given points. In a more general               Our notion of geodesic decomposability is general and
+definition, each point ui (i = 1, . . . , N ) is associated to a       applicable to manifolds of any shape. It generalizes that
+scalar weight wi belonging to a probability-simplex vector             of [67], which is equivalent to ours in the special case
+∆N and the (weighted) intrinsic mean is:                               M = Rn , where the intrinsic mean is the arithmetic mean,
+                                                                       and the exponential and logarithmic maps behave like the
+                            N
+                            X                                          identity function. Our manifold formalization agrees with
+              µ = arg min         wi dM (u, ui )2           (2)
+                     u∈M                                               the fact that lower-dimensional semantic subspaces in CLIP
+                            i=1
+                                                                       latent space are captured by submanifolds better than linear
+This distance-minimizing element µ guarantees that the im-             subspaces [46].
+ages of the points through the logarithmic
+                                   P       map are centered            Best decomposable approximation. Decomposable sets
+in the origin of the tangent space: i wi Logµ (ui ) = 0.               live in a lower dimension subspace of their manifold M.
+
+
+
+                                                               24919
+The dimension of Span({vzi }zi ∈Zi ) is indeed at most
+|Zi | − 1 for all i = 1, . . . , s, implying the additive com-
+binations of the primitive
+                       P directions belong to a subspace
+of dimension at most i (|Zi | − 1). This suggests that a
+generic set of embeddings {uz } is unlikely to be perfectly
+decomposable. We thus search for its best decomposable
+approximation, that is the set {ũz } that minimizes the error
+                     X
+                          dM (uz , ũz )2                   (4)
+                        z∈Z
+
+In general, this is a hard problem to solve. Similarly to the
+standard solution to Principal Geodesic Analysis [15], we
+use Eq. (1) to approximate the objective in the “simpler”
+Euclidean space Tµ M, and rewrite Eq. (4) as:
+              X
+                   || Logµ (uz ) − Logµ (ũz )||2 ,       (5)
+               z∈Z
+
+The solution to the approximate problem is obtained by
+computing vector means in Tµ M, as described in the next                 Figure 2. Sketch of our decomposition method. (top-left) Each
+proposition. For a fixed primitive concept zi ∈ Zi , let                 concept in Z ={red, blue}×{□, △} is represented by k = 5 em-
+Z(zi ) = {(z1′ , . . . , zr′ ) ∈ Z | zi′ = zi } denote the slice of Z    beddings on a manifold. (bottom) These are mapped in the tangent
+containing all tuples with the i-th component equal to zi .              space where optimal primitive directions are computed as vector
+                                                                         means and combined by addition. (top-right) The obtained com-
+Proposition 1. Given a set ϕ(Z) = {uz | z ∈ Z} ⊂ M                       positions are mapped back to the manifold to obtain a decompos-
+with intrinsic mean µ, the minimization problem                          able approximation of the input embeddings.
+                  X
+        arg min        || Logµ (uz ) − Logµ (ũz )||2 ,
+          {ũz } z∈Z                                    (6)             an image from the tuple z = (red, car) likely contains non-
+             s.t. {ũz } is geodesically decomposable                   negligible extra information, e.g. a driver, a road, or a blue
+                                                                        sky in the background. This stems from the inherent am-
+is solved by ũz = Expµ (vz1 + · · · + vzr ), where                     biguity and non-uniqueness of visual signals. Most impor-
+                                                                        tantly, it is absent in text, for which it is easier to manually
+                          1          X
+                                                                        craft the string “a red car” ensuring no extra information.
+               vzi =                          Logµ (uz )         (7)
+                        |Z(zi )|                                        Problem formulation. Since images contain noise in ad-
+                                   z∈Z(zi )
+                                                                        dition to represented concepts, we consider an input set
+                                                                        ϕ(Z × E) = {u(z,e) | (z, e) ∈ Z × E} where each z is
+            P
+Moreover,       zi ∈Zi vzi = 0 for all i = 1, . . . , s.
+                                                                        represented by k = |E| different image embeddings vary-
+    This result tells us that each vector vzi in the optimal            ing along the unknown noise dimension E. Also, differ-
+decomposition is the tangent mean of all the input compo-               ent images may contain different amounts of noise. For
+sitions including the primitive zi . Moreover, the choice of            each fixed z, we model this aspect with a probability dis-
+the intrinsic mean as the point of tangency guarantees the              tribution {p(z,e) }e∈E describing how well the elements in
+uniqueness constraint is satisfied (see Appendix for details).          {u(z,e) }e∈E represent their label z. In this setting, we want
+3.3. Decomposable Embeddings of Visual Inputs                           the decomposable set {ũz }z∈Z minimizing the objective
+                                                                                          X
+Our framework holds for arbitrary manifolds and for any                                            p(z,e) dM (u(z,e) , ũz )2 ,      (8)
+embedding map, hence being independent of the input                                    (z,e)∈Z×E
+modality. However, collections of natural visual data con-              where the importance given to the approximation error for
+tain noise and are sparse. We account for these properties              each input embedding is weighted according to the noise
+in our framework as presented in the following.                         distribution. The next result generalizes Proposition 1,
+                                                                        which addresses the special case k = 1, and provides an
+3.3.1   Removing noise from finite image sets                           easy-to-compute approximate solution to the problem.
+We refer to noise as information carried by images in ad-                                Pp(z,e) , (z, e) ∈ Z × E, be non-negative
+                                                                        Proposition 2. Let
+dition to the composite concept of interest. For example,               scalars such that e∈E p(z,e) = 1 for each z ∈ Z, and let
+
+
+
+                                                                    24920
+ϕ(Z × E) = {u(z,e) | (z, e) ∈ Z × E} ⊂ M be a set of em-                          Note that the obtained decomposable set contains vector
+beddings with weighted   intrinsic mean µ w.r.t. the weights                      representations of all the concepts in Z, including the un-
+                                                                                  seen elements of Z \ Z ′ . The formulation in (11) deals with
+                 P
+w(z,e) = p(z,e) / (z,e) p(z,e) . The minimization problem:
+                 X                                                                all aspects mentioned so far: the manifold M, noise, and
+  arg min                   p(z,e) || Logµ (u(z,e) ) − Logµ (ũz )||2 ,           sparsity. In the next section, we use it to evaluate the com-
+    {ũz }
+             (z,e)∈Z×E                                                            positional structure of real visual embeddings.
+                                                                                  Noise distribution. The described setup requires the noise
+        s.t. {ũz } is geodesically decomposable
+                                                                                  scores p(z,e) . Given a collection of visual inputs T repre-
+                                                                       (9)
+                                                                                  senting each label z ∈ Z ′ with kz > 0 elements, a sim-
+is solved by ũz = Expµ (vz1 + · · · + vzs ), where
+                                                                                  ple choice is using uniform scores p(z,e) = 1/kz . Alterna-
+           1            X                      X                                  tively, we propose using the CLIP image-to-text distribution
+vzi =                            vz ,   vz =         p(z,e) Logµ (u(z,e) )        p(z,e) = P((z, e)|y(z)), where y(z) is a text prompt for la-
+         |Z(zi )|
+                      z∈Z(zi )                 e∈E                                bel z ∈ Z ′ . This is the softmax of the scaled similarities
+                                                                      (10)
+                                                                                                             exp(u⊤ (z,e) uy(z) /t)
+             P
+Moreover,        zi ∈Zi vzi = 0 for all i = 1, . . . , s.
+                                                                                           P((z, e)|y(z)) = P         ⊤
+                                                                                                                                          (12)
+   Fig. 2 visualizes the decomposition procedure. Notice                                                      e exp(u(z,e) uy(z) /t)
+
+that, using the same notation of the proposition, the vec-                        The temperature parameter t is learned during training, but
+tors vz can be seen as a denoised tangent representation of                       it can be tweaked to smooth or sharpen the distribution.
+the tuples in Z and the solution {ũz }z∈Z to the weighted
+optimization problem corresponds to the decomposable ap-                          4. Experimental Validation
+proximation given by Proposition 1 applied to the denoised
+embeddings {uz := Expµ (vz )}z∈Z . Indeed, these have                             We carry out experiments to analyze the decomposable
+intrinsic mean equal to the weighted intrinsic mean µ.                            properties of visual embeddings of VLMs. When not speci-
+                                                                                  fied differently, we use the pre-trained CLIP ViT-L/14 [54].
+Lemma 2. Using the notation of Proposition 2, the set                             We also consider CLIP ResNet50 [54] and SigLIP [72]. All
+{uz := Expµ (vz )}z∈Z has intrinsic mean µ.                                       considered models are from the OpenCLIP repository [8].
+                                                                                  We use images with attribute-object labels to represent sets
+3.3.2    Dealing with sparsity in finite image sets                               of composite concepts of the form Z = Zattr × Zobj .
+                                                                                      In this setup, we first assess the decomposable nature
+The previously described setup assumes that every z ∈ Z is                        of small sets of embeddings inspecting their geometric ar-
+represented by k > 0 images. This requirement can be too                          rangement according to Proposition 2 (Sec. 4.1). Then, we
+restrictive in practice, because some combinations of prim-                       leverage the structured nature of the decomposed embed-
+itives may not occur in real image collections. For exam-                         dings and experiment on the tasks of compositional clas-
+ple, if Z = {red, blue} × {car, apple}, there will probably                       sification (Sec. 4.2) and group robustness (Sec. 4.3). Fi-
+be no pictures of a (blue, apple). We refer to the absence                        nally, we visualize the approximate decomposable embed-
+of composite concepts as sparsity. Once more, please note                         dings using a diffusion model (StableDiffusion v2.1 [57])
+that sparsity is not an issue with text, since strings can be                     with the unCLIP technique [56] (Sec. 4.4).
+manually crafted for any z ∈ Z.                                                   Attribute-object decomposition. We usually deal with
+Problem Formulation. In general, in a labeled image col-                          sparse collections of visual inputs T where only a subset Z ′
+lection, only a subset T ⊂ Z × E is available, and only                           of labels present at least one image. Thus, we compute the
+a subgroup Z ′ ⊂ Z of composite concepts is represented                           embedding decomposition according to Eq. (11): the opti-
+by at least one element in T . In this scenario, we obtain                        mal vectors ũ(a,o) = Expµ (va + vo ) are the combinations
+a decomposable approximation of ϕ(T ) by approximating
+                                                                                  of the attribute directions va = Z ′1(a) o v(a,o) and the ob-
+                                                                                                                          P
+the vector means in Eq. (10) with the mean of the avail-
+                                                                                  ject directions vo = Z ′1(o) a v(a,o) , where the denoised
+                                                                                                                P
+able elements. The only requirement is that every primitive
+zi ∈ Zi (i = 1, . . . , s) appears in at least one tuple of Z ′ .                 representations v(a,o) , (a, o) ∈ Z ′ , are the mean tangent
+                                                                                  vectors within pairs. For compositional classification and
+Precisely, we first compute the weighted  P intrinsic mean µ
+of ϕ(T ) with weights w(z,e) = p(z,e) / (z,e)∈T p(z,e) , and                      group robustness, we use the CLIP image-to-text probabil-
+then consider ũz = Expµ (vz1 + · · · + vzs ), where:                             ities as the noise distribution discussed in Sec. 3.3.2. We
+                                                                                  finetune the temperature parameter (see Appendix for de-
+             1          X                      X                                  tails). In the other experiments, we utilize uniform scores.
+vzi =                            vz , vz =           p(z,e) Logµ (u(z,e) )
+        |Z ′ (zi )|                                                               Datasets. We represent composite concepts with images
+                      z∈Z ′ (zi )         e∈E s.t.
+                                          (z,e)∈T                                 from the training sets of diverse compositional datasets. We
+                                                                      (11)        test compositional classification on the typical benchmark
+
+
+
+                                                                             24921
+datasets UT-Zappos [69] and MIT-states [25] with the splits                      k=1                                         k=5                                        k = 30
+from [53]. UT-Zappos contains images of shoes centered on                                                      0.3                                         0.2
+                                                                      0.6
+a white background all sharing the same orientation. There                                                     0.0                                         0.0
+are 12 object classes referring to the footwear type and 16           0.0
+
+attribute categories referring to the material. MIT-states is a                                               -0.3                                        -0.2
+                                                                               0.0   0.6                             -0.4     0.0            0.4                 -0.3    0.0       0.3
+collection of natural objects in different states. The dataset
+contains 115 attribute categories and 245 object categories,                   k=1                                          k=5                                   k = 30
+generating a large number of possible combinations.                                                                                                0.2                                  0.2
+                                                                                                        0.2
+    We test group robustness on the Waterbirds and CelebA                                               0.0                                        0.0                                  0.0
+datasets with the splits in [58]. These contain objects with                                        -0.2                                           -0.2                             -0.2
+spuriously correlated attributes, making them suitable for                                        0.3                                            0.2                              0.2
+                                                                      -0.2 0.0              0.0               -0.3                         0.0            -0.2 0.0             0.0
+debiasing tasks. Waterbirds contains images of two bird                        0.2   -0.3                             0.0           -0.2                           0.2     -0.2
+                                                                                                                            0.3
+species Zobj ={waterbird, landbird} on two types of back-
+                                                                   Figure 3. (top) 2-D projections of image embeddings representing
+ground Zattr ={land, water}. We use the version of CelebA
+                                                                   the 2 × 2 composite labels of the Waterbirds dataset. (bottom) 3-
+from [58] that contains close-ups photos of celebrities la-
+                                                                   D projections of image embeddings representing 2 × 3 composite
+beled with hair-color Zobj = {blonde, dark} and gender             labels with images from the UT-Zappos dataset. Denoised pair
+Zattr ={male, female}. The data distribution over the four         representations (marked with a black contour) are computed with
+different groups is highly unbalanced in the train sets of         k = 1, 5, 30 randomly selected images.
+these two datasets, implying spurious correlations.
+
+4.1. Visualizing Compositional Embeddings
+                                                                   labels in the test set are in Z ′ . In the closed-world setting,
+We evaluated the decomposability of the embeddings from            the set of target labels Z test ⊂ Z contains only the pairs ap-
+a geometric perspective. We visualize lower-dimensional            pearing in the dataset, while in the open-world framework,
+PCA projections of the tangent vectors {v(a,o) }, con-             no prior knowledge is assumed and all the attribute-object
+sidering that the denoised representations u(a,o) :=               combinations in Z test = Z are considered. Both settings
+Expµ (v(a,o) ) are geodesically decomposable if and only if        require generalizing the prior knowledge about the primi-
+their tangent directions are the vertices of a geometric shape     tives to understand the unseen compositions in Z test \ Z ′ .
+with parallel faces. For example, decomposable sets of size        This operation is particularly challenging in the open-world
+|Z| = 2 × 2 and |Z| = 2 × 3 correspond to a parallelogram          scenario, where the more numerous novel compositions in
+and a triangular prism, respectively.                              the test set are a distraction for the predictor.
+   In Fig. 3 we show the (first row) 2-D projection of                Our framework provides a straightforward solution to
+image embeddings from the Waterbirds dataset, rep-                 the complex problem of compositional classification. The
+resenting the four compositions of two attributes and              geodesically decomposable set {ũ(a,o) } computed with
+two objects, and the (second row) 3-D projection of                the full train data T represents all the pairs, includ-
+the two-by-three concepts in the set {leather, suede} ×            ing the unseen ones. Thus we classify an image x
+{boots ankle, boots knee high, shoes flats} of the UT-             as arg max(a,o)∈Z test ũ⊤ (a,o) ux . We evaluate the predic-
+Zappos dataset. By increasing the number k of images per           tion with the standard metrics [7, 53]: attribute accu-
+pair, the noise is successfully removed and the resulting          racy (ATTR), object accuracy (OBJ), best seen accuracy
+representations define shapes with parallel faces, indicating      (SEEN), best unseen accuracy (UNSEEN), best harmonic
+approximate geodesical decomposability. This highlights            mean (HM) between the seen and unseen accuracy and area
+the importance of the denoising step and demonstrates              under the seen-unseen curve (AUC).
+compositional regularities of visual embeddings.                   Baselines. Our primary goal is to examine if the Geodesi-
+                                                                   cally Decomposable Embeddings (GDE) approximating
+4.2. Compositional Classification                                  the train data contain semantically meaningful information
+We perform compositional classification on the UT-Zappos           about the composite concepts they represent. We evaluate
+and MIT-states datasets using the decomposable approxi-            the relative performance ρ (AUC ratio) obtained with de-
+mation of the train data as classifiers. This task serves to       composed embeddings w.r.t. the results achieved with the
+evaluate the generalization capabilities towards novel com-        standard zero-shot baseline (CLIP) using the full-state em-
+positions of objects and states. Specifically, we follow the       beddings (attribute-object labels (a, o) ∈ Z test are repre-
+standard generalized zero-shot evaluation protocol in both         sented by the text embedding of “An image of a {a} {o}”).
+closed-world and open-world scenarios [41].                           We investigate the importance of complying with data
+   We compute decomposable embeddings on a subset                  geometry and compare with the Linearly Decomposable
+Z ′ ⊂ Z of seen pairs from the training set, while not all         Embeddings (LDE) proposed in [67], which we compute
+
+
+
+                                                              24922
+                                                                                CLOSED - WORLD                                                                OPEN - WORLD
+   DATASET           M ETHOD                   ATTR           O BJ      S EEN     U NSEEN HM          AUC              ρ             ATTR     O BJ    S EEN    U NSEEN HM             AUC           ρ
+                     CLIP [54]                  24.1      58.3          11.9        45.7    15.3          4.4          -             18.8     57.4    11.9           23.8     12.0     2.3           -
+                     LDE ( TEXT )* [67]         24.1      58.8          11.9        45.7    14.1           4.0      92.4 %           19.2     57.2    11.9           20.0     11.1     1.9       83.2 %
+ UT-Z APPOS          GDE ( TEXT )               25.3      60.0          17.0        48.2    18.9          6.4      146.6 %           18.7     59.9    17.0           21.4     12.2     2.5      111.1 %
+                     LDE ( IMAGE )              13.9      52.6           5.6        32.1     6.6           0.9      21.1 %            9.8     48.0    5.6            14.9      2.3     0.2        8.9 %
+                     GDE ( IMAGE )              36.3      64.1          31.4        55.9    29.3          13.9     317.9 %           28.6     61.7    31.3           33.3     19.0     6.7      293.5 %
+                     CLIP [54]                  33.0      52.1          30.6        45.3    26.3          11.1        -              15.6     47.7    30.6           8.3      8.4      1.7          -
+                     LDE ( TEXT )* [67]         30.6      51.2          24.7        43.0    21.9           8.2     73.4 %            21.1     50.7    24.7           13.8     11.9     2.5      148.1 %
+ MIT- STATES         GDE ( TEXT )               32.6      51.7          27.8        45.2    24.5          10.0     89.7 %            21.3     49.9    27.8           13.0     12.1     2.6      158.5 %
+                     LDE ( IMAGE )              15.3      30.5          15.0        20.9    11.1           2.0     18.4 %            11.0     34.8    15.0            5.6      4.6     0.4       27.1 %
+                     GDE ( IMAGE )              28.1      45.3          30.7        36.1    23.4          8.6      77.7 %            18.5     43.6    29.7           8.5      9.3      1.8      106.6 %
+
+Table 1. Compositional classification results on the UT-Zappos and MIT-states datasets. Highest values within modality are in bold and
+“*” indicates that the results of our implementation are shown.
+
+                                                     CLIP, RN50                                                  CLIP, V I T-L/ 14                                    S IG LIP, V I T-SO400M/ 14
+  DATASET      M ETHOD         ATTR   O BJ   S EEN    U NSEEN HM         AUC       ρ       ATTR    O BJ     S EEN U NSEEN HM         AUC      ρ       ATTR    O BJ    S EEN U NSEEN HM AUC              ρ
+               CLIP [54]       24.4   40.5   4.8       41.9       6.7     1.5        -     24.1    58.3     11.9     45.7     15.3   4.4        -      52.5   74.4    44.9    68.1    39.2   24.6       -
+ UT-Z APPOS    LDE ( IMAGE )   15.1   44.6   3.2       21.7       4.7     0.5     33.5 %   13.9    52.6     5.6      32.1      6.6    0.9    21.1 %    21.4   50.3     7.0    42.1     8.2    1.6    6.5 %
+               GDE ( IMAGE )   28.2   56.1   24.0      43.7      23.7     8.6    578.5 %   36.3    64.1     31.4     55.9     29.3   13.9   317.9 %    48.1   72.4    42.5    68.7    41.3   24.7   100.4 %
+               CLIP [54]       26.6   42.3   23.5      35.2      19.4     6.2       -      33.0    52.1     30.6     45.3     26.3   11.1      -       45.9   61.2    43.8    58.1    39.7   22.2      -
+ MIT- STATES   LDE ( IMAGE )   13.7   25.1   10.6      16.2       8.0     1.1    17.8 %    15.3    30.5     15.0     20.9     11.1    2.0   18.4 %     18.7   34.6    18.6    27.2    14.6    3.6   16.1 %
+               GDE ( IMAGE )   20.8   34.4   18.9      25.1      14.2     3.4    54.9 %    28.1    45.3     30.7     36.1     23.4    8.6   77.7 %     32.3   50.3    36.8    40.8    27.3   11.9   53.6 %
+
+                           Table 2. Ablation on backbone architecture in compositional classification, closed-world scenario.
+
+
+by setting M = Rn in our method, for both text and image                                                      ased embeddings. We evaluate it on the group robustness
+modalities. We indicate the modality by adding “( TEXT )”                                                     benchmark presented in [58], which requires classifying an
+or “( IMAGE )” next to method names. Decomposed text-                                                         image without leveraging spurious correlations. In this set-
+embeddings are given by Proposition 1, as noise and spar-                                                     ting, a set of target classes Zobj has spurious correlations
+sity belong only to visual data.                                                                              with a set of attributes Zattr due to the highly unbalanced
+Results. Table 1 reports the results in the closed-word and                                                   data distribution over the groups in G = Zattr × Zobj . The
+open-world settings. In general, GDEs of visual data per-                                                     goal is to obtain an object classifier that does not exploit
+form closely to the zero-shot full-state baseline, demonstrat-                                                spurious correlations, improving the average accuracy over
+ing they encode semantically meaningful information about                                                     all the groups (AVG) while keeping the (GAP) on the worst
+the labels. Interestingly, on the UT-Zappos dataset, they                                                     group accuracy (WG) small. We use the object embeddings
+improve the standard zero-shot approach by a large mar-                                                       ũo := Expµ (vo ), o ∈ Zobj computed with our method to
+gin. We attribute this gap to the fact that in UT-Zappos                                                      evaluate the group robustness performance. Intuitively,
+numerous representations are used for the computation of                                                      these embed only object representations that are not corre-
+each primitive direction on average (∼1400 per attribute,                                                     lated with attribute-related spurious features. We thus pre-
+∼1900 per object). In contrast, the MIT-states dataset con-                                                   dict the object class of an image x as arg maxo∈Zobj ũ⊤
+                                                                                                                                                                     o ux .
+tains noisy annotations [2] and on average fewer represen-                                                    Baselines. In addition to the zero-shot CLIP and LDE
+tations to compute the primitives (∼260 per attribute, ∼120                                                   method, we include two standard baselines that use labeled
+per object). The decomposition shows robustness to spar-                                                      data, namely Empirical Risk Minimization (ERM) with lin-
+sity, as indicated by the good open-world unseen accuracy                                                     ear probing [32] and ERM with feature adapters [16]. Fur-
+on the MIT-states datasets, for which seen pairs are less than                                                thermore, we compare with two recent methods improv-
+5% of the total. LDE for visual data performs much worse                                                      ing the performance of VLMs, Deep Feature Reweighting
+than GDE on both datasets and when ablating the VLM                                                           (DFR) [30] and Contrastive Adapters (CA) [73], and with
+backbone (see Tab. 2). This indicates that image embed-                                                       FairerCLIP [10] that performs debiasing of the frozen CLIP
+dings are not closely linearly decomposable, and highlights                                                   representations in the training-free setting like our method.
+the importance of respecting the data geometry when deal-
+ing with the extra complexity given by noise and sparsity.                                                    Results. Table 3 reports the results on the group robustness
+This verifies also on other geometries (see Appendix).                                                        benchmarks. GDE considerably outperforms CLIP and
+                                                                                                              LDE , with an increase of WG accuracy on the Waterbirds
+4.3. Group Robustness                                                                                         and CelebA datasets of about 42 and 21.8, respectively.
+                                                                                                              This indicates that our method effectively decomposes the
+Pre-trained VLMs produce biased representations, leading                                                      embeddings of object and attribute primitives, producing
+to zero-shot classifiers not robust to group shifts [73]. Our                                                 robust classifiers. Notably, it achieves state-of-the-art WG
+framework offers a training-free method to compute unbi-                                                      accuracy and smaller Gap compared to all other methods
+
+
+
+                                                                                                  24923
+                                                                                                   a: rubber           a: leather         a: faux fur         a: patent leather
+                                         WATERBIRDS                   C ELEBA                      o: boots mid-calf   o: shoes oxfords   o: boots mid-calf   o: sandals
+ M ETHOD                                WG AVG G AP                 WG AVG G AP
+ CLIP [54]                              44.4   84.3     40.0        74.4    86.9    12.4
+ LDE ( TEXT ) [67]                      64.6   88.0     23.3        83.9    85.5     1.6
+ ERM L INEAR P ROBE [32]                65.4   97.7     32.3        30.4    94.6    64.2
+ ERM A DAPTER [16]                      76.1   97.8     21.7        40.0    94.3    54.3
+ DFR (S UBSAMPLE ) [30]                 58.8   95.9     37.1        78.7    91.8    13.1           a: diced            a: tiny            a: old              a: inflated
+                                                                                                   o: fruit            o: tiger           o: clock            o: boat
+ DFR (U PSAMPLE ) [30]                  66.5   96.4     29.8        83.9    91.2     7.2
+ CA [73]                                85.3   94.5      9.3        83.9    90.4     6.4
+ FAIRER CLIP [10]                       86.0   92.2      6.1        85.2    87.8     2.5
+ GDE ( IMAGE )                          86.4   91.5      5.0        87.5    87.9     0.4
+
+           Table 3. Comparison of results on group robustness.
+                                                                                                   o1 : cat            o1 : elephant      o1 : tiger          o1 : cat
+                   Waterbirds                                   CelebA                             o2 : tiger          o2 : horse         o2 : bear           o2 : bear
+
+  90
+                                               88
+  80
+
+  70                                           87
+
+                                       WG                                          WG
+  60
+                                       Avg     86                                  Avg
+
+       5      25         50       75    100         5    25         50       75     100         Figure 5. Attribute-object pairs generated using decomposed em-
+                   % support samples                          % support samples
+                                                                                                beddings with StableDiffusion for the UT-Zappos (first row) and
+Figure 4. Data efficiency of GDE on the group robustness bench-                                 MIT-states (second row) datasets. The two leftmost labels are seen
+mark. Subsets of the full support set are sampled keeping the                                   pairs, while the two right-most are unseen pairs. We also generate
+group ratios fixed. The shaded confidence band shows the stan-                                  object-object pairs (third row) blending animal species.
+dard deviation over five experiments.
+
+
+that use labeled data, including the task-specific FairerCLIP.                                     The modularity of the decomposable structures allows
+GDE is thus an effective training-free solution to compute                                      representing the composition of two objects o1 , o2 ∈ Zobj
+unbiased embeddings. Furthermore, GDE demonstrates                                              as Expµ (vo1 + vo2 ). Inspired by [39], we experiment with
+remarkable data-efficiency performance, achieving high re-                                      blending different animal species (Fig. 5, third row). The
+sults using limited amount of data (see Fig. 4). For exam-                                      generated images portray photorealistic creatures with fea-
+ple, when using 25% of the full train samples (randomly                                         tures of the two input species. This further highlights the
+selected keeping group ratios fixed) the WG decreases less                                      power and versatility of the proposed framework. More
+than 1% on both the Waterbirds and CelebA datasets.                                             generated images are in the Appendix.
+
+4.4. Visualize Decomposable Approximations
+                                                                                                5. Conclusion
+We visualize the decomposed visual embeddings using a
+diffusion model implementing the unCLIP mechanism (Sta-                                         We investigated the emergence of compositional structures
+bleDiffusion v2.1) [56, 57], trained to invert the CLIP image                                   within the image latent space of vision-language models
+encoder by conditioning the generative process with the im-                                     and demonstrated that visual embeddings also exhibit a de-
+age embeddings. We invert the decomposable vectors ũ(a,o)                                      gree of compositionality similar to that of textual represen-
+obtained in previous experiments. In this way, we can qual-                                     tations. We proposed a training-free framework, Geodesi-
+itatively examine the information they contain.                                                 cally Decomposable Embeddings (GDE), designed to ad-
+    In Fig. 5 we show some generated images for object-                                         dress the noisy and sparse nature of image data. GDE de-
+attribute pairs where the attribute is not the most common                                      composes visual representations as a geometry-aware com-
+state of the object (i.e. we avoid common pairs like “green                                     bination of optimal directions representing primitive con-
+broccoli” or “big elephant”), observing whether the gener-                                      cepts. We demonstrated that these composed representa-
+ated image correctly represents the full label and not just the                                 tions encode complex concepts and are effective in several
+attribute/object. The generated images well represent both                                      tasks, including compositional classification and group ro-
+the object and the attribute of the label, with no difference in                                bustness. Notably, GDE presents more robust abilities to
+the quality of the outputs from seen (two leftmost columns)                                     perform compositionality than existing approaches based
+and unseen pairs (two rightmost columns). This empha-                                           on linear decomposition of latent spaces, contributing to
+sizes the generalization properties of our decomposable im-                                     higher results in group robustness than existing task-specific
+age embeddings, with potential to be applied in practical                                       methods. We believe this work contributes to achieving bet-
+tasks like augmenting compositional sparse datasets.                                            ter interpretability and controllability of modern VLMs.
+
+
+
+                                                                                           24924
+Acknowledgements. This work was sponsored by                         [14] Martin A Fischler and Robert A Elschlager. The representa-
+the ERJU project, the EU Horizon project ELIAS                            tion and matching of pictorial structures. IEEE Transactions
+(No.     101120237), Ministero delle Imprese e del                        on computers, 100(1):67–92, 1973. 1, 2
+Made in Italy (IPCEI Cloud DM 27 giugno 2022                         [15] P Thomas Fletcher, Conglin Lu, Stephen M Pizer, and
+– IPCEI-CL-0000007), and the FAIR - Future AI                             Sarang Joshi. Principal geodesic analysis for the study of
+Research (PE00000013), funded by NextGeneration                           nonlinear statistics of shape. IEEE TMI, 23(8):995–1005,
+EU. The authors acknowledge the CINECA award                              2004. 2, 4
+under the ISCRA initiative for the availability of                   [16] Peng Gao, Shijie Geng, Renrui Zhang, Teli Ma, Rongyao
+high-performance computing resources and support.                         Fang, Yongfeng Zhang, Hongsheng Li, and Yu Qiao.
+                                                                          Clip-adapter: Better vision-language models with feature
+                                                                          adapters. IJCV, 132(2):581–595, 2024. 7, 8
+References                                                           [17] Songwei Ge, Shlok Mishra, Simon Kornblith, Chun-Liang
+                                                                          Li, and David Jacobs. Hyperbolic contrastive learning for vi-
+ [1] Jacob Andreas. Measuring compositionality in representa-             sual representations beyond objects. In CVPR, pages 6840–
+     tion learning. In ICLR, 2019. 1                                      6849, 2023. 1
+ [2] Yuval Atzmon, Felix Kreuk, Uri Shalit, and Gal Chechik.         [18] Yunye Gong, Srikrishna Karanam, Ziyan Wu, Kuan-Chuan
+     A causal view of compositional zero-shot recognition.                Peng, Jan Ernst, and Peter C Doerschuk. Learning compo-
+     NeurIPS, 33:1462–1473, 2020. 7                                       sitional visual concepts with mutual consistency. In CVPR,
+ [3] Alberto Baldrati, Lorenzo Agnolucci, Marco Bertini, and Al-          2018. 1
+     berto Del Bimbo. Zero-shot composed image retrieval with        [19] Alon Hafri, E. J. Green, and Chaz Firestone. Compositional-
+     textual inversion. In ICCV, 2023. 2                                  ity in visual perception. Behavioral and Brain Sciences, 46:
+ [4] Moritz Böhle, Mario Fritz, and Bernt Schiele. B-cos net-            e277, 2023. 2
+     works: Alignment is all we need for interpretability. In        [20] Irina Higgins, Nicolas Sonnerat, Loic Matthey, Arka Pal,
+     CVPR, 2022. 2                                                        Christopher P Burgess, Matko Bošnjak, Murray Shanahan,
+ [5] Duygu Ceylan, Chun-Hao P Huang, and Niloy J Mitra.                   Matthew Botvinick, Demis Hassabis, and Alexander Lerch-
+     Pix2video: Video editing using image diffusion. In ICCV,             ner. Scan: Learning hierarchical compositional visual con-
+     2023. 2                                                              cepts. In ICLR, 2018. 1
+ [6] Sarah Chabal and Viorica Marian. Speakers of different lan-     [21] Zhi Hou, Xiaojiang Peng, Yu Qiao, and Dacheng Tao. Vi-
+     guages process the visual world differently. Journal of Ex-          sual compositional learning for human-object interaction de-
+     perimental Psychology: General, 144(3):539–550, 2015. 2              tection. In ECCV, 2020. 2
+ [7] Wei-Lun Chao, Soravit Changpinyo, Boqing Gong, and Fei          [22] Zhi Hou, Baosheng Yu, and Dacheng Tao. Discovering
+     Sha. An empirical study and analysis of generalized zero-            human-object interaction concepts via self-compositional
+     shot learning for object recognition in the wild. In ECCV,           learning. In ECCV, 2022. 2
+     pages 52–68. Springer, 2016. 6                                  [23] Cheng-Yu Hsieh, Jieyu Zhang, Zixian Ma, Aniruddha Kem-
+ [8] Mehdi Cherti, Romain Beaumont, Ross Wightman, Mitchell               bhavi, and Ranjay Krishna. Sugarcrepe: Fixing hackable
+     Wortsman, Gabriel Ilharco, Cade Gordon, Christoph Schuh-             benchmarks for vision-language compositionality. NeurIPS,
+     mann, Ludwig Schmidt, and Jenia Jitsev. Reproducible scal-           2023. 2
+     ing laws for contrastive language-image learning. In CVPR,      [24] Drew A Hudson and Christopher D Manning. Compositional
+     pages 2818–2829, 2023. 5                                             attention networks for machine reasoning. In ICLR, 2018. 1
+ [9] Konrad Czechowski, Tomasz Odrzygóźdź, Marek Zbysiński,      [25] Phillip Isola, Joseph J. Lim, and Edward H. Adelson. Dis-
+     Michał Zawalski, Krzysztof Olejnik, Yuhuai Wu, Łukasz                covering states and transformations in image collections. In
+     Kuciński, and Piotr Miłoś. Subgoal search for complex rea-         CVPR, 2015. 6
+     soning tasks. NeurIPS, 2021. 1                                  [26] Chao Jia, Yinfei Yang, Ye Xia, Yi-Ting Chen, Zarana Parekh,
+[10] Sepehr Dehdashtian, Lan Wang, and Vishnu Naresh Boddeti.             Hieu Pham, Quoc Le, Yun-Hsuan Sung, Zhen Li, and Tom
+     Fairerclip: Debiasing zero-shot predictions of clip in rkhss.        Duerig. Scaling up visual and vision-language representation
+     In ICLR, 2024. 2, 7, 8                                               learning with noisy text supervision. In ICML, pages 4904–
+[11] Karan Desai, Maximilian Nickel, Tanmay Rajpurohit, Justin            4916, 2021. 1
+     Johnson, and Shanmukha Ramakrishna Vedantam. Hyper-             [27] Shyamgopal Karthik, Karsten Roth, Massimiliano Mancini,
+     bolic image-text representations. In ICML, pages 7694–               and Zeynep Akata. Vision-by-language for training-free
+     7731. PMLR, 2023. 1                                                  compositional image retrieval. In ICLR, 2024. 2
+[12] Jacob Feldman. Probabilistic origins of compositional men-      [28] Keizo Kato, Yin Li, and Abhinav Gupta. Compositional
+     tal representations. Psychological Review, 131(3):599–624,           learning for human object interaction. In ECCV, 2018. 2
+     2024. 2                                                         [29] Bahjat Kawar, Shiran Zada, Oran Lang, Omer Tov, Huiwen
+[13] Pedro Felzenszwalb, David McAllester, and Deva Ra-                   Chang, Tali Dekel, Inbar Mosseri, and Michal Irani. Imagic:
+     manan. A discriminatively trained, multiscale, deformable            Text-based real image editing with diffusion models. In
+     part model. In CVPR, 2008. 1, 2                                      CVPR, 2023. 2
+
+
+
+
+                                                                 24925
+[30] Polina Kirichenko, Pavel Izmailov, and Andrew Gordon Wil-          [47] Bjorn Ommer and Joachim Buhmann. Learning the com-
+     son. Last layer re-training is sufficient for robustness to spu-        positional nature of visual object categories for recognition.
+     rious correlations. In ICLR, 2023. 7, 8                                 IEEE TPAMI, 32(3):501–516, 2009. 1, 2
+[31] Jayanth Koushik, Hiroaki Hayashi, and Devendra Singh               [48] Bjorn Ommer and Joachim M Buhmann. Learning the com-
+     Sachan. Compositional reasoning for visual question an-                 positional nature of visual objects. In CVPR, 2007. 2
+     swering. In ICML, 2017. 1, 2                                       [49] Dim P Papadopoulos, Youssef Tamaazousti, Ferda Ofli, In-
+[32] Ananya Kumar, Aditi Raghunathan, Robbie Matthew Jones,                  gmar Weber, and Antonio Torralba. How to make a pizza:
+     Tengyu Ma, and Percy Liang. Fine-tuning can distort pre-                Learning a compositional layer-based gan model. In CVPR,
+     trained features and underperform out-of-distribution. In               2019. 1, 2
+     ICLR, 2022. 7, 8                                                   [50] Barbara Partee et al. Lexical semantics and compositional-
+[33] Aditya Kusupati, Gantavya Bhatt, Aniket Rege, Matthew                   ity. An invitation to cognitive science: Language, 1:311–360,
+     Wallingford, Aditya Sinha, Vivek Ramanujan, William                     1995. 1
+     Howard-Snyder, Kaifeng Chen, Sham Kakade, Prateek Jain,            [51] Barbara H Partee. Compositionality in formal semantics: Se-
+     et al. Matryoshka representation learning. NeurIPS, 35:                 lected papers. John Wiley & Sons, 2008. 1
+     30233–30249, 2022. 1                                               [52] Pramuditha Perera, Matthew Trager, Luca Zancato, Alessan-
+[34] Kevin J. Lande. Compositionality in perception: A frame-                dro Achille, and Stefano Soatto. Prompt algebra for task
+     work. WIREs Cognitive Science, 15(6):e1691, 2024. 2                     composition. arXiv preprint arXiv:2306.00310, 2023. 1, 2
+[35] Martha Lewis, Nihal Nayak, Peilin Yu, Jack Merullo, Qinan          [53] Senthil Purushwalkam, Maximilian Nickel, Abhinav Gupta,
+     Yu, Stephen Bach, and Ellie Pavlick. Does CLIP bind con-                and Marc’Aurelio Ranzato. Task-driven modular networks
+     cepts? probing compositionality in large image models. In               for zero-shot compositional learning. In ICCV, 2019. 6
+     Findings of the Association for Computational Linguistics:         [54] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+     EACL 2024, pages 1487–1500, 2024. 2                                     Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+[36] Xilai Li, Xi Song, and Tianfu Wu. Aognets: Compositional                Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learn-
+     grammatical architectures for deep learning. In CVPR, 2019.             ing transferable visual models from natural language super-
+     1                                                                       vision. In ICML, pages 8748–8763. PMLR, 2021. 1, 2, 5, 7,
+[37] Yong-Lu Li, Yue Xu, Xiaohan Mao, and Cewu Lu. Sym-                      8
+     metry and group in attribute-object compositions. In CVPR,         [55] Sameera Ramasinghe, Violetta Shevchenko, Gil Avraham,
+     2020. 2                                                                 and Ajanthan Thalaiyasingam. Accept the modality gap: An
+[38] Renjie Liao, Alex Schwing, Richard Zemel, and Raquel                    exploration in the hyperbolic space. In CVPR, pages 27263–
+     Urtasun.     Learning deep parsimonious representations.                27272, 2024. 1
+     NeurIPS, 2016. 1                                                   [56] Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu,
+[39] Giorgio Longari, Lorenzo Olearo, Simone Melzi, Rafael                   and Mark Chen. Hierarchical text-conditional image gener-
+     Peñaloza, and Alessandro Raganato. How to blend concepts               ation with clip latents. arXiv preprint arXiv:2204.06125, 1
+     in diffusion models. arXiv preprint arXiv:2407.14280, 2024.             (2):3, 2022. 5, 8
+     8                                                                  [57] Robin Rombach, Andreas Blattmann, Dominik Lorenz,
+[40] Xiaocheng Lu, Song Guo, Ziming Liu, and Jingcai Guo. De-                Patrick Esser, and Björn Ommer. High-resolution image syn-
+     composed soft prompt guided fusion enhancing for compo-                 thesis with latent diffusion models. In CVPR, pages 10684–
+     sitional zero-shot learning. In CVPR, 2023. 2                           10695, 2022. 5, 8
+[41] Massimiliano Mancini, Muhammad Ferjad Naeem, Yongqin               [58] Shiori Sagawa, Pang Wei Koh, Tatsunori B. Hashimoto, and
+     Xian, and Zeynep Akata. Open world compositional zero-                  Percy Liang. Distributionally robust neural networks. In
+     shot learning. In CVPR, pages 5222–5230, 2021. 2, 6                     ICLR, 2020. 6, 7
+[42] Massimiliano Mancini, Muhammad Ferjad Naeem, Yongqin               [59] Kuniaki Saito, Kihyuk Sohn, Xiang Zhang, Chun-Liang Li,
+     Xian, and Zeynep Akata. Learning graph embeddings for                   Chen-Yu Lee, Kate Saenko, and Tomas Pfister. Pic2word:
+     open world compositional zero-shot learning. IEEE TPAMI,                Mapping pictures to words for zero-shot composed image
+     46(3):1545–1560, 2022.                                                  retrieval. In CVPR, 2023. 2
+[43] Ishan Misra, Abhinav Gupta, and Martial Hebert. From red           [60] Sascha Saralajew, Lars Holdijk, Maike Rees, Ebubekir Asan,
+     wine to red tomato: Composition with context. In CVPR,                  and Thomas Villmann. Classification-by-components: Prob-
+     2017.                                                                   abilistic modeling of reasoning over a set of components.
+[44] Tushar Nagarajan and Kristen Grauman. Attributes as op-                 NeurIPS, 2019. 1, 2
+     erators: factorizing unseen attribute-object compositions. In      [61] Jürgen Schmidhuber. Towards compositional learning in dy-
+     ECCV, 2018. 1, 2                                                        namic networks. Technical University of Munich (Technical
+[45] Nihal V. Nayak, Peilin Yu, and Stephen Bach. Learning to                Report FKI-129-90), 1990. 1
+     compose soft prompts for compositional zero-shot learning.         [62] Zhangzhang Si and Song-Chun Zhu. Learning and-or tem-
+     In ICLR, 2023. 1, 2                                                     plates for object recognition and detection. IEEE TPAMI, 35
+[46] James Oldfield, Christos Tzelepis, Yannis Panagakis, Mi-                (9):2189–2205, 2013. 1
+     halis Nicolaou, and Ioannis Patras. Parts of speech–grounded       [63] Austin Stone, Huayan Wang, Michael Stark, Yi Liu, D
+     subspaces in vision-language models. NeurIPS, 36:2700–                  Scott Phoenix, and Dileep George. Teaching composition-
+     2724, 2023. 2, 3                                                        ality to cnns. In CVPR, 2017. 1, 2
+
+
+
+
+                                                                    24926
+[64] Fuwen Tan, Song Feng, and Vicente Ordonez. Text2scene:
+     Generating compositional scenes from textual descriptions.
+     In CVPR, 2019. 2
+[65] Tristan Thrush, Ryan Jiang, Max Bartolo, Amanpreet
+     Singh, Adina Williams, Douwe Kiela, and Candace Ross.
+     Winoground: Probing vision and language models for visio-
+     linguistic compositionality. In CVPR, 2022. 2
+[66] Shengbang Tong, Zhuang Liu, Yuexiang Zhai, Yi Ma, Yann
+     LeCun, and Saining Xie. Eyes wide shut? exploring the
+     visual shortcomings of multimodal llms. In CVPR, 2024. 2
+[67] Matthew Trager, Pramuditha Perera, Luca Zancato, Alessan-
+     dro Achille, Parminder Bhatia, and Stefano Soatto. Lin-
+     ear spaces of meanings: compositional structures in vision-
+     language models. In ICCV, pages 15395–15404, 2023. 1, 2,
+     3, 6, 7, 8
+[68] Jianyu Wang and Alan L Yuille. Semantic part segmenta-
+     tion using compositional model combining shape and ap-
+     pearance. In CVPR, 2015. 1
+[69] Aron Yu and Kristen Grauman. Fine-grained visual compar-
+     isons with local learning. In CVPR, pages 192–199, 2014.
+     6
+[70] Mert Yuksekgonul, Federico Bianchi, Pratyusha Kalluri,
+     Dan Jurafsky, and James Zou. When and why vision-
+     language models behave like bags-of-words, and what to do
+     about it? In ICLR, 2023. 2
+[71] Tian Yun, Usha Bhalla, Ellie Pavlick, and Chen Sun. Do
+     vision-language pretrained models learn composable primi-
+     tive concepts? TMLR, 2023. 1
+[72] Xiaohua Zhai, Basil Mustafa, Alexander Kolesnikov, and
+     Lucas Beyer. Sigmoid loss for language image pre-training.
+     In ICCV, 2023. 5
+[73] Michael Zhang and Christopher Ré. Contrastive adapters
+     for foundation model group robustness. NeurIPS, 35:21682–
+     21697, 2022. 7, 8
+[74] Yizhen Zhang, Minkyu Choi, Kuan Han, and Zhongming
+     Liu. Explainable semantic space by grounding language to
+     vision with cross-modal contrastive learning. Advances in
+     Neural Information Processing Systems, 34:18513–18526,
+     2021. 1
+[75] Zhixing Zhang, Ligong Han, Arnab Ghosh, Dimitris N
+     Metaxas, and Jian Ren. Sine: Single image editing with text-
+     to-image diffusion models. In CVPR, 2023. 2
+[76] Bo Zhao, Bo Chang, Zequn Jie, and Leonid Sigal. Modular
+     generative adversarial networks. In ECCV, 2018. 2
+
+
+
+
+                                                                24927
+

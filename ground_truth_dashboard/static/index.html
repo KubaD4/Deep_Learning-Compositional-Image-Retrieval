@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CelebA Ground Truth Explorer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Deep Learning · UNITN 2025/2026</p>
+          <h1>CelebA Ground Truth Explorer</h1>
+          <p class="lede">
+            Naviga le sorgenti del JSON, verifica la mappatura indice → file e confronta gli attributi dei target validi.
+          </p>
+        </div>
+        <div class="dataset-stat" aria-label="Dimensione test set">
+          <strong id="test-size">—</strong>
+          <span>immagini nel test split</span>
+        </div>
+      </header>
+
+      <section class="control-panel" aria-label="Controlli dashboard">
+        <label class="field query-field">
+          <span>Query</span>
+          <select id="query-select"></select>
+        </label>
+
+        <label class="field index-field">
+          <span>Dataset index</span>
+          <div class="input-action">
+            <input id="source-input" type="number" min="0" max="19961" inputmode="numeric" />
+            <button id="jump-button" class="small-button" type="button">Apri</button>
+          </div>
+        </label>
+
+        <div class="pager" aria-label="Navigazione sorgenti">
+          <button id="previous-button" class="arrow-button" type="button" aria-label="Sorgente precedente">←</button>
+          <div class="pager-copy">
+            <span id="position-label">—</span>
+            <small>usa anche ← e →</small>
+          </div>
+          <button id="next-button" class="arrow-button" type="button" aria-label="Sorgente successiva">→</button>
+        </div>
+      </section>
+
+      <section class="query-summary">
+        <div>
+          <span class="section-kicker">Modifica richiesta</span>
+          <div id="query-chips" class="chips"></div>
+        </div>
+        <div class="mapping-note">
+          <span>Mapping corretto</span>
+          <strong id="mapping-label">—</strong>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Confronto visivo</span>
+            <h2>Sorgente + tutti i target validi</h2>
+          </div>
+          <p id="target-count" class="muted"></p>
+        </div>
+        <div class="target-navigation">
+          <button id="previous-targets" class="small-button" type="button">← 5 target</button>
+          <label class="target-slider-field">
+            <span id="target-range-label">Target —</span>
+            <input id="target-slider" type="range" min="0" max="0" value="0" step="1" />
+          </label>
+          <button id="next-targets" class="small-button" type="button">5 target →</button>
+          <button id="same-identity-button" class="same-identity-button" type="button">Trova stesso ID</button>
+        </div>
+        <div class="gallery-shell" aria-live="polite">
+          <div id="source-gallery" class="source-gallery"></div>
+          <div id="target-gallery" class="target-gallery"></div>
+        </div>
+      </section>
+
+      <section class="matrix-section">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Join sugli attributi</span>
+            <h2>Matrice CelebA completa</h2>
+          </div>
+          <p class="muted">Le colonne colorate appartengono alla query. Scorri orizzontalmente.</p>
+        </div>
+        <div id="attribute-matrix" class="matrix-wrap"></div>
+      </section>
+
+      <div id="error-box" class="error-box" hidden></div>
+    </main>
+
+    <template id="image-card-template">
+      <article class="image-card">
+        <div class="card-heading">
+          <div>
+            <span class="card-role"></span>
+            <strong class="card-index"></strong>
+          </div>
+          <span class="identity-badge"></span>
+        </div>
+        <div class="image-frame">
+          <img class="face-image" alt="" />
+        </div>
+        <div class="card-meta">
+          <code class="filename"></code>
+          <div class="quality-row"></div>
+          <div class="active-attributes"></div>
+        </div>
+      </article>
+    </template>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

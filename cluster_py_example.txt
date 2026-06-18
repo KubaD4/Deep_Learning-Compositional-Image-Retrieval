@@ -1,0 +1,183 @@
+cat inference.py
+#!/usr/bin/env python3
+import os
+import json
+import torch
+import torch.nn as nn
+from torchvision import models, transforms
+import torchvision.transforms.functional as TF
+from PIL import Image, ImageDraw, ImageFont
+import shutil
+
+# ==============================================================================
+# CONFIGURAZIONE PERCORSI
+# ==============================================================================
+PROJECT_ROOT = "/mnt/meditech/group1"
+DATA_DIR     = os.path.join(PROJECT_ROOT, "data/ml_dataset")
+STATS_PATH   = os.path.join(PROJECT_ROOT, "results/training_output/dataset_stats.json")
+
+# Rimosso lo slash prima di scripts_kuba
+MODEL_WEIGHTS = os.path.join(
+    PROJECT_ROOT, 
+    "scripts_kuba/training_output/hpsearch_v4_20260419_120733/cfg000_lrH7e-04_lrB4e-05_b16_blk8_do0.1_b10.95_l1/best_model.pth"
+)
+
+# Rimosso lo slash prima di results
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "results/training_output/inference_results")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# Pazienti di test indicati
+TEST_PTS = [
+    # training
+    "pz214",
+    "pz213",
+    "pz052",
+    "pz015",
+    
+    #validation
+    "pz112",
+    "pz113",
+    "pz017",
+    "pz070",
+    
+    #test
+    "pz090",
+    "pz116",
+    "pz001",
+    "pz200",
+    "pz204"
+]
+
+IMG_SIZE = 512
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# ==============================================================================
+# ARCHITETTURA MODELLO
+# ==============================================================================
+def build_model(dropout: float = 0.1) -> nn.Module:
+    model = models.resnet50(weights=None)
+    
+    # Sostituzione pooling per preservare asse Y 
+    model.avgpool = nn.AdaptiveAvgPool2d((16, 1))
+
+    # Sostituzione fully connected
+    model.fc = nn.Sequential(
+        nn.Dropout(p=dropout),
+        nn.Linear(2048 * 16, 512),
+        nn.BatchNorm1d(512),
+        nn.ReLU(),
+        nn.Dropout(p=dropout * 0.5),
+        nn.Linear(512, 1),
+    )
+    return model
+
+# ==============================================================================
+# TRASFORMAZIONI
+# ==============================================================================
+class TopLeftCropPad:
+    def __init__(self, size):
+        self.size = size
+    def __call__(self, img):
+        w, h = img.size
+        pad_w, pad_h = max(0, self.size - w), max(0, self.size - h)
+        if pad_w > 0 or pad_h > 0:
+            img = TF.pad(img, (0, 0, pad_w, pad_h), fill=0)
+        return TF.crop(img, top=0, left=0, height=self.size, width=self.size)
+
+# ==============================================================================
+# SCRIPT PRINCIPALE
+# ==============================================================================
+def main():
+    print(f"=== INIZIO INFERENZA ===")
+    print(f"Device in uso: {DEVICE}")
+    
+    # 1. Caricamento statistiche per normalizzazione
+    if not os.path.exists(STATS_PATH):
+        print(f"ERRORE: file stats non trovato in {STATS_PATH}")
+        return
+    with open(STATS_PATH, "r") as f:
+        stats = json.load(f)
+    my_mean, my_std = stats["mean"], stats["std"]
+    
+    # Definisci i transform
+    crop_pad = TopLeftCropPad(IMG_SIZE)
+    transform_tensor = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=my_mean, std=my_std),
+    ])
+
+    # 2. Inizializzazione Modello
+    print(f"Caricamento modello: {MODEL_WEIGHTS}")
+    model = build_model(dropout=0.1)
+    model.load_state_dict(torch.load(MODEL_WEIGHTS, map_location=DEVICE))
+    model.to(DEVICE)
+    model.eval()
+
+    # 3. Loop sui pazienti di Test
+    for pz in TEST_PTS:
+        pz_dir = os.path.join(DATA_DIR, pz)
+        if not os.path.exists(pz_dir):
+            print(f"Avviso: Cartella {pz} non trovata, salto.")
+            continue
+            
+        img_path = os.path.join(pz_dir, "image_visual.png")
+        label_path = os.path.join(pz_dir, "label.txt")
+        check_img_path = os.path.join(pz_dir, "image_annotated_check.png")
+
+        # Leggi immagine e target reale
+        raw_img = Image.open(img_path).convert("RGB")
+        with open(label_path, "r") as f:
+            true_y = float(json.load(f)["target_y_pixel"])
+
+        # Pre-processing
+        # Dobbiamo applicare il crop/pad all'immagine prima di disegnarci sopra,
+        # in modo che i pixel corrispondano alla predizione della rete (che lavora su 512x512)
+        base_img_512 = crop_pad(raw_img)
+        input_tensor = transform_tensor(base_img_512).unsqueeze(0).to(DEVICE)
+
+        # Predizione
+        with torch.no_grad():
+            pred_norm = model(input_tensor).item()
+            pred_y = pred_norm * IMG_SIZE
+
+        error_px = abs(pred_y - true_y)
+        
+        # 4. Disegno la predizione sull'immagine
+        draw_img = base_img_512.copy()
+        draw = ImageDraw.Draw(draw_img)
+        
+        # Disegna la linea della predizione (Rossa, spessa 3 pixel)
+        y_draw = int(round(pred_y))
+        draw.line([(0, y_draw), (IMG_SIZE, y_draw)], fill="red", width=3)
+        
+        # Opzionale: Disegna anche la GT (Verde) direttamente qui per vederle sovrapposte
+        y_true_draw = int(round(true_y))
+        draw.line([(0, y_true_draw), (IMG_SIZE, y_true_draw)], fill="green", width=1)
+        
+        # Testo con info
+        testo = f"Pred: {pred_y:.1f} | GT: {true_y:.1f} | Err: {error_px:.1f}px"
+        # Sfondo scuro per il testo per renderlo leggibile
+        draw.rectangle([(5, 5), (320, 25)], fill="black")
+        draw.text((10, 10), testo, fill="white")
+
+        # 5. Salvataggio risultati
+        out_pz_dir = os.path.join(OUTPUT_DIR, pz)
+        os.makedirs(out_pz_dir, exist_ok=True)
+        
+        # Salva la predizione
+        out_pred_path = os.path.join(out_pz_dir, f"{pz}_predicted.png")
+        draw_img.save(out_pred_path)
+        
+        # Copia il check del chirurgo (la GT originale)
+        if os.path.exists(check_img_path):
+            out_check_path = os.path.join(out_pz_dir, f"{pz}_check_original.png")
+            shutil.copy(check_img_path, out_check_path)
+            
+        print(f"[{pz}] Errore: {error_px:.1f} px --> Salvato in {out_pz_dir}")
+
+    print(f"=== COMPLETATO ===")
+    print(f"Tutte le immagini salvate in: {OUTPUT_DIR}")
+
+if __name__ == "__main__":
+    main()
+

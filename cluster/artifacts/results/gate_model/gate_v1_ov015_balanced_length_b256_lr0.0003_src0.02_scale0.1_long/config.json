@@ -1,0 +1,10 @@
+{
+  "model_id": "openai/clip-vit-base-patch32",
+  "method": "learned_gate_v1",
+  "checkpoint": "/mnt/meditech/group1/deep_learning/cluster/artifacts/training_runs/hpsearch_gate_v1_20260618_024432_long/gate_v1_ov015_balanced_length_b256_lr0.0003_src0.02_scale0.1_long/checkpoints/best_val_official_like_at10.pt",
+  "top_ks": [
+    1,
+    5,
+    10
+  ]
+}

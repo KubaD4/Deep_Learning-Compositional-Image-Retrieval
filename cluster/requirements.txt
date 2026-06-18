@@ -1,0 +1,10 @@
+# The cluster may already provide CUDA-enabled torch and torchvision.
+# setup_environment.sh first creates a venv with system site packages.
+torch>=2.2
+torchvision>=0.17
+transformers>=4.40,<6
+pandas>=2.0
+matplotlib>=3.8
+python-dateutil>=2.8
+Pillow>=10
+tqdm>=4.66
