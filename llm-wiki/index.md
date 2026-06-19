@@ -6,6 +6,12 @@ This is the maintained knowledge base for the project in `/Users/kuba/deep_learn
 
 Read this index first, then open the linked pages needed for the task. Raw source files remain in the project root and `celeba/`; converted readable derivatives live in `source-markdown/`.
 
+## Wiki Maintenance Rules
+
+- When updating project knowledge, experiments, architecture decisions, cluster commands, or results, also update [Log](log.md) with a short dated entry.
+- When several wiki updates accumulate, remind the user to push the wiki changes to GitHub so future agents and collaborators see the same context.
+- Do not rely only on chat history for important decisions. If a decision affects future work, record it in the relevant wiki page and mention it in the log.
+
 ## Core Pages
 
 - [Current State and Proposed Solution](../PROJECT_STATE_AND_SOLUTION.md): authoritative snapshot of completed work, task definition, selected method, repository state, risks, and remaining milestones.

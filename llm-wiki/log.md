@@ -173,3 +173,9 @@
 - Implemented the next experiment, `gate_v3` learned sequential composition: apply each signed contrastive direction with a learned `alpha_j`, normalize after every edit step, then optionally add a small residual correction.
 - Added `GateSequentialComposer`, `gate_sequential_short_configs.json`, `gate_sequential_long_configs.json`, `jobs/41_hpsearch_sequential_gate_short.sh`, and `jobs/42_hpsearch_sequential_gate_long.sh`.
 - Updated the cluster runbook and training strategy with the `gate_v3` hypothesis: test whether the remaining gap to `Contrastive Sequential` is mostly caused by the normalization schedule and whether learned source-conditioned step sizes can improve it.
+
+## [2026-06-19] documentation | Added wiki maintenance rules
+
+- Added `llm-wiki/index.md` maintenance rules requiring important project/wiki updates to also update `llm-wiki/log.md`.
+- Recorded that agents should periodically remind the user to push wiki changes to GitHub so future agents and collaborators share the same context.
+- Clarified that durable decisions should be written into the relevant wiki page rather than left only in chat history.
