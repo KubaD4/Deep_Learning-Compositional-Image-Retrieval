@@ -161,3 +161,15 @@
 - Implemented `gate_v2` additive-gate composer: `q = normalize(z_source + edit_scale * sum(alpha_j * d_j) + residual_scale * delta)`, where `d_j` is the signed contrastive direction `normalize(t_positive - t_negative)` or its negative.
 - Added short and long additive-gate hpsearch configs and jobs. The short smoke test completed successfully: `add_s001` reached `val_official_like@10 = 0.7207`, above the previous short best (`0.6973`) but below the best long `gate_v1` run; `add_s002` without residual (`residual_scale = 0`) dropped to `0.6797`, suggesting that a small residual correction is useful.
 - Left the long additive-gate hpsearch queued on Baldo (`jobs/40_hpsearch_additive_gate_long.sh`) for the next cluster availability window.
+
+## [2026-06-19] results | Evaluated gate_v2 and prepared learned sequential gate_v3
+
+- Completed the long additive-gate hpsearch (`gate_v2`). Best validation config was `add_l009`, with `val_official_like@10 = 0.7969`, `val_exact_R@10 = 0.6016`, `val_attr_success@10 = 0.8987`, selected at epoch 2 / step 4000.
+- Evaluated `add_l009` on the official `celeba_evaluation.json` protocol. It achieved Macro R@10 `0.1790`, Micro R@10 `0.1645`, Macro P@10 `0.0269`, and Micro P@10 `0.0249`.
+- Confirmed that `gate_v2/add_l009` improves over `gate_v1/ov015` on official Macro R@10 (`0.1790` vs `0.1601`) and beats `Contrastive Sum` (`0.1707`), but remains below `Contrastive Sequential` (`0.1871`) and Adaptive Tangent Sequential (`0.1869`).
+- Per-query analysis showed `gate_v2/add_l009` is especially strong on local edits and local compositions: `+Eyeglasses` (`0.4335` vs best baseline `0.2518`), `+Eyeglasses,+Smiling` (`0.3382` vs `0.2712`), `-Heavy_Makeup` (`0.2102` vs `0.1686`), and `+Mustache` (`0.2824` vs `0.2525`).
+- The same analysis showed remaining failures on global/correlated or hair/hat edits: `+Male` (`0.0414` vs `0.2395`), `+Blond_Hair` (`0.1454` vs `0.1938`), `+Black_Hair,-Wavy_Hair` (`0.1621` vs `0.2107`), and `-Smiling,+Eyeglasses,+Wearing_Hat` (`0.3544` vs `0.4304`).
+- Updated the interpretation: `gate_v2` fixed the main weakness of `gate_v1` by directly using signed contrastive CLIP directions, but it still behaves more like `Contrastive Sum` because it normalizes once after summing directions.
+- Implemented the next experiment, `gate_v3` learned sequential composition: apply each signed contrastive direction with a learned `alpha_j`, normalize after every edit step, then optionally add a small residual correction.
+- Added `GateSequentialComposer`, `gate_sequential_short_configs.json`, `gate_sequential_long_configs.json`, `jobs/41_hpsearch_sequential_gate_short.sh`, and `jobs/42_hpsearch_sequential_gate_long.sh`.
+- Updated the cluster runbook and training strategy with the `gate_v3` hypothesis: test whether the remaining gap to `Contrastive Sequential` is mostly caused by the normalization schedule and whether learned source-conditioned step sizes can improve it.

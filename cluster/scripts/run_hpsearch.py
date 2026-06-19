@@ -58,6 +58,15 @@ def append_summary(path: Path, row: dict) -> None:
         writer.writerow(row)
 
 
+def family_from_configs(configs: list[dict]) -> str:
+    composer_types = {config.get("composer_type", "residual_only") for config in configs}
+    if "sequential_gate" in composer_types:
+        return "gate_v3"
+    if "additive_gate" in composer_types:
+        return "gate_v2"
+    return "gate_v1"
+
+
 def main() -> int:
     args = parse_args()
     with args.configs.open(encoding="utf-8") as handle:
@@ -66,9 +75,7 @@ def main() -> int:
         configs = configs[: args.limit]
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    family = "gate_v2" if any(
-        config.get("composer_type") == "additive_gate" for config in configs
-    ) else "gate_v1"
+    family = family_from_configs(configs)
     search_dir = ARTIFACTS_DIR / TRAINING_RUN_DIRNAME / f"hpsearch_{family}_{stamp}_{args.profile}"
     search_dir.mkdir(parents=True, exist_ok=True)
     summary_path = search_dir / "summary.csv"
@@ -121,6 +128,7 @@ def main() -> int:
             "sampler_mode": config.get("sampler_mode", ""),
             "composer_type": config.get("composer_type", ""),
             "condition_mode": config.get("condition_mode", ""),
+            "gate_state": config.get("gate_state", ""),
             "learning_rate": config.get("learning_rate", ""),
             "lambda_source": config.get("lambda_source", ""),
             "residual_scale": config.get("residual_scale", ""),

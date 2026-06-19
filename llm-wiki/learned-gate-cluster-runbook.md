@@ -20,6 +20,10 @@ The conceptual strategy is documented in [Proposed Training Strategy](training-s
 | Additive-gate long configs | `cluster/configs/gate_additive_long_configs.json` | Ten long configs varying edit scale, gate max, residual scale, learning rate, and temperature. |
 | Additive-gate short job | `cluster/jobs/39_hpsearch_additive_gate_short.sh` | Short queue smoke test for `gate_v2`. |
 | Additive-gate long job | `cluster/jobs/40_hpsearch_additive_gate_long.sh` | Long queue hpsearch for `gate_v2`. |
+| Sequential-gate short configs | `cluster/configs/gate_sequential_short_configs.json` | Two-config smoke test for `gate_v3`, the learned sequential contrastive composer. |
+| Sequential-gate long configs | `cluster/configs/gate_sequential_long_configs.json` | Ten long configs varying sequential gate state, edit scale, gate max, residual scale, learning rate, and temperature. |
+| Sequential-gate short job | `cluster/jobs/41_hpsearch_sequential_gate_short.sh` | Short queue smoke test for `gate_v3`. |
+| Sequential-gate long job | `cluster/jobs/42_hpsearch_sequential_gate_long.sh` | Long queue hpsearch for `gate_v3`. |
 
 ## Slurm Corrections To Preserve
 
@@ -62,8 +66,10 @@ cd /mnt/meditech/group1/deep_learning/cluster
 | 16 | `CHECKPOINT=artifacts/training_runs/<run>/checkpoints/best_val_official_like_at10.pt sbatch --export=ALL,CHECKPOINT jobs/36_evaluate_gate_json.sh` | Evaluates a specific checkpoint. | Same as above, but tied to the selected run. |
 | 17 | `sbatch jobs/39_hpsearch_additive_gate_short.sh` | Runs the `gate_v2` additive-gate smoke test. | `artifacts/training_runs/hpsearch_gate_v2_*_short/summary.csv`; `add_s001` completed with `val_official_like@10 = 0.7207`. |
 | 18 | `sbatch jobs/40_hpsearch_additive_gate_long.sh` | Runs the long `gate_v2` hpsearch. | `artifacts/training_runs/hpsearch_gate_v2_*_long/summary.csv`; select best `add_l*` by `best_val_official_like@10`, then evaluate on JSON. |
-| 19 | `python3 scripts/summarize_gate_runs.py --top 50` | Summarizes all gate runs across short/long and v1/v2. | `artifacts/results/gate_model/all_gate_runs_summary.csv`; look for `add_l*` rows after the long job. |
+| 19 | `python3 scripts/summarize_gate_runs.py --top 50` | Summarizes all gate runs across short/long and v1/v2/v3. | `artifacts/results/gate_model/all_gate_runs_summary.csv`; look for `add_l*` or `seq_l*` rows after long jobs. |
 | 20 | `sbatch jobs/38_plot_official_comparison.sh` | Rebuilds official comparison plots after evaluating a new gate checkpoint. | `artifacts/results/official_comparison/combined_summary.csv`, `method_comparison.csv`, and PNG plots. |
+| 21 | `sbatch jobs/41_hpsearch_sequential_gate_short.sh` | Runs the `gate_v3` learned-sequential smoke test. | `artifacts/training_runs/hpsearch_gate_v3_*_short/summary.csv`; check that both `seq_s*` configs complete. |
+| 22 | `sbatch jobs/42_hpsearch_sequential_gate_long.sh` | Runs the long `gate_v3` hpsearch. | `artifacts/training_runs/hpsearch_gate_v3_*_long/summary.csv`; select best `seq_l*` by `best_val_official_like@10`, then evaluate on JSON. |
 
 ## Current Learned Results
 
@@ -118,6 +124,40 @@ add_s002: residual_scale=0.0, edit_scale=1.0, gate_max=1.5
 ```
 
 This suggests the direct contrastive movement plus a small residual is more promising than removing the residual entirely. The long additive hpsearch is the next decisive experiment.
+
+As of 2026-06-19, the long `gate_v2` additive hpsearch completed. Best validation config:
+
+```text
+add_l009:
+val_official_like@10 = 0.7969
+val_exact_R@10       = 0.6016
+val_attr_success@10  = 0.8987
+best epoch/step      = 2 / 4000
+mean_rank_B          = 50.6
+```
+
+Official JSON ranking after evaluating `add_l009`:
+
+```text
+Official JSON Macro R@10:
+Contrastive Sequential        0.1871
+Adaptive Tangent Sequential   0.1869
+gate_v2/add_l009              0.1790
+Contrastive Sum               0.1707
+gate_v1/ov015                 0.1601
+Direct Sequential             0.1121
+Direct Sum                    0.1084
+```
+
+`gate_v2/add_l009` is a real improvement over `gate_v1` and beats `Contrastive Sum`, but it still trails `Contrastive Sequential`. The next test is `gate_v3`, which applies the learned weighted directions sequentially and normalizes after every edit:
+
+```text
+q_0 = z_source
+q_j = normalize(q_{j-1} + edit_scale * alpha_j * d_j)
+q   = normalize(q_n + residual_scale * delta)
+```
+
+This directly tests whether the remaining gap is caused by the normalization schedule rather than by the learned gate itself.
 
 ## Interpreting Training Outputs
 

@@ -326,12 +326,105 @@ add_s002: same but residual_scale=0.0
 
 The residual-free ablation dropping badly suggests that a small learned correction is useful, but the direct additive contrastive direction should remain the main movement.
 
-Recommended next experiment: run `gate_v2` long hpsearch and evaluate the best `add_l*` checkpoint on the official JSON. The target to beat is:
+The long `gate_v2` hpsearch completed on 2026-06-19. The best validation run was `add_l009`:
 
 ```text
-Macro R@10 >= 0.1871
-Micro R@10 >= 0.1668
+add_l009:
+val_official_like@10 = 0.7969
+val_exact_R@10       = 0.6016
+val_attr_success@10  = 0.8987
+best epoch/step      = 2 / 4000
+mean_rank_B          = 50.6
 ```
+
+On the official JSON benchmark, `add_l009` reached:
+
+```text
+gate_v2/add_l009 official JSON:
+Macro R@10 = 0.1790
+Micro R@10 = 0.1645
+Macro P@10 = 0.0269
+Micro P@10 = 0.0249
+```
+
+This is a strong improvement over `gate_v1` (`Macro R@10 = 0.1601`) and beats `Contrastive Sum` (`Macro R@10 = 0.1707`), but it is still slightly below the best arithmetic baselines:
+
+```text
+Contrastive Sequential        Macro R@10 = 0.1871
+Adaptive Tangent Sequential   Macro R@10 = 0.1869
+gate_v2/add_l009              Macro R@10 = 0.1790
+```
+
+Per-query official JSON inspection showed the shape of the improvement:
+
+```text
++Eyeglasses                       add_l009 0.4335 vs best baseline 0.2518
++Eyeglasses, +Smiling             add_l009 0.3382 vs best baseline 0.2712
+-Heavy_Makeup                     add_l009 0.2102 vs best baseline 0.1686
++Mustache                         add_l009 0.2824 vs best baseline 0.2525
++Wearing_Lipstick, -Heavy_Makeup,
+  +Smiling                         add_l009 0.1176 vs best baseline 0.0882
+```
+
+but the model still loses on several global, correlated, or hair-related edits:
+
+```text
++Male                             add_l009 0.0414 vs best baseline 0.2395
++Blond_Hair                       add_l009 0.1454 vs best baseline 0.1938
++Black_Hair, -Wavy_Hair           add_l009 0.1621 vs best baseline 0.2107
+-Male, -Mustache                  add_l009 0.0000 vs best baseline 0.0741
+-Smiling, +Eyeglasses, +Hat       add_l009 0.3544 vs best baseline 0.4304
+```
+
+Interpretation: `gate_v2` fixed the main weakness of `gate_v1` by using real contrastive CLIP directions, but it still applies all directions as one weighted sum and normalizes only once at the end.
+
+## 2026-06-19 Update: Learned Sequential Gate
+
+The best non-learned method is `Contrastive Sequential`, not `Contrastive Sum`. The key difference is the normalization schedule:
+
+```text
+Contrastive Sum:
+q = normalize(z_s + d_1 + d_2 + ... + d_n)
+
+Contrastive Sequential:
+q_0 = z_s
+q_1 = normalize(q_0 + d_1)
+q_2 = normalize(q_1 + d_2)
+...
+q_n = normalize(q_{n-1} + d_n)
+```
+
+`gate_v2` is closer to `Contrastive Sum`:
+
+```text
+q = normalize(z_s + edit_scale * sum(alpha_j * d_j) + residual_scale * Delta z)
+```
+
+The next architecture, `gate_v3`, is a learned version of `Contrastive Sequential`:
+
+```text
+q_0       = z_s
+alpha_j   = sigmoid(gate(q_{j-1}, d_j)) * gate_max
+q_j       = normalize(q_{j-1} + edit_scale * alpha_j * d_j)
+Delta z   = residual_mlp([z_s, sum(alpha_j * d_j), z_s * c, |z_s - c|])
+q         = normalize(q_n + residual_scale * Delta z)
+```
+
+Two variants should be tested:
+
+```text
+gate_state = current  # alpha_j sees q_{j-1}; most faithful to sequential arithmetic
+gate_state = source   # alpha_j always sees z_s; simpler source-conditioned weights
+```
+
+This experiment answers a narrow question: can the learned system keep the strong inductive bias of `Contrastive Sequential` while improving it through source-conditioned step sizes? If yes, it should close the remaining gap between `gate_v2/add_l009` and the best arithmetic baseline.
+
+If `gate_v3` improves validation but not official JSON, the likely issue is still training/evaluation mismatch: same-identity tuple supervision learns exact target movement, while official JSON accepts many cross-identity valid answers. In that case the next strategies are:
+
+- add official-style multi-positive validation/training masks using attribute compatibility;
+- add a source attribute-presence probe as explicit gate input;
+- train attribute-family-specific gates for global attributes (`Male`, `Young`, `Chubby`) and local attributes (`Eyeglasses`, `Smiling`, `Mustache`);
+- use query-order ensembling for sequential methods, because multi-attribute sequential composition can be order-sensitive.
 
 Softmax is differentiable, so the reason to avoid it is not differentiability. The problem is that softmax forces attributes to compete: if one edit gets a larger weight, the others must receive smaller weights. Independent sigmoid gates are more appropriate because multiple requested edits can all be important at the same time.
 

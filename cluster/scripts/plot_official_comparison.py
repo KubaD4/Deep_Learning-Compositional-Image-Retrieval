@@ -81,6 +81,31 @@ def load_baselines(root: Path) -> tuple[list[pd.DataFrame], list[pd.DataFrame]]:
     return per_query_frames, summary_frames
 
 
+def gate_label(result_dir: Path, include_all: bool) -> str:
+    if not include_all:
+        return "Learned gate"
+    parts = result_dir.name.split("_")
+    config_id = next(
+        (
+            part
+            for part in parts
+            if part.startswith("add")
+            or part.startswith("seq")
+            or part.startswith("ov")
+            or part.startswith("cfg")
+            or part == "manual"
+        ),
+        result_dir.name,
+    )
+    if "gate_v3" in result_dir.name:
+        family = "v3"
+    elif "gate_v2" in result_dir.name:
+        family = "v2"
+    else:
+        family = "v1"
+    return f"Learned gate {family} {config_id}"
+
+
 def load_gate_results(root: Path, include_all: bool) -> tuple[list[pd.DataFrame], list[pd.DataFrame]]:
     candidates = []
     for summary_path in sorted(root.glob("*/summary.csv")):
@@ -101,7 +126,7 @@ def load_gate_results(root: Path, include_all: bool) -> tuple[list[pd.DataFrame]
     per_query_frames = []
     summary_frames = []
     for score, result_dir, per_query_path, summary_path in selected:
-        label = "Learned gate" if not include_all else f"Learned gate {result_dir.name[:18]}"
+        label = gate_label(result_dir, include_all)
         per_query = read_csv(per_query_path)
         summary = read_csv(summary_path)
         per_query["method"] = label
@@ -276,6 +301,11 @@ def main() -> int:
 
     per_query = pd.concat(per_query_frames, ignore_index=True)
     summaries = pd.concat(summary_frames, ignore_index=True)
+    summaries = (
+        summaries.sort_values("macro_Recall@10", ascending=False)
+        .drop_duplicates(subset=["method"], keep="first")
+        .reset_index(drop=True)
+    )
     per_query.to_csv(args.output_dir / "combined_per_query_metrics.csv", index=False)
     summaries.to_csv(args.output_dir / "combined_summary.csv", index=False)
     write_numeric_tables(summaries, per_query, args.output_dir)

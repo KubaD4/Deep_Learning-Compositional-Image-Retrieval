@@ -239,6 +239,96 @@ class GateAdditiveComposer(nn.Module):
         return query, alpha, delta
 
 
+class GateSequentialComposer(nn.Module):
+    """Learned version of the contrastive sequential CLIP arithmetic baseline.
+
+    Instead of summing all edited directions and normalizing once at the end,
+    this composer applies one signed CLIP direction at a time:
+
+        q_j = normalize(q_{j-1} + alpha_j * d_j)
+
+    The gate can look either at the current query state or at the original
+    source embedding. The default uses the current state because that is the
+    closest learned analogue of the sequential baseline.
+    """
+
+    def __init__(
+        self,
+        clip_dim: int = 512,
+        gate_hidden: tuple[int, ...] = (512, 128),
+        residual_hidden: tuple[int, ...] = (1024, 512),
+        dropout: float = 0.1,
+        edit_scale: float = 1.0,
+        gate_max: float = 1.5,
+        residual_scale: float = 0.02,
+        gate_uses_current: bool = True,
+    ):
+        super().__init__()
+        self.clip_dim = clip_dim
+        self.edit_scale = float(edit_scale)
+        self.gate_max = float(gate_max)
+        self.residual_scale = float(residual_scale)
+        self.gate_uses_current = bool(gate_uses_current)
+        combined_dim = clip_dim * 4
+        self.gate = build_mlp(combined_dim, list(gate_hidden), 1, dropout)
+        self.residual = build_mlp(combined_dim, list(residual_hidden), clip_dim, dropout)
+
+    def forward(
+        self,
+        source: torch.Tensor,
+        conditions: torch.Tensor,
+        condition_mask: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        source = F.normalize(source.float(), dim=-1)
+        conditions = F.normalize(conditions.float(), dim=-1)
+        active_mask = condition_mask.bool()
+
+        query = source
+        weighted_steps = []
+        alpha_values = []
+
+        for position in range(conditions.shape[1]):
+            condition = conditions[:, position, :]
+            active = active_mask[:, position]
+            gate_source = query if self.gate_uses_current else source
+            gate_input = torch.cat(
+                [
+                    gate_source,
+                    condition,
+                    gate_source * condition,
+                    (gate_source - condition).abs(),
+                ],
+                dim=-1,
+            )
+            alpha = torch.sigmoid(self.gate(gate_input).squeeze(-1)) * self.gate_max
+            alpha = alpha * active.float()
+            step = alpha.unsqueeze(-1) * condition
+            stepped_query = F.normalize(query + self.edit_scale * step, dim=-1)
+            query = torch.where(active.unsqueeze(-1), stepped_query, query)
+            weighted_steps.append(step)
+            alpha_values.append(alpha)
+
+        if weighted_steps:
+            aggregated = torch.stack(weighted_steps, dim=1).sum(dim=1)
+            alpha_out = torch.stack(alpha_values, dim=1)
+        else:
+            aggregated = torch.zeros_like(source)
+            alpha_out = torch.zeros_like(condition_mask.float())
+
+        residual_input = torch.cat(
+            [
+                source,
+                aggregated,
+                source * aggregated,
+                (source - aggregated).abs(),
+            ],
+            dim=-1,
+        )
+        delta = self.residual(residual_input)
+        query = F.normalize(query + self.residual_scale * delta, dim=-1)
+        return query, alpha_out, delta
+
+
 def create_model_from_config(config: dict, clip_dim: int = 512) -> nn.Module:
     composer_type = config.get("composer_type", "residual_only")
     common = {
@@ -255,6 +345,13 @@ def create_model_from_config(config: dict, clip_dim: int = 512) -> nn.Module:
             **common,
             edit_scale=float(config.get("edit_scale", 1.0)),
             gate_max=float(config.get("gate_max", 1.5)),
+        )
+    if composer_type == "sequential_gate":
+        return GateSequentialComposer(
+            **common,
+            edit_scale=float(config.get("edit_scale", 1.0)),
+            gate_max=float(config.get("gate_max", 1.5)),
+            gate_uses_current=str(config.get("gate_state", "current")) == "current",
         )
     raise ValueError(f"Unknown composer_type: {composer_type}")
 
