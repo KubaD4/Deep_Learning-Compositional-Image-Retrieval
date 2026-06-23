@@ -161,7 +161,7 @@ Therefore it satisfies the query and has only one non-query difference, which is
 Project root:
 
 ```text
-/Users/kuba/deep_learning/
+<repo-root>/
 ```
 
 ### 4.1 Essential Files

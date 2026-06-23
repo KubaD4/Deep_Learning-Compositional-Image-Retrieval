@@ -14,7 +14,7 @@ import shutil
 from pathlib import Path
 
 
-ROOT = Path("/Users/kuba/deep_learning")
+ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK = ROOT / "notebooks" / "02_learned_gate_final_pipeline.ipynb"
 CLUSTER_NOTEBOOK = ROOT / "cluster" / "notebooks" / "02_learned_gate_final_pipeline.ipynb"
 

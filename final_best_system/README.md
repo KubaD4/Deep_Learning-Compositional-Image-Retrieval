@@ -88,4 +88,5 @@ If present, the best learned-gate checkpoint is stored at:
 weights/best_val_official_like_at10.pt
 ```
 
-If that file is missing after cloning, use `weights/fetch_best_weights.sh` from a machine with cluster access.
+If that file is missing after cloning, place a compatible checkpoint at that path.
+The committed package is expected to include it, so this should normally not be needed.

@@ -818,10 +818,10 @@ Next proposed experiment:
 
 ## Packaged Current Best System
 
-On 2026-06-23 the current best system artifacts were packaged locally under:
+On 2026-06-23 the current best system artifacts were packaged under:
 
 ```text
-/Users/kuba/deep_learning/final_best_system
+final_best_system/
 ```
 
 The package contains:
@@ -941,7 +941,7 @@ final_best_system/REPORT_NOTES.md
 
 ## Final Local Package Status
 
-As of 2026-06-23, `/Users/kuba/deep_learning/final_best_system` is the clean local result package to use for report assets and GitHub sharing.
+As of 2026-06-23, `final_best_system/` is the clean result package to use for report assets and GitHub sharing.
 
 It contains:
 

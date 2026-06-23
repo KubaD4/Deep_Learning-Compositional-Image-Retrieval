@@ -18,6 +18,7 @@ METHOD_FOLDERS = {
     "05_adaptive_tangent_sequential": "Adaptive tangent sequential",
 }
 METHOD_ORDER = list(METHOD_FOLDERS.values())
+ROOT = Path(__file__).resolve().parents[1]
 
 METRICS = [
     "Recall@1",
@@ -34,7 +35,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--results-root",
         type=Path,
-        default=Path("/Users/kuba/deep_learning/cluster/artifacts/results/baselines"),
+        default=ROOT / "artifacts" / "results" / "baselines",
         help="Folder containing the baseline result directories.",
     )
     parser.add_argument(

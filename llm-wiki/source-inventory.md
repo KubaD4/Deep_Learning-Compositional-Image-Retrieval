@@ -4,7 +4,7 @@ This page records the project files inspected through 2026-06-11.
 
 ## Repository Shape
 
-- Project root: `/Users/kuba/deep_learning`
+- Project root: repository root (`<repo-root>`)
 - Total size after setup: about 3.9 GB.
 - `.venv/`: about 374 MB, project-local MarkItDown environment.
 - `celeba/`: about 1.7 GB extracted CelebA data.

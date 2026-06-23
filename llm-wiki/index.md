@@ -1,6 +1,6 @@
 # Deep Learning Project LLM Wiki
 
-This is the maintained knowledge base for the project in `/Users/kuba/deep_learning`.
+This is the maintained knowledge base for the project repository.
 
 ## How To Use This Wiki
 
@@ -58,6 +58,6 @@ The task is to build a compositional image retrieval system. Given a reference f
 
 The assignment specifically asks for a more flexible fusion mechanism than CLAY's rigid pre-SVD stacking of multiple condition embeddings. The project may be training-free or training-based, but it should be lightweight, rigorously evaluated, and reported clearly in a single Colab notebook.
 
-As of 2026-06-23, the strongest final system is `model_plus_generic_delta_100`: a learned gate query corrected by a generic CLIP arithmetic displacement, `q_final = normalize(q_model + 1.0 * (q_sum - source))`. It reaches official JSON Macro R@10 `0.2827` and Micro R@10 `0.2386`. The assignment vanilla baseline is `direct_sum` (Macro R@10 `0.1084`), while the strongest no-training CLIP-only baseline is `contrastive_sequential` (Macro R@10 `0.1871`). The clean local package for report assets is `/Users/kuba/deep_learning/final_best_system`, including the best checkpoint at `final_best_system/weights/best_val_official_like_at10.pt`. See [Official Results and Literature Findings](official-results-and-literature-findings.md), [Proposed Training Strategy](training-strategy.md), and [Learned Gate Cluster Runbook](learned-gate-cluster-runbook.md).
+As of 2026-06-23, the strongest final system is `model_plus_generic_delta_100`: a learned gate query corrected by a generic CLIP arithmetic displacement, `q_final = normalize(q_model + 1.0 * (q_sum - source))`. It reaches official JSON Macro R@10 `0.2827` and Micro R@10 `0.2386`. The assignment vanilla baseline is `direct_sum` (Macro R@10 `0.1084`), while the strongest no-training CLIP-only baseline is `contrastive_sequential` (Macro R@10 `0.1871`). The clean package for report assets is `final_best_system/`, including the best checkpoint at `final_best_system/weights/best_val_official_like_at10.pt`. See [Official Results and Literature Findings](official-results-and-literature-findings.md), [Proposed Training Strategy](training-strategy.md), and [Learned Gate Cluster Runbook](learned-gate-cluster-runbook.md).
 
 Read [PROJECT_STATE_AND_SOLUTION.md](../PROJECT_STATE_AND_SOLUTION.md) for the current project snapshot, then use [PROJECT_GUIDE.md](../PROJECT_GUIDE.md) as the detailed onboarding and execution plan.

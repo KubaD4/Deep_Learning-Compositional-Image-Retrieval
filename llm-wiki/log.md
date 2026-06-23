@@ -2,7 +2,7 @@
 
 ## [2026-06-09] setup | Initial project wiki and MarkItDown setup
 
-- Inspected the project boundary at `/Users/kuba/deep_learning`.
+- Inspected the project boundary at the repository root.
 - Identified 20 non-image/non-work source files, 202599 CelebA aligned JPG images, and 9 PDF-derived work files from a prior extraction folder.
 - Installed Microsoft MarkItDown in a project-local `.venv` and recorded `markitdown[all]==0.1.6` in `requirements.txt`.
 - Converted all 9 PDFs plus `Project Skeleton.ipynb` into `llm-wiki/source-markdown/`.
@@ -310,7 +310,7 @@
 ## [2026-06-23] packaging | Created final best system folder and 1v1 plots
 
 - Added `tools/create_best_system_package.py`, a regenerable local packaging script.
-- Created `/Users/kuba/deep_learning/final_best_system` with code snapshots, prompt/text embedding caches, configs, winner result CSVs, and report-oriented 1v1 plots.
+- Created `final_best_system/` with code snapshots, prompt/text embedding caches, configs, winner result CSVs, and report-oriented 1v1 plots.
 - Packaged primary winner: `model_plus_generic_delta_100`, highest Macro Recall@10, formula `q_final = normalize(q_model + 1.0 * (q_generic_sum - source))`.
 - Corrected baseline terminology: `direct_sum` is the assignment vanilla baseline; `contrastive_sequential` is the strongest no-training CLIP-only baseline from our experiments.
 - Regenerated clean report files under `final_best_system/results/clean_report`.
@@ -337,3 +337,10 @@
 - Added the cosine-normalization figure and explanation required for future reports/notebooks.
 - Added mathematical modeling of the sequential gate, CLIP arithmetic delta branch, InfoNCE/multi-positive training objective, source/target cosine losses, and final official metrics.
 - Regenerated `final_best_system` using the cluster-copied checkpoint and cluster-copied prompt-v2 cache; `WEIGHTS_MISSING.txt` has been removed and replaced by `weights/CHECKPOINT_INFO.txt`.
+
+## [2026-06-23] maintenance | Removed machine-specific fetch scripts
+
+- Removed the tracked `final_best_system/weights/fetch_best_weights.sh` script because it used a personal `scp` destination path.
+- Updated `tools/create_best_system_package.py` so generated metadata uses repo-relative paths and no longer emits a machine-specific fetch script.
+- Updated `tools/update_final_notebook.py` and `cluster/scripts/plot_baseline_queries.py` to discover paths relative to the repository/script location instead of hardcoding a local Mac path.
+- Reworded wiki/report references from a specific local path to `final_best_system/` / `<repo-root>` so collaborators can use the repository on their own machines.

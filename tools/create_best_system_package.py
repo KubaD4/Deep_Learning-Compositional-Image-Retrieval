@@ -20,7 +20,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-ROOT = Path("/Users/kuba/deep_learning")
+ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "cluster" / "artifacts" / "results"
 EMBEDDINGS = ROOT / "cluster" / "data" / "celeba" / "embeddings" / "openai_clip_vit_b32"
 OUT = ROOT / "final_best_system"
@@ -86,6 +86,14 @@ def copy_tree(src: Path, dst: Path) -> None:
     if dst.exists():
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
+
+
+def project_path(path: Path) -> str:
+    """Return repo-relative paths in generated metadata when possible."""
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return str(path)
 
 
 def label_query(query: str, max_len: int = 42) -> str:
@@ -377,7 +385,7 @@ def make_manifest(overall_rows: list[dict], per_query_rows: list[dict]) -> None:
             "name": "model_plus_generic_delta_100",
             "reason": "Highest Macro Recall@10 among all current systems.",
             "formula": "q_final = normalize(q_model + 1.0 * (q_generic_sum - source))",
-            "result_dir": str(BEST_DIR),
+            "result_dir": project_path(BEST_DIR),
             "macro_Recall@10": float(best["macro_Recall@10"]),
             "micro_Recall@10": float(best["micro_Recall@10"]),
         },
@@ -385,7 +393,7 @@ def make_manifest(overall_rows: list[dict], per_query_rows: list[dict]) -> None:
             "name": "model_plus_tuned_delta_050",
             "reason": "Highest Micro Recall@10 among all current systems.",
             "formula": "q_final = normalize(q_model + 0.5 * (q_tuned_sum - source))",
-            "result_dir": str(BEST_MICRO_DIR),
+            "result_dir": project_path(BEST_MICRO_DIR),
             "macro_Recall@10": float(best_micro["macro_Recall@10"]),
             "micro_Recall@10": float(best_micro["micro_Recall@10"]),
         },
@@ -393,7 +401,7 @@ def make_manifest(overall_rows: list[dict], per_query_rows: list[dict]) -> None:
             "name": "direct_sum",
             "reason": "Vanilla zero-shot baseline requested by the assignment: unmodified CLIP plus naive latent arithmetic.",
             "formula": "q = normalize(source + sum(sign * positive_text_embedding(attribute)))",
-            "result_dir": str(ASSIGNMENT_BASELINE_DIR),
+            "result_dir": project_path(ASSIGNMENT_BASELINE_DIR),
             "macro_Recall@10": float(assignment["macro_Recall@10"]),
             "micro_Recall@10": float(assignment["micro_Recall@10"]),
         },
@@ -401,13 +409,13 @@ def make_manifest(overall_rows: list[dict], per_query_rows: list[dict]) -> None:
             "name": "contrastive_sequential",
             "reason": "Strongest no-training CLIP-only baseline among our arithmetic variants.",
             "formula": "q_i = normalize(q_{i-1} + sign * contrastive_text_direction(attribute))",
-            "result_dir": str(STRONG_BASELINE_DIR),
+            "result_dir": project_path(STRONG_BASELINE_DIR),
             "macro_Recall@10": float(strong["macro_Recall@10"]),
             "micro_Recall@10": float(strong["micro_Recall@10"]),
         },
         "checkpoint": {
             "local_status": "present" if local_checkpoint.exists() else "missing",
-            "local_path": str(local_checkpoint) if local_checkpoint.exists() else "",
+            "local_path": project_path(local_checkpoint) if local_checkpoint.exists() else "",
             "expected_remote_path": checkpoint_path,
             "note": "The final system uses this learned gate checkpoint plus the CLIP arithmetic delta branch.",
         },
@@ -509,7 +517,8 @@ If present, the best learned-gate checkpoint is stored at:
 weights/best_val_official_like_at10.pt
 ```
 
-If that file is missing after cloning, use `weights/fetch_best_weights.sh` from a machine with cluster access.
+If that file is missing after cloning, place a compatible checkpoint at that path.
+The committed package is expected to include it, so this should normally not be needed.
 """
     (OUT / "README.md").write_text(readme, encoding="utf-8")
     report_notes = """# Report Notes
@@ -629,24 +638,14 @@ def main() -> int:
     else:
         (weights_dir / "WEIGHTS_MISSING.txt").write_text(
             "The learned-gate checkpoint is not present in this local copy.\n\n"
-            "Expected best checkpoint on cluster:\n"
+            "Expected checkpoint filename:\n"
+            "best_val_official_like_at10.pt\n\n"
+            "Original experiment checkpoint recorded in the result metadata:\n"
             f"{checkpoint_path}\n\n"
-            "Suggested command from the Mac:\n"
-            f"scp kuba.diquattro@baldo.disi.unitn.it:{checkpoint_path} "
-            "/Users/kuba/deep_learning/final_best_system/weights/\n",
+            "Place the checkpoint at:\n"
+            "final_best_system/weights/best_val_official_like_at10.pt\n",
             encoding="utf-8",
         )
-    fetch_script = weights_dir / "fetch_best_weights.sh"
-    fetch_script.write_text(
-        "#!/bin/bash\n"
-        "set -euo pipefail\n\n"
-        f"scp kuba.diquattro@baldo.disi.unitn.it:{checkpoint_path} "
-        "/Users/kuba/deep_learning/final_best_system/weights/\n"
-        "echo \"Copied best checkpoint into /Users/kuba/deep_learning/final_best_system/weights/\"\n",
-        encoding="utf-8",
-    )
-    fetch_script.chmod(0o755)
-
     print(f"Created {OUT}")
     print(f"Clean report: {clean_report}")
     return 0
