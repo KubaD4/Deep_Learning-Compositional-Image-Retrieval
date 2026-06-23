@@ -1,0 +1,482 @@
+{
+  "5_o_Clock_Shadow": {
+    "positive": [
+      "a face with five o clock shadow",
+      "a portrait of a person with light facial stubble",
+      "a close-up face with short beard stubble"
+    ],
+    "negative": [
+      "a clean-shaven face",
+      "a portrait of a person without facial stubble",
+      "a close-up face with smooth clean-shaven skin"
+    ]
+  },
+  "Arched_Eyebrows": {
+    "positive": [
+      "a face with arched eyebrows",
+      "a portrait of a person with high curved eyebrows",
+      "a close-up face showing arched eyebrows"
+    ],
+    "negative": [
+      "a face without arched eyebrows",
+      "a portrait of a person with straight eyebrows",
+      "a close-up face with flat eyebrows"
+    ]
+  },
+  "Attractive": {
+    "positive": [
+      "an attractive face",
+      "a portrait of an attractive person",
+      "a close-up photo of an attractive face"
+    ],
+    "negative": [
+      "an unattractive face",
+      "a portrait of a less attractive person",
+      "a close-up photo of an unattractive face"
+    ]
+  },
+  "Bags_Under_Eyes": {
+    "positive": [
+      "a face with bags under the eyes",
+      "a portrait of a person with tired eyes",
+      "a close-up face showing under-eye bags"
+    ],
+    "negative": [
+      "a face without bags under the eyes",
+      "a portrait of a person with fresh eyes",
+      "a close-up face with smooth skin under the eyes"
+    ]
+  },
+  "Bald": {
+    "positive": [
+      "a bald person",
+      "a portrait of a person with a bald head",
+      "a close-up face with no hair on the head"
+    ],
+    "negative": [
+      "a person with hair",
+      "a portrait of a person with a full head of hair",
+      "a close-up face with visible hair on the head"
+    ]
+  },
+  "Bangs": {
+    "positive": [
+      "a face with bangs",
+      "a portrait of a person with bangs over the forehead",
+      "a close-up face showing fringe bangs"
+    ],
+    "negative": [
+      "a face without bangs",
+      "a portrait of a person with no bangs",
+      "a close-up face with the forehead not covered by bangs"
+    ]
+  },
+  "Big_Lips": {
+    "positive": [
+      "a face with big lips",
+      "a portrait of a person with full lips",
+      "a close-up face showing large lips"
+    ],
+    "negative": [
+      "a face without big lips",
+      "a portrait of a person with thin lips",
+      "a close-up face showing small lips"
+    ]
+  },
+  "Big_Nose": {
+    "positive": [
+      "a face with a big nose",
+      "a portrait of a person with a large nose",
+      "a close-up face showing a prominent nose"
+    ],
+    "negative": [
+      "a face without a big nose",
+      "a portrait of a person with a small nose",
+      "a close-up face showing a less prominent nose"
+    ]
+  },
+  "Black_Hair": {
+    "positive": [
+      "a close-up portrait photo of a face with black hair",
+      "an image of a person with black hair",
+      "a face photo showing dark black hair"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without black hair",
+      "an image of a person with non-black hair",
+      "a face photo showing hair that is not black"
+    ]
+  },
+  "Blond_Hair": {
+    "positive": [
+      "a close-up portrait photo of a face with blond hair",
+      "an image of a person with blonde hair",
+      "a face photo showing light blond hair"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without blond hair",
+      "an image of a person with non-blond hair",
+      "a face photo showing hair that is not blonde"
+    ]
+  },
+  "Blurry": {
+    "positive": [
+      "a blurry face photo",
+      "a portrait photo that is out of focus",
+      "a close-up face image with blur"
+    ],
+    "negative": [
+      "a sharp face photo",
+      "a portrait photo that is in focus",
+      "a clear close-up face image"
+    ]
+  },
+  "Brown_Hair": {
+    "positive": [
+      "a face with brown hair",
+      "a portrait of a person with brown hair",
+      "a close-up face showing brown hair"
+    ],
+    "negative": [
+      "a face without brown hair",
+      "a portrait of a person with non-brown hair",
+      "a close-up face showing hair that is not brown"
+    ]
+  },
+  "Bushy_Eyebrows": {
+    "positive": [
+      "a face with bushy eyebrows",
+      "a portrait of a person with thick eyebrows",
+      "a close-up face showing dense eyebrows"
+    ],
+    "negative": [
+      "a face without bushy eyebrows",
+      "a portrait of a person with thin eyebrows",
+      "a close-up face showing light eyebrows"
+    ]
+  },
+  "Chubby": {
+    "positive": [
+      "a close-up portrait photo of a round full face",
+      "an image of a face with full cheeks",
+      "a face photo with round facial features"
+    ],
+    "negative": [
+      "a close-up portrait photo of a narrow thin face",
+      "an image of a face with thin cheeks",
+      "a face photo with slim facial features"
+    ]
+  },
+  "Double_Chin": {
+    "positive": [
+      "a face with a double chin",
+      "a portrait of a person showing a double chin",
+      "a close-up face with fullness under the chin"
+    ],
+    "negative": [
+      "a face without a double chin",
+      "a portrait of a person with a defined chin",
+      "a close-up face without fullness under the chin"
+    ]
+  },
+  "Eyeglasses": {
+    "positive": [
+      "a close-up portrait photo of a face with eyeglasses",
+      "an image of a person wearing glasses",
+      "a face photo with glasses visible"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without eyeglasses",
+      "an image of a person not wearing glasses",
+      "a face photo with no glasses visible"
+    ]
+  },
+  "Goatee": {
+    "positive": [
+      "a face with a goatee",
+      "a portrait of a person with a goatee beard",
+      "a close-up face showing a goatee"
+    ],
+    "negative": [
+      "a face without a goatee",
+      "a portrait of a person with no goatee beard",
+      "a close-up face without a goatee"
+    ]
+  },
+  "Gray_Hair": {
+    "positive": [
+      "a face with gray hair",
+      "a portrait of a person with grey hair",
+      "a close-up face showing gray hair"
+    ],
+    "negative": [
+      "a face without gray hair",
+      "a portrait of a person with non-gray hair",
+      "a close-up face showing hair that is not gray"
+    ]
+  },
+  "Heavy_Makeup": {
+    "positive": [
+      "a close-up portrait photo of a face with heavy makeup",
+      "an image of a person wearing noticeable makeup",
+      "a face photo with strong makeup visible"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without heavy makeup",
+      "an image of a person wearing little or no makeup",
+      "a face photo with natural-looking makeup"
+    ]
+  },
+  "High_Cheekbones": {
+    "positive": [
+      "a face with high cheekbones",
+      "a portrait of a person with prominent cheekbones",
+      "a close-up face showing high cheekbones"
+    ],
+    "negative": [
+      "a face without high cheekbones",
+      "a portrait of a person with less prominent cheekbones",
+      "a close-up face with soft cheekbones"
+    ]
+  },
+  "Male": {
+    "positive": [
+      "a close-up portrait photo of a male face",
+      "an image of a face with masculine facial features",
+      "a face photo of an adult man"
+    ],
+    "negative": [
+      "a close-up portrait photo of a female face",
+      "an image of a face with feminine facial features",
+      "a face photo of an adult woman"
+    ]
+  },
+  "Mouth_Slightly_Open": {
+    "positive": [
+      "a face with a slightly open mouth",
+      "a portrait of a person with an open mouth",
+      "a close-up face showing the mouth slightly open"
+    ],
+    "negative": [
+      "a face with a closed mouth",
+      "a portrait of a person with the mouth closed",
+      "a close-up face showing closed lips"
+    ]
+  },
+  "Mustache": {
+    "positive": [
+      "a close-up portrait photo of a face with a mustache",
+      "an image of a person with a moustache",
+      "a face photo with a mustache visible"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without a mustache",
+      "an image of a person with no moustache",
+      "a face photo with no mustache visible"
+    ]
+  },
+  "Narrow_Eyes": {
+    "positive": [
+      "a face with narrow eyes",
+      "a portrait of a person with narrow eyes",
+      "a close-up face showing narrow eyes"
+    ],
+    "negative": [
+      "a face without narrow eyes",
+      "a portrait of a person with wide open eyes",
+      "a close-up face showing larger eyes"
+    ]
+  },
+  "No_Beard": {
+    "positive": [
+      "a clean-shaven face",
+      "a face without a beard",
+      "a portrait of a person with no facial hair"
+    ],
+    "negative": [
+      "a face with a beard",
+      "a bearded face",
+      "a portrait of a person with facial hair"
+    ]
+  },
+  "Oval_Face": {
+    "positive": [
+      "an oval face",
+      "a portrait of a person with an oval face shape",
+      "a close-up face with an oval shape"
+    ],
+    "negative": [
+      "a face that is not oval",
+      "a portrait of a person without an oval face shape",
+      "a close-up face with a non-oval shape"
+    ]
+  },
+  "Pale_Skin": {
+    "positive": [
+      "a face with pale skin",
+      "a portrait of a person with light pale skin",
+      "a close-up face showing pale complexion"
+    ],
+    "negative": [
+      "a face without pale skin",
+      "a portrait of a person with darker skin",
+      "a close-up face without a pale complexion"
+    ]
+  },
+  "Pointy_Nose": {
+    "positive": [
+      "a face with a pointy nose",
+      "a portrait of a person with a pointed nose",
+      "a close-up face showing a pointy nose"
+    ],
+    "negative": [
+      "a face without a pointy nose",
+      "a portrait of a person with a rounded nose",
+      "a close-up face without a pointed nose"
+    ]
+  },
+  "Receding_Hairline": {
+    "positive": [
+      "a face with a receding hairline",
+      "a portrait of a person with a receding hairline",
+      "a close-up face showing a receding hairline"
+    ],
+    "negative": [
+      "a face without a receding hairline",
+      "a portrait of a person with a full hairline",
+      "a close-up face showing a normal hairline"
+    ]
+  },
+  "Rosy_Cheeks": {
+    "positive": [
+      "a face with rosy cheeks",
+      "a portrait of a person with pink cheeks",
+      "a close-up face showing rosy cheeks"
+    ],
+    "negative": [
+      "a face without rosy cheeks",
+      "a portrait of a person without pink cheeks",
+      "a close-up face with neutral cheeks"
+    ]
+  },
+  "Sideburns": {
+    "positive": [
+      "a face with sideburns",
+      "a portrait of a person with visible sideburns",
+      "a close-up face showing sideburns"
+    ],
+    "negative": [
+      "a face without sideburns",
+      "a portrait of a person with no sideburns",
+      "a close-up face without sideburns"
+    ]
+  },
+  "Smiling": {
+    "positive": [
+      "a close-up portrait photo of a smiling face",
+      "an image of a person smiling",
+      "a face photo with a happy expression"
+    ],
+    "negative": [
+      "a close-up portrait photo of a non-smiling face",
+      "an image of a person not smiling",
+      "a face photo with a neutral expression"
+    ]
+  },
+  "Straight_Hair": {
+    "positive": [
+      "a face with straight hair",
+      "a portrait of a person with straight hair",
+      "a close-up face showing straight hair"
+    ],
+    "negative": [
+      "a face without straight hair",
+      "a portrait of a person with non-straight hair",
+      "a close-up face showing hair that is not straight"
+    ]
+  },
+  "Wavy_Hair": {
+    "positive": [
+      "a close-up portrait photo of a face with wavy hair",
+      "an image of a person with wavy hair",
+      "a face photo showing wavy hair"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without wavy hair",
+      "an image of a person with straight or non-wavy hair",
+      "a face photo showing hair that is not wavy"
+    ]
+  },
+  "Wearing_Earrings": {
+    "positive": [
+      "a face with earrings",
+      "a portrait of a person wearing earrings",
+      "a close-up face showing earrings"
+    ],
+    "negative": [
+      "a face without earrings",
+      "a portrait of a person not wearing earrings",
+      "a close-up face with no earrings"
+    ]
+  },
+  "Wearing_Hat": {
+    "positive": [
+      "a close-up portrait photo of a person wearing a hat",
+      "an image of a face with a hat visible",
+      "a face photo of someone wearing a hat"
+    ],
+    "negative": [
+      "a close-up portrait photo of a person not wearing a hat",
+      "an image of a face with no hat visible",
+      "a face photo of someone without a hat"
+    ]
+  },
+  "Wearing_Lipstick": {
+    "positive": [
+      "a close-up portrait photo of a face with lipstick",
+      "an image of a person wearing lipstick",
+      "a face photo with lipstick visible"
+    ],
+    "negative": [
+      "a close-up portrait photo of a face without lipstick",
+      "an image of a person not wearing lipstick",
+      "a face photo with no lipstick visible"
+    ]
+  },
+  "Wearing_Necklace": {
+    "positive": [
+      "a person wearing a necklace",
+      "a portrait of a person with a necklace",
+      "a close-up portrait showing a necklace"
+    ],
+    "negative": [
+      "a person without a necklace",
+      "a portrait of a person not wearing a necklace",
+      "a close-up portrait with no necklace"
+    ]
+  },
+  "Wearing_Necktie": {
+    "positive": [
+      "a person wearing a necktie",
+      "a portrait of a person with a tie",
+      "a close-up portrait showing a necktie"
+    ],
+    "negative": [
+      "a person without a necktie",
+      "a portrait of a person not wearing a tie",
+      "a close-up portrait with no necktie"
+    ]
+  },
+  "Young": {
+    "positive": [
+      "a close-up portrait photo of a young face",
+      "an image of a face with youthful facial features",
+      "a face photo of a young adult person"
+    ],
+    "negative": [
+      "a close-up portrait photo of an older face",
+      "an image of a face with mature facial features",
+      "a face photo of an older adult person"
+    ]
+  }
+}

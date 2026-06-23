@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -84,19 +85,11 @@ def load_baselines(root: Path) -> tuple[list[pd.DataFrame], list[pd.DataFrame]]:
 def gate_label(result_dir: Path, include_all: bool) -> str:
     if not include_all:
         return "Learned gate"
-    parts = result_dir.name.split("_")
-    config_id = next(
-        (
-            part
-            for part in parts
-            if part.startswith("add")
-            or part.startswith("seq")
-            or part.startswith("ov")
-            or part.startswith("cfg")
-            or part == "manual"
-        ),
+    match = re.search(
+        r"(hybmp_l\d+(?:_[A-Za-z0-9]+)*|offmp_l\d+(?:_[A-Za-z0-9]+)*|seqp2_ov\d+|seqp2_l\d+|seq_l\d+|seq_s\d+|add_l\d+|add_s\d+|ov\d+|cfg\d+|manual)",
         result_dir.name,
     )
+    config_id = match.group(1) if match else result_dir.name
     if "gate_v3" in result_dir.name:
         family = "v3"
     elif "gate_v2" in result_dir.name:

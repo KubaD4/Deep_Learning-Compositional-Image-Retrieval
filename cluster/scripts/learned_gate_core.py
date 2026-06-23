@@ -262,6 +262,8 @@ class GateSequentialComposer(nn.Module):
         gate_max: float = 1.5,
         residual_scale: float = 0.02,
         gate_uses_current: bool = True,
+        use_attr_probe: bool = False,
+        attr_count: int = 40,
     ):
         super().__init__()
         self.clip_dim = clip_dim
@@ -269,9 +271,14 @@ class GateSequentialComposer(nn.Module):
         self.gate_max = float(gate_max)
         self.residual_scale = float(residual_scale)
         self.gate_uses_current = bool(gate_uses_current)
-        combined_dim = clip_dim * 4
+        self.use_attr_probe = bool(use_attr_probe)
+        self.attr_count = int(attr_count)
+        self.attr_probe = build_mlp(clip_dim, [512, 128], self.attr_count, dropout) if self.use_attr_probe else None
+        probe_dim = self.attr_count if self.use_attr_probe else 0
+        combined_dim = clip_dim * 4 + probe_dim
         self.gate = build_mlp(combined_dim, list(gate_hidden), 1, dropout)
         self.residual = build_mlp(combined_dim, list(residual_hidden), clip_dim, dropout)
+        self.last_attr_logits: torch.Tensor | None = None
 
     def forward(
         self,
@@ -284,6 +291,12 @@ class GateSequentialComposer(nn.Module):
         active_mask = condition_mask.bool()
 
         query = source
+        attr_probs = None
+        if self.attr_probe is not None:
+            self.last_attr_logits = self.attr_probe(source)
+            attr_probs = torch.sigmoid(self.last_attr_logits)
+        else:
+            self.last_attr_logits = None
         weighted_steps = []
         alpha_values = []
 
@@ -300,6 +313,8 @@ class GateSequentialComposer(nn.Module):
                 ],
                 dim=-1,
             )
+            if attr_probs is not None:
+                gate_input = torch.cat([gate_input, attr_probs], dim=-1)
             alpha = torch.sigmoid(self.gate(gate_input).squeeze(-1)) * self.gate_max
             alpha = alpha * active.float()
             step = alpha.unsqueeze(-1) * condition
@@ -324,6 +339,8 @@ class GateSequentialComposer(nn.Module):
             ],
             dim=-1,
         )
+        if attr_probs is not None:
+            residual_input = torch.cat([residual_input, attr_probs], dim=-1)
         delta = self.residual(residual_input)
         query = F.normalize(query + self.residual_scale * delta, dim=-1)
         return query, alpha_out, delta
@@ -352,6 +369,8 @@ def create_model_from_config(config: dict, clip_dim: int = 512) -> nn.Module:
             edit_scale=float(config.get("edit_scale", 1.0)),
             gate_max=float(config.get("gate_max", 1.5)),
             gate_uses_current=str(config.get("gate_state", "current")) == "current",
+            use_attr_probe=bool(config.get("use_attr_probe", False)),
+            attr_count=int(config.get("attr_count", 40)),
         )
     raise ValueError(f"Unknown composer_type: {composer_type}")
 

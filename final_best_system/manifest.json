@@ -1,0 +1,45 @@
+{
+  "best_primary_system": {
+    "name": "model_plus_generic_delta_100",
+    "reason": "Highest Macro Recall@10 among all current systems.",
+    "formula": "q_final = normalize(q_model + 1.0 * (q_generic_sum - source))",
+    "result_dir": "/Users/kuba/deep_learning/cluster/artifacts/results/sum_model_blends/model_plus_generic_delta_100",
+    "macro_Recall@10": 0.28274972764075396,
+    "micro_Recall@10": 0.238593731090403
+  },
+  "best_micro_system": {
+    "name": "model_plus_tuned_delta_050",
+    "reason": "Highest Micro Recall@10 among all current systems.",
+    "formula": "q_final = normalize(q_model + 0.5 * (q_tuned_sum - source))",
+    "result_dir": "/Users/kuba/deep_learning/cluster/artifacts/results/sum_model_blends/model_plus_tuned_delta_050",
+    "macro_Recall@10": 0.2732250979572816,
+    "micro_Recall@10": 0.24098390415103474
+  },
+  "assignment_vanilla_baseline": {
+    "name": "direct_sum",
+    "reason": "Vanilla zero-shot baseline requested by the assignment: unmodified CLIP plus naive latent arithmetic.",
+    "formula": "q = normalize(source + sum(sign * positive_text_embedding(attribute)))",
+    "result_dir": "/Users/kuba/deep_learning/cluster/artifacts/results/baselines/01_direct_sum",
+    "macro_Recall@10": 0.10842420927025993,
+    "micro_Recall@10": 0.12477308483601597
+  },
+  "strongest_zero_shot_clip_baseline": {
+    "name": "contrastive_sequential",
+    "reason": "Strongest no-training CLIP-only baseline among our arithmetic variants.",
+    "formula": "q_i = normalize(q_{i-1} + sign * contrastive_text_direction(attribute))",
+    "result_dir": "/Users/kuba/deep_learning/cluster/artifacts/results/baselines/04_contrastive_sequential",
+    "macro_Recall@10": 0.18707577909100628,
+    "micro_Recall@10": 0.1665254750090766
+  },
+  "checkpoint": {
+    "local_status": "present",
+    "local_path": "/Users/kuba/deep_learning/final_best_system/weights/best_val_official_like_at10.pt",
+    "expected_remote_path": "/mnt/meditech/group1/deep_learning/cluster/artifacts/training_runs/hpsearch_gate_v3_20260621_001921_long/gate_v3_sequentialgate_hybmp_l002_w050_balanced_length_b256_lr0.0001_src0.02_scale0.02_long/checkpoints/best_val_official_like_at10.pt",
+    "note": "The final system uses this learned gate checkpoint plus the CLIP arithmetic delta branch."
+  },
+  "assignment_metrics": {
+    "primary": "Recall@K for K=1,5,10 averaged across valid source images.",
+    "secondary": "Precision@K for K=1,5,10.",
+    "reported_here": "macro metrics average per-query values equally; micro metrics average over all source-query cases."
+  }
+}

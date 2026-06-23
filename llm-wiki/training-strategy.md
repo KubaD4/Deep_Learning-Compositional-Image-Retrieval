@@ -426,6 +426,54 @@ If `gate_v3` improves validation but not official JSON, the likely issue is stil
 - train attribute-family-specific gates for global attributes (`Male`, `Young`, `Chubby`) and local attributes (`Eyeglasses`, `Smiling`, `Mustache`);
 - use query-order ensembling for sequential methods, because multi-attribute sequential composition can be order-sensitive.
 
+## 2026-06-19 Update: Prompt v2 Ablation
+
+The first `gate_v3` official JSON result beat the best arithmetic baseline:
+
+```text
+gate_v3/seq_l007              Macro R@10 = 0.1951
+Contrastive Sequential        Macro R@10 = 0.1871
+Adaptive Tangent Sequential   Macro R@10 = 0.1869
+```
+
+However, the per-query profile remains uneven. The learned sequential gate is strong on local, visually concrete attributes such as `+Eyeglasses`, `+Smiling`, `-Heavy_Makeup`, and `+Mustache`, but weak on global/correlated or prompt-sensitive attributes:
+
+```text
++Male                         gate_v3 0.0464 vs best baseline 0.2395
+-Male, -Mustache              gate_v3 0.0000 vs best baseline 0.0741
++Chubby, -Young               gate_v3 0.0205 vs best baseline 0.0497
+-Smiling, +Eyeglasses, +Hat   gate_v3 0.3797 vs best baseline 0.4304
++Black_Hair, -Wavy_Hair       gate_v3 0.1963 vs best baseline 0.2107
+```
+
+The next controlled experiment is `prompt_v2`: keep the same model, training data, and best hyperparameters from `seq_l007`, but rebuild the signed text direction cache from a revised prompt ensemble.
+
+Motivation:
+
+- CLIP prompt engineering literature reports that natural templates such as `"a photo of a {label}"` and prompt ensembling improve zero-shot behavior compared with bare labels.
+- Our original prompts were already contextual, but not always uniformly photographic.
+- Some problematic prompts, especially `Male`, `Young`, and `Chubby`, used semantically broad labels that may trigger CLIP correlations rather than localized visual evidence.
+
+Prompt v2 policy:
+
+- use more uniform templates: `"a close-up portrait photo of ..."`, `"an image of ..."`, `"a face photo ..."`;
+- avoid over-forcing semantic labels where possible;
+- describe visible facial evidence for `Male`, `Young`, and `Chubby` more carefully;
+- keep the experiment controlled by training only one long config with the same parameters as `seq_l007`.
+
+The intended comparison is:
+
+```text
+seq_l007      = gate_v3 with original prompt cache
+seqp2_l007    = gate_v3 with prompt_v2 cache, same architecture and hyperparameters
+```
+
+When prompt v2 results are available, compare:
+
+- synthetic validation: `best_val_official_like@10`, `best_val_exact_R@10`, `best_val_attr_success@10`;
+- official JSON macro/micro Recall@10;
+- per-query deltas, especially `Male`, `Young`, `Chubby`, hair queries, and hat queries.
+
 Softmax is differentiable, so the reason to avoid it is not differentiability. The problem is that softmax forces attributes to compete: if one edit gets a larger weight, the others must receive smaller weights. Independent sigmoid gates are more appropriate because multiple requested edits can all be important at the same time.
 
 The gate is not given ground-truth scalar weights. It learns them indirectly from retrieval loss. If increasing the weight of `+Eyeglasses` helps move `q` toward targets with eyeglasses and away from safe negatives, gradients will increase the gate behavior for similar source/query cases. If an edit is already visually present or weakly relevant for a source image, the best retrieval direction may require a smaller residual, and the gate can learn to reduce that edit strength.
@@ -752,6 +800,25 @@ Same-identity pairs provide strong supervision for identity preservation, but th
 
 Therefore, same-identity training is a useful inductive bias, not a perfect reproduction of the evaluation target distribution.
 
+The 2026-06-20 `seqp2_ov005` analysis quantified this mismatch:
+
+```text
+same identity in top-1   ~= 69.1%
+same identity in top-10  ~= 88.6%
+official valid in top-10 ~= 19.4%
+```
+
+This means the best model is very good at staying near the source identity, but many official JSON queries reward cross-identity targets. Same-identity valid targets are especially rare for the weak queries:
+
+```text
++Male                only 2.5% of source cases have any same-identity valid target
+-Young               only 3.8%
++Chubby, -Young      only 0.7%
+-Male, -Mustache     0.0%
+```
+
+See [Official Results and Literature Findings](official-results-and-literature-findings.md) for the full diagnosis and paper links.
+
 The recommended experiments are:
 
 - zero-shot CLIP arithmetic baseline;
@@ -780,3 +847,15 @@ Start small:
 After this pipeline works, test longer edit sets, benchmark-style targets, hybrid sampling, and more advanced multi-positive losses.
 
 The first run deliberately does not plug KNN/multi-positive targets into the loss. KNN is used after prediction for retrieval. Multi-positive training can be added as a second experiment once the single-positive pipeline is verified.
+
+Decision after `seqp2_ov005`: the next experiment should be an official-like multi-positive training objective built from train/validation attributes, not from `celeba_evaluation.json`. Candidate positives should satisfy the query, remain close to the source in CLIP image space, and differ in few non-query attributes. This better matches the official benchmark without leaking the official JSON into training.
+
+Decision after job `45`: pure official-like multi-positive training slightly underperformed the previous best `seqp2_ov005` on the official JSON despite improving the synthetic validation proxy. This suggests the official-like objective is useful but too strong when it replaces exact same-identity supervision.
+
+The next training objective is therefore hybrid:
+
+```text
+loss_retrieval = (1 - w) * exact_info_nce + w * multipositive_info_nce
+```
+
+This keeps exact target `B` as a positive for identity/source preservation, while adding a controlled fraction of benchmark-style compatible positives. The first long grid should test `w = 0.25`, `0.50`, and `0.75`, with and without the attribute-presence probe, then compare official JSON Macro/Micro R@10 against `seqp2_ov005`.

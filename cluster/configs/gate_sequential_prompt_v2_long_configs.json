@@ -1,0 +1,24 @@
+[
+  {
+    "config_id": "seqp2_l007",
+    "composer_type": "sequential_gate",
+    "condition_mode": "signed_direction",
+    "prompt_cache_path": "data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
+    "gate_state": "current",
+    "sampler_mode": "balanced_length",
+    "learning_rate": 0.0001,
+    "temperature": 0.03,
+    "lambda_source": 0.02,
+    "lambda_target": 0.1,
+    "residual_scale": 0.02,
+    "edit_scale": 1.0,
+    "gate_max": 1.5,
+    "dropout": 0.1,
+    "batch_size": 256,
+    "epochs": 60,
+    "steps_per_epoch": 2000,
+    "validate_every_steps": 4000,
+    "val_max_queries": 4096,
+    "val_batch_size": 256
+  }
+]

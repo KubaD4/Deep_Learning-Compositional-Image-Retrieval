@@ -25,6 +25,16 @@ def parse_args():
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--time-budget-seconds-per-run", type=int, default=0)
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument(
+        "--evaluate-best-json",
+        action="store_true",
+        help="After hpsearch, evaluate the best checkpoint on celeba_evaluation.json.",
+    )
+    parser.add_argument(
+        "--plot-after-json",
+        action="store_true",
+        help="After JSON evaluation, regenerate official comparison plots.",
+    )
     parser.add_argument("--force", action="store_true")
     return parser.parse_args()
 
@@ -65,6 +75,61 @@ def family_from_configs(configs: list[dict]) -> str:
     if "additive_gate" in composer_types:
         return "gate_v2"
     return "gate_v1"
+
+
+def best_checkpoint_from_summary(summary_path: Path) -> Path | None:
+    if not summary_path.exists():
+        return None
+    with summary_path.open(encoding="utf-8") as handle:
+        rows = [
+            row
+            for row in csv.DictReader(handle)
+            if row.get("status") == "complete" and row.get("best_val_official_like@10")
+        ]
+    if not rows:
+        return None
+    best = max(rows, key=lambda row: float(row["best_val_official_like@10"]))
+    checkpoint = Path(best["run_dir"]) / "checkpoints" / "best_val_official_like_at10.pt"
+    return checkpoint if checkpoint.exists() else None
+
+
+def run_best_json_evaluation(
+    summary_path: Path,
+    progress: Path,
+    device: str,
+    force: bool,
+    plot_after_json: bool,
+) -> None:
+    checkpoint = best_checkpoint_from_summary(summary_path)
+    if checkpoint is None:
+        progress_line(progress, "SKIP JSON evaluation: no completed best checkpoint found")
+        return
+
+    progress_line(progress, f"START JSON evaluation checkpoint={checkpoint}")
+    command = [
+        sys.executable,
+        "scripts/evaluate_gate_on_json.py",
+        "--checkpoint",
+        str(checkpoint),
+        "--device",
+        device,
+    ]
+    if force:
+        command.append("--force")
+    completed = subprocess.run(command, check=False)
+    progress_line(progress, f"END JSON evaluation status=exit_{completed.returncode}")
+    if completed.returncode != 0 or not plot_after_json:
+        return
+
+    progress_line(progress, "START official comparison plots")
+    plot_command = [
+        sys.executable,
+        "scripts/plot_official_comparison.py",
+        "--output-dir",
+        "artifacts/results/official_comparison",
+    ]
+    plot_completed = subprocess.run(plot_command, check=False)
+    progress_line(progress, f"END official comparison plots status=exit_{plot_completed.returncode}")
 
 
 def main() -> int:
@@ -128,6 +193,7 @@ def main() -> int:
             "sampler_mode": config.get("sampler_mode", ""),
             "composer_type": config.get("composer_type", ""),
             "condition_mode": config.get("condition_mode", ""),
+            "prompt_cache_path": config.get("prompt_cache_path", ""),
             "gate_state": config.get("gate_state", ""),
             "learning_rate": config.get("learning_rate", ""),
             "lambda_source": config.get("lambda_source", ""),
@@ -137,12 +203,26 @@ def main() -> int:
             "dropout": config.get("dropout", ""),
             "batch_size": batch_size,
             "temperature": config.get("temperature", ""),
+            "use_multipositive_loss": config.get("use_multipositive_loss", ""),
+            "multipositive_weight": config.get("multipositive_weight", ""),
+            "multipositive_hamming": config.get("multipositive_hamming", ""),
+            "multipositive_top_fraction": config.get("multipositive_top_fraction", ""),
+            "use_attr_probe": config.get("use_attr_probe", ""),
+            "lambda_attr_probe": config.get("lambda_attr_probe", ""),
             **best,
         }
         append_summary(summary_path, row)
         progress_line(progress, f"END config={config['config_id']} status={status} best={best}")
 
     progress_line(progress, f"HPSEARCH complete summary={summary_path}")
+    if args.evaluate_best_json:
+        run_best_json_evaluation(
+            summary_path=summary_path,
+            progress=progress,
+            device=args.device,
+            force=args.force,
+            plot_after_json=args.plot_after_json,
+        )
     print(f"Hyperparameter search summary: {summary_path}")
     return 0
 

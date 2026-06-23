@@ -34,7 +34,7 @@ from learned_gate_core import (
     signed_condition_text,
     write_csv_rows,
 )
-from project_core import ARTIFACTS_DIR, CELEBA_DIR, TOP_KS, choose_device, load_torch
+from project_core import ARTIFACTS_DIR, CELEBA_DIR, ROOT, TOP_KS, choose_device, load_torch
 
 
 STOP_REQUESTED = False
@@ -148,6 +148,13 @@ def load_pair_index(split: str) -> dict:
     return load_torch(path)
 
 
+def resolve_project_path(path_value: str | os.PathLike | None) -> Path | None:
+    if not path_value:
+        return None
+    path = Path(path_value)
+    return path if path.is_absolute() else ROOT / path
+
+
 def positions_by_length(index: dict) -> dict[int, torch.Tensor]:
     result = {}
     lengths = index["query_lengths"]
@@ -224,6 +231,54 @@ def false_negative_mask(source_attrs, candidate_attrs, attr_indices, signs, hamm
     return valid & ~eye
 
 
+def official_like_mask(source_attrs, candidate_attrs, attr_indices, signs, hamming_threshold):
+    batch = source_attrs.shape[0]
+    device = source_attrs.device
+    valid = torch.ones((batch, batch), dtype=torch.bool, device=device)
+    query_attr_mask = torch.zeros((batch, source_attrs.shape[1]), dtype=torch.bool, device=device)
+
+    for position in range(attr_indices.shape[1]):
+        active = attr_indices[:, position] >= 0
+        if not bool(active.any()):
+            continue
+        attrs = attr_indices[:, position].clamp_min(0)
+        desired = signs[:, position]
+        candidate_values = candidate_attrs[:, attrs].T
+        valid &= (~active[:, None]) | (candidate_values == desired[:, None])
+        query_attr_mask[torch.arange(batch, device=device), attrs] |= active
+
+    nonquery_diff = candidate_attrs.unsqueeze(0) != source_attrs.unsqueeze(1)
+    nonquery_diff &= ~query_attr_mask[:, None, :]
+    valid &= nonquery_diff.sum(dim=-1) <= hamming_threshold
+    return valid
+
+
+def source_similarity_filter(source, target, config):
+    batch = source.shape[0]
+    device = source.device
+    similarity = F.normalize(source, dim=-1) @ F.normalize(target, dim=-1).T
+    keep = torch.ones((batch, batch), dtype=torch.bool, device=device)
+    min_cos = config.get("multipositive_min_source_cos")
+    if min_cos is not None:
+        keep &= similarity >= float(min_cos)
+    top_fraction = float(config.get("multipositive_top_fraction", 0.0))
+    if top_fraction > 0.0:
+        count = max(1, min(batch, math.ceil(batch * top_fraction)))
+        top_indices = similarity.topk(count, dim=1).indices
+        top_mask = torch.zeros_like(keep)
+        top_mask.scatter_(1, top_indices, True)
+        keep &= top_mask
+    return keep
+
+
+def multi_positive_contrastive_loss(scores, positive_mask, neutral_mask):
+    scores = scores.masked_fill(neutral_mask & ~positive_mask, -torch.inf)
+    positive_scores = scores.masked_fill(~positive_mask, -torch.inf)
+    numerator = torch.logsumexp(positive_scores, dim=1)
+    denominator = torch.logsumexp(scores, dim=1)
+    return -(numerator - denominator).mean()
+
+
 def compute_losses(model, batch, embeddings, attrs, prompt_cache, config, device):
     src_idx_cpu = batch["source_indices"].long()
     tgt_idx_cpu = batch["target_indices"].long()
@@ -244,6 +299,9 @@ def compute_losses(model, batch, embeddings, attrs, prompt_cache, config, device
 
     query, alpha, _ = model(source, conditions, mask)
     scores = (query @ target.T) / float(config["temperature"])
+    labels = torch.arange(len(src_idx_cpu), device=device)
+    eye = torch.eye(len(src_idx_cpu), dtype=torch.bool, device=device)
+
     false_negatives = false_negative_mask(
         source_attrs,
         target_attrs,
@@ -251,24 +309,58 @@ def compute_losses(model, batch, embeddings, attrs, prompt_cache, config, device
         signs,
         int(config["false_negative_hamming"]),
     )
-    scores = scores.masked_fill(false_negatives, -torch.inf)
-    labels = torch.arange(len(src_idx_cpu), device=device)
-    info_nce = F.cross_entropy(scores, labels)
+    exact_scores = scores.masked_fill(false_negatives, -torch.inf)
+    exact_info_nce = F.cross_entropy(exact_scores, labels)
+
+    if bool(config.get("use_multipositive_loss", False)):
+        official_like = official_like_mask(
+            source_attrs,
+            target_attrs,
+            attr_indices,
+            signs,
+            int(config.get("multipositive_hamming", config["false_negative_hamming"])),
+        )
+        source_like = source_similarity_filter(source, target, config)
+        positive_mask = eye | (official_like & source_like)
+        neutral_mask = official_like & ~positive_mask
+        multipositive_info_nce = multi_positive_contrastive_loss(scores, positive_mask, neutral_mask)
+        multipositive_weight = float(config.get("multipositive_weight", 1.0))
+        info_nce = (
+            (1.0 - multipositive_weight) * exact_info_nce
+            + multipositive_weight * multipositive_info_nce
+        )
+        positive_count = positive_mask.float().sum(dim=1).mean()
+    else:
+        multipositive_info_nce = torch.zeros((), device=device)
+        multipositive_weight = 0.0
+        info_nce = exact_info_nce
+        positive_count = torch.ones((), device=device)
     target_cos = 1.0 - (query * F.normalize(target, dim=-1)).sum(dim=-1).mean()
     source_cos = 1.0 - (query * F.normalize(source, dim=-1)).sum(dim=-1).mean()
+    attr_probe_loss = torch.zeros((), device=device)
+    attr_logits = getattr(model, "last_attr_logits", None)
+    if attr_logits is not None and float(config.get("lambda_attr_probe", 0.0)) > 0:
+        attr_targets = (source_attrs.float() > 0).float()
+        attr_probe_loss = F.binary_cross_entropy_with_logits(attr_logits, attr_targets)
     loss = (
         info_nce
         + float(config["lambda_target"]) * target_cos
         + float(config["lambda_source"]) * source_cos
+        + float(config.get("lambda_attr_probe", 0.0)) * attr_probe_loss
     )
     return loss, {
         "loss": float(loss.detach().cpu()),
         "info_nce": float(info_nce.detach().cpu()),
+        "exact_info_nce": float(exact_info_nce.detach().cpu()),
+        "multipositive_info_nce": float(multipositive_info_nce.detach().cpu()),
+        "multipositive_weight": float(multipositive_weight),
         "target_cosine_loss": float(target_cos.detach().cpu()),
         "source_preservation_loss": float(source_cos.detach().cpu()),
+        "attr_probe_loss": float(attr_probe_loss.detach().cpu()),
         "cos_q_target": float((query * F.normalize(target, dim=-1)).sum(dim=-1).mean().detach().cpu()),
         "cos_q_source": float((query * F.normalize(source, dim=-1)).sum(dim=-1).mean().detach().cpu()),
         "gate_mean": float(alpha[mask].mean().detach().cpu()) if bool(mask.any()) else 0.0,
+        "positive_count": float(positive_count.detach().cpu()),
     }
 
 
@@ -588,7 +680,8 @@ def main() -> int:
 
     train_cache = load_image_embedding_cache("train")
     valid_cache = load_image_embedding_cache("valid")
-    prompt_cache = load_prompt_embedding_cache()
+    prompt_cache_path = config.get("prompt_cache_path")
+    prompt_cache = load_prompt_embedding_cache(resolve_project_path(prompt_cache_path))
     train_index = load_pair_index("train")
     valid_index = load_pair_index("valid")
     if prompt_cache["attributes"] != train_index["attributes"]:
@@ -657,7 +750,8 @@ def main() -> int:
                     f"loss={loss_parts['loss']:.4f} "
                     f"info_nce={loss_parts['info_nce']:.4f} "
                     f"cos_q_source={loss_parts['cos_q_source']:.4f} "
-                    f"cos_q_target={loss_parts['cos_q_target']:.4f}",
+                    f"cos_q_target={loss_parts['cos_q_target']:.4f} "
+                    f"pos_count={loss_parts['positive_count']:.2f}",
                 )
 
             should_validate = global_step % int(config["validate_every_steps"]) == 0

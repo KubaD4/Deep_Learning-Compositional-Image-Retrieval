@@ -13,7 +13,7 @@ Every future agent/chat working in this folder must first read:
 5. `PROJECT_GUIDE.md` for detailed implementation, experiment, or onboarding instructions
 6. Any other wiki pages linked from the index that match the task
 
-The wiki is the persistent working memory for the project. Keep it current whenever new files, results, decisions, experiments, or explanations are produced.
+The wiki is the persistent working memory for the project. Always keep it current whenever new files, results, decisions, experiments, or explanations are produced.
 
 `llm-wiki/` is local-only and intentionally ignored by git. Do not stage, force-add, commit, or publish it unless the user explicitly requests a policy change.
 
@@ -70,5 +70,8 @@ When new work happens:
 - Update or add the narrowest relevant wiki page.
 - Update `llm-wiki/index.md`.
 - Append to `llm-wiki/log.md`.
+- When findings, results, or design decisions change, update the wiki and log in the same turn before handing work back.
+- If a paper, blog post, or external reference materially informs a decision, save its link in the relevant wiki page with a one-line note explaining why it matters.
+- Periodically remind the user to push wiki/context updates to Git so future agents and collaborators see the same project state.
 - If a new source file appears, add it to `llm-wiki/source-inventory.md`.
 - If a source was converted with MarkItDown, link both the raw source and generated Markdown.

@@ -179,3 +179,161 @@
 - Added `llm-wiki/index.md` maintenance rules requiring important project/wiki updates to also update `llm-wiki/log.md`.
 - Recorded that agents should periodically remind the user to push wiki changes to GitHub so future agents and collaborators share the same context.
 - Clarified that durable decisions should be written into the relevant wiki page rather than left only in chat history.
+
+## [2026-06-19] notebook | Added final learned-gate pipeline notebook
+
+- Added `notebooks/02_learned_gate_final_pipeline.ipynb` as a report-oriented notebook for the final pipeline.
+- Added the same notebook under `cluster/notebooks/02_learned_gate_final_pipeline.ipynb` so the cluster bundle contains the deliverable workflow.
+- Linked the final learned-gate notebook from `llm-wiki/index.md`.
+- The notebook installs dependencies, checks Git LFS embedding caches, verifies/extracts data, creates frozen CLIP embeddings if missing, creates prompt-ensemble embeddings, builds same-identity training pairs, runs the latest `gate_v3` hpsearch when enabled, evaluates checkpoints on `celeba_evaluation.json`, and regenerates official comparison plots.
+- The text sections document the main pivots from arithmetic CLIP baselines to `gate_v1`, `gate_v2`, and finally `gate_v3`, while keeping the executable training focus on the latest learned sequential gate.
+
+## [2026-06-19] notebook | Converted final notebook into single-file submission
+
+- Re-read the assignment deliverables section and confirmed the required format: one self-contained Jupyter/Colab notebook with complete codebase and report text.
+- Rebuilt `notebooks/02_learned_gate_final_pipeline.ipynb` as a monolithic submission notebook with data loading, CLIP embedding extraction, prompt embeddings, baseline evaluation, pair generation, `gate_v3` model definitions, training loop, hpsearch, official JSON evaluation, plots, and discussion all inline.
+- Updated the mirrored cluster copy at `cluster/notebooks/02_learned_gate_final_pipeline.ipynb`.
+- Clarified in the wiki index that this notebook is the single deliverable notebook; earlier notebooks/scripts remain development artifacts, not the intended final submission.
+
+## [2026-06-19] notebook | Aligned final notebook prompts with cluster runs
+
+- Updated the final notebook prompt configuration to inline the exact prompt dictionary from `cluster/configs/attribute_prompts.json`.
+- This keeps the single-notebook submission aligned with the prompt ensembles used to train and evaluate the cluster `gate_v3` results.
+
+## [2026-06-19] experiment | Prepared prompt-v2 ablation for gate_v3
+
+- Reviewed the new official JSON results: `gate_v3/seq_l007` achieved Macro R@10 `0.1951`, beating `Contrastive Sequential` (`0.1871`) and `Adaptive Tangent Sequential` (`0.1869`).
+- Noted the remaining weak queries: `+Male`, `-Male,-Mustache`, `+Chubby,-Young`, `+Black_Hair,-Wavy_Hair`, and `-Smiling,+Eyeglasses,+Wearing_Hat`.
+- Created `cluster/configs/attribute_prompts_v2_photo_templates.json`, a revised prompt ensemble using more uniform photo/portrait templates and less semantically forced wording for difficult global attributes such as `Male`, `Young`, and `Chubby`.
+- Added support for `prompt_cache_path` in training and official JSON evaluation so different prompt caches can be compared without overwriting the original prompt cache.
+- Added `cluster/configs/gate_sequential_prompt_v2_long_configs.json`, a controlled one-run config using the same parameters as best `seq_l007` but the prompt-v2 cache.
+- Added `cluster/jobs/43_hpsearch_sequential_prompt_v2_long.sh`, which creates `signed_attribute_prompt_embeddings_v2_photo_templates.pt` and trains the prompt-v2 long run.
+- Future comparison target: compare `seqp2_l007` directly against `seq_l007` on synthetic validation and official JSON per-query metrics.
+
+## [2026-06-20] experiment | Added prompt-v2 overnight hpsearch
+
+- Added `cluster/configs/gate_sequential_prompt_v2_overnight_configs.json`, a twelve-config `gate_v3` prompt-v2 grid around the best `seq_l007` setup.
+- The overnight grid keeps the new photo/portrait prompt cache fixed and varies learning rate, temperature, source-preservation strength, residual scale, edit scale, and whether the gate reads the current sequential state or the original source state.
+- Added `cluster/jobs/44_hpsearch_sequential_prompt_v2_overnight.sh` to run this grid on `meditech-long` for up to 12 hours.
+- Future comparison target: compare `seqp2_ov*` against both the original-prompt `seq_l007` and the controlled prompt-v2 `seqp2_l007`, especially on `Male`, `Young`, `Chubby`, hair, and hat queries.
+
+## [2026-06-20] cluster | Automated official JSON evaluation after hpsearch
+
+- Extended `cluster/scripts/run_hpsearch.py` with `--evaluate-best-json`, which selects the completed config with the highest `best_val_official_like@10` and evaluates its `best_val_official_like_at10.pt` checkpoint on `celeba_evaluation.json`.
+- Added `--plot-after-json`, which regenerates `artifacts/results/official_comparison` after the automatic JSON evaluation.
+- Updated prompt-v2 jobs `43` and `44` to run both flags, so future long hpsearch runs produce training summaries, official JSON results, and official comparison plots in one job.
+
+## [2026-06-20] results | Diagnosed `seqp2_ov005` and selected next experiment
+
+- Recorded `gate_v3/seqp2_ov005` as the current best official JSON model: Macro R@10 `0.2117`, Micro R@10 `0.1936`, Macro P@10 `0.0320`.
+- Confirmed that it beats the best arithmetic baseline, `Contrastive Sequential`, by about `+13.2%` relative on Macro R@10 and `+16.3%` relative on Micro R@10.
+- Identified the remaining weak queries: `+Male`, `-Male,-Mustache`, `+Chubby,-Young`, and `+Wearing_Lipstick,-Heavy_Makeup,+Smiling`.
+- Quantified the same-identity mismatch: the model retrieves same identity in top-10 about `88.6%` of official cases, but official valid targets are often cross-identity, especially for `Male`, `Young`, and `Chubby`.
+- Added [Official Results and Literature Findings](official-results-and-literature-findings.md) with result tables, benchmark interpretation, same-identity analysis, and relevant CLIP/compositionality papers.
+- Added a wiki maintenance rule: when papers materially inform a decision, save them in the wiki with links and a one-line relevance note.
+- Decided next experiment: keep `gate_v3/seqp2_ov005` as backbone, then add official-like multi-positive training from train/valid attributes, hard negatives, an optional attribute-presence probe, and a medium-capacity MLP ablation. Do not train on `celeba_evaluation.json`.
+
+## [2026-06-20] implementation | Added official-like multi-positive training
+
+- Extended `GateSequentialComposer` with an optional attribute-presence probe. When enabled, the probe predicts the 40 CelebA attributes from the frozen source CLIP embedding and appends probe probabilities to gate/residual inputs.
+- Added auxiliary `lambda_attr_probe` BCE loss so the probe learns calibrated-ish attribute state without changing the frozen CLIP encoder.
+- Added `use_multipositive_loss`: the training batch target embeddings become a mini-gallery where compatible candidates can be additional positives if they satisfy the signed query and stay within the non-query Hamming threshold.
+- Added `multipositive_top_fraction` to keep only CLIP-near compatible positives, preserving the idea of source similarity instead of accepting any attribute-compatible face.
+- Added `cluster/configs/gate_sequential_official_like_long_configs.json` with four configs: no-probe, probe, medium MLP, and wider positive selection.
+- Added `cluster/jobs/45_hpsearch_official_like_long.sh`, which runs the new hpsearch and then automatically evaluates the best checkpoint on the official JSON and regenerates plots.
+
+## [2026-06-21] results | Diagnosed job 45 and implemented hybrid official-like training
+
+- Recorded job `45` result: best synthetic validation config was `offmp_l004_widepos` with `val_official_like@10 = 0.8340`, but official JSON Macro R@10 was `0.2091`, slightly below current best `seqp2_ov005` at `0.2117`.
+- Interpreted the result as evidence that pure official-like multi-positive training is useful but too strong when it replaces same-identity exact-target supervision.
+- Implemented hybrid retrieval loss in `cluster/scripts/train_gate_model.py`: `loss_retrieval = (1 - w) * exact_info_nce + w * multipositive_info_nce`.
+- Added logging for `exact_info_nce`, `multipositive_info_nce`, and `multipositive_weight` so future runs can diagnose whether improvements come from exact-target learning or relaxed official-like positives.
+- Added `cluster/configs/gate_sequential_hybrid_official_like_long_configs.json` with eight long configs sweeping `multipositive_weight`, attribute probe usage, positive-pool width, and stronger source preservation.
+- Added `cluster/jobs/46_hpsearch_hybrid_official_like_long.sh`, a 12-hour long-queue job that creates prompt-v2 embeddings, runs the hybrid hpsearch, evaluates the best checkpoint on the official JSON, and regenerates comparison plots.
+- Updated `AGENTS.md` to make wiki/log updates mandatory after findings/results/decisions and to require paper links plus relevance notes when literature informs a decision.
+
+## [2026-06-21] results | Hybrid official-like loss became the new best model
+
+- Analyzed cluster output for job `46_hpsearch_hybrid_official_like_long.sh`; all eight configs completed successfully.
+- Best selected config was `hybmp_l002_w050`: `multipositive_weight = 0.50`, no attribute probe, top-fraction positives `0.15`, `val_official_like@10 = 0.8323`, `val_exact_R@10 = 0.6338`, `val_attr_success@10 = 0.9282`.
+- Official JSON result for `hybmp_l002_w050`: Macro R@10 `0.2130`, Micro R@10 `0.1953`, Macro P@10 `0.0325`, Micro P@10 `0.0297`.
+- This slightly improves over the previous best `seqp2_ov005` (Macro R@10 `0.2117`, Micro R@10 `0.1936`) and strengthens the result over the best arithmetic baseline `Contrastive Sequential` (Macro R@10 `0.1871`, Micro R@10 `0.1665`).
+- Hybrid ablation finding: moderate official-like loss weight helps; attribute probe, wider positive pools, and stronger source preservation did not improve the selected result in this run.
+- Noted that the cluster per-query delta CSV still used collapsed gate labels such as `sequentialgate`; regenerate it with the updated analyzer before treating per-query values as specific to `hybmp_l002`.
+
+## [2026-06-23] results | Reran arithmetic baselines and finalized comparison
+
+- Reran all five arithmetic baselines on the cluster from scratch: direct sum, direct sequential, contrastive sum, contrastive sequential, and adaptive tangent sequential.
+- Regenerated official comparison tables and plots with `--include-all-gates`; the rerun confirmed stable baseline values.
+- Final strongest baseline remains `Contrastive sequential`: Macro R@10 `0.1871`, Micro R@10 `0.1665`.
+- Final strongest learned model remains `hybmp_l002_w050`: Macro R@10 `0.2130`, Micro R@10 `0.1953`, Macro P@10 `0.0325`, Micro P@10 `0.0297`.
+- Final gain over strongest baseline: about `+13.9%` relative Macro R@10 and `+17.3%` relative Micro R@10.
+- Per-query clean comparison confirms learned-gate strengths on local compositional edits (`Eyeglasses`, `Smiling`, `Heavy_Makeup`, `Mustache`, hat composition) and persistent weaknesses on global/correlated attributes (`Male`, `-Male/-Mustache`, `Chubby/Young`).
+
+## [2026-06-23] analysis | Local algebra diagnosis for Male, Young, and Chubby
+
+- Ran local no-training CLIP-vector sweeps using cached test embeddings and text/prompt embeddings; no packages were installed and temporary scripts were removed afterwards.
+- Found that `Male` is highly separable in CLIP space (`d-prime` around `7.7-7.9`), so the learned gate failure on `+Male` is not because CLIP cannot represent male/female. It is likely a training/evaluation mismatch: same-identity preservation discourages large global demographic movement while the official JSON often rewards cross-identity targets.
+- Found that `Young` is only moderately separable (`d-prime` around `1.3-1.7`) and improves with stronger tangent movement: local best `-Young` R@10 around `0.0995` versus `hybmp_l002` around `0.0794`.
+- Found that `Chubby` is intrinsically weak/noisy in CLIP text space (`d-prime` around `0.5`) and benefits from endpoint/global-query behavior rather than source-preserving edit behavior: local best `+Chubby,-Young` R@10 around `0.111-0.116` versus `hybmp_l002` around `0.0223`.
+- Direction surgery for `Male` by removing correlated lipstick/makeup/facial-hair components did not help; the plain text male direction was already best.
+- Added the proposed next no-training experiment: attribute-type-aware composition fallback using learned gate for local edits, arithmetic contrastive directions for `Male`, stronger tangent movement for `Young`, and low-source endpoint composition for `Chubby+older` queries.
+
+## [2026-06-23] implementation | Added no-training attribute-routed orchestrator
+
+- Added `cluster/orchestrator/evaluate_orchestrated_router.py`, a separate experimental evaluator that splits official queries into local learned-gate conditions and weak/global arithmetic conditions.
+- Added `cluster/jobs/47_evaluate_orchestrated_router_short.sh`, a short-queue job that evaluates six routing/fusion methods in one run and writes separate outputs under `artifacts/results/orchestrated_router`.
+- Implemented methods: `stage_tuned`, `delta_sum_tuned`, `score_fusion_70local`, `score_fusion_50`, `rrf_union`, and `full_arithmetic_if_weak`.
+- The weak arithmetic rules use fixed no-training heuristics from the local algebra analysis: contrastive direction for `Male`, stronger tangent movement for `Young`, endpoint/global query with small `Double_Chin` helper for `Chubby + older`, and prompt-v1 directions for `Male + Mustache`.
+- The script could not be fully smoke-tested locally because the Mac has result CSVs but not the learned gate checkpoint files; it passed syntax/help checks and is expected to run on the cluster where checkpoints are present.
+
+## [2026-06-23] implementation | Added sum-only vs model+sum blend evaluator
+
+- Added `cluster/orchestrator/evaluate_sum_model_blends.py` to compare learned model only, arithmetic only, vector-delta corrections, score-level fusion, and reciprocal-rank fusion.
+- Added `cluster/jobs/48_evaluate_sum_model_blends_short.sh`, a short-queue job that runs all blend methods in one evaluator and stores outputs under `artifacts/results/sum_model_blends`.
+- The goal is to determine whether the tuned arithmetic sum works better than the model globally, or whether it should be used only as a correction/fusion signal.
+- This experiment is intentionally less hand-routed than the previous attribute-routed orchestrator and should guide whether the next method should use fixed blending, learned confidence, or explicit attribute-type routing.
+
+## [2026-06-23] results | Model plus arithmetic delta is the new strongest family
+
+- Analyzed local copies of `artifacts/results/sum_model_blends`.
+- Main result: arithmetic-only is not competitive, but arithmetic as a vector correction on top of the learned gate is substantially stronger.
+- Best Macro R@10: `model_plus_generic_delta_100` with Macro R@10 `0.2828`, Micro R@10 `0.2386`, Macro P@10 `0.0462`.
+- Best Micro R@10: `model_plus_tuned_delta_050` with Macro R@10 `0.2732`, Micro R@10 `0.2410`, Macro P@10 `0.0447`.
+- Current learned gate `hybmp_l002` / `model_only` is Macro R@10 `0.2130`, Micro R@10 `0.1953`; strongest previous baseline `contrastive_sequential` is Macro R@10 `0.1871`, Micro R@10 `0.1665`.
+- Therefore `model_plus_generic_delta_100` improves over `hybmp_l002` by `+32.7%` relative Macro R@10 and `+22.2%` relative Micro R@10; it improves over `contrastive_sequential` by `+51.1%` relative Macro R@10 and `+43.3%` relative Micro R@10.
+- Weak-query behavior improved sharply: `+Male` from `0.0520` to `0.2558-0.3154`, `-Young` from `0.0794` to up to `0.1481`, `-Male,-Mustache` from `0.0000` to up to `0.1481`, and `+Chubby,-Young` from `0.0223` to up to `0.0651`.
+- Score-level fusion and reciprocal-rank fusion did not explain the gain; the gain comes from correcting the query vector before retrieval:
+  `q_final = normalize(q_model + beta * (q_sum - source))`.
+- Decision: avoid hard-coded attribute routers if possible. Prefer a global model-plus-delta family and next sweep beta/tangent variants before training a learned beta/confidence head.
+
+## [2026-06-23] packaging | Created final best system folder and 1v1 plots
+
+- Added `tools/create_best_system_package.py`, a regenerable local packaging script.
+- Created `/Users/kuba/deep_learning/final_best_system` with code snapshots, prompt/text embedding caches, configs, winner result CSVs, and report-oriented 1v1 plots.
+- Packaged primary winner: `model_plus_generic_delta_100`, highest Macro Recall@10, formula `q_final = normalize(q_model + 1.0 * (q_generic_sum - source))`.
+- Corrected baseline terminology: `direct_sum` is the assignment vanilla baseline; `contrastive_sequential` is the strongest no-training CLIP-only baseline from our experiments.
+- Regenerated clean report files under `final_best_system/results/clean_report`.
+- Clean report includes all assignment metrics: Recall@1/5/10 and Precision@1/5/10, with macro and micro aggregation.
+- Final vs assignment baseline: Macro Recall@10 `0.1084 -> 0.2827` (`+160.8%` relative); Micro Recall@10 `0.1248 -> 0.2386` (`+91.2%` relative).
+- Final vs strongest CLIP-only baseline: Macro Recall@10 `0.1871 -> 0.2827` (`+51.1%` relative); Micro Recall@10 `0.1665 -> 0.2386` (`+43.3%` relative).
+- The first packaging pass did not yet include the learned-gate checkpoint; this was corrected later the same day after copying the checkpoint and prompt-v2 cache from the cluster.
+
+## [2026-06-23] report | Added cosine-normalization explanation and final package status
+
+- Added report/notebook instruction: include or regenerate `final_best_system/explanations/toy_vector_correction_clip_cosine.png`.
+- Required explanation for the report: "Stessa direzione. Per cosine similarity sono praticamente uguali. Il punto chiave: CLIP retrieval non chiede quanto sono vicino come coordinate assolute, ma qual è l'immagine con embedding che ha angolo/cosine più alto rispetto a q_final."
+- Added `final_best_system/REPORT_NOTES.md` with the same instruction.
+- Confirmed the best checkpoint is now present locally at `final_best_system/weights/best_val_official_like_at10.pt`.
+- Updated the wiki index current-state section to the final best system: `model_plus_generic_delta_100`, Macro R@10 `0.2827`, Micro R@10 `0.2386`.
+- Clean package contents to use going forward: `final_best_system/results/clean_report`, `final_best_system/results/assignment_baseline_direct_sum`, `final_best_system/results/strong_clip_baseline_contrastive_sequential`, `final_best_system/results/best_system_model_plus_generic_delta_100`, and `final_best_system/weights`.
+
+## [2026-06-23] notebook | Updated final notebook and cluster-sourced artifacts
+
+- Updated `notebooks/02_learned_gate_final_pipeline.ipynb` and mirrored it to `cluster/notebooks/02_learned_gate_final_pipeline.ipynb`.
+- The notebook now contains the current final system, not only `gate_v3` alone: `q_final = normalize(q_model + 1.0 * (q_sum - source))`.
+- Added repo-relative checkpoint loading from `final_best_system/weights/best_val_official_like_at10.pt`.
+- Added loading for the prompt-v2 cache used by the final checkpoint: `signed_attribute_prompt_embeddings_v2_photo_templates.pt`.
+- Added the cosine-normalization figure and explanation required for future reports/notebooks.
+- Added mathematical modeling of the sequential gate, CLIP arithmetic delta branch, InfoNCE/multi-positive training objective, source/target cosine losses, and final official metrics.
+- Regenerated `final_best_system` using the cluster-copied checkpoint and cluster-copied prompt-v2 cache; `WEIGHTS_MISSING.txt` has been removed and replaced by `weights/CHECKPOINT_INFO.txt`.

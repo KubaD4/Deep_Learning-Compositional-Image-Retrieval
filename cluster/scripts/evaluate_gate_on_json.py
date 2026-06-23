@@ -23,6 +23,7 @@ from project_core import (
     ARTIFACTS_DIR,
     CHECKPOINT_DIR,
     MODEL_ID,
+    ROOT,
     TOP_KS,
     atomic_json_dump,
     choose_device,
@@ -108,6 +109,13 @@ def query_tensors(query: str, attribute_to_index: dict[str, int], device):
     )
     signs = torch.tensor([[sign for sign, _ in parsed]], dtype=torch.int8, device=device)
     return attr_indices, signs
+
+
+def resolve_project_path(path_value: str | Path | None) -> Path | None:
+    if not path_value:
+        return None
+    path = Path(path_value)
+    return path if path.is_absolute() else ROOT / path
 
 
 def finalize(annotations, chunks_dir: Path, result_dir: Path, checkpoint: Path) -> None:
@@ -205,7 +213,8 @@ def main() -> int:
     attribute_to_index = {name: index for index, name in enumerate(attributes)}
     annotations = load_evaluation()
     gallery_cache = load_image_embedding_cache("test")
-    prompt_cache = load_prompt_embedding_cache()
+    prompt_cache_path = config.get("prompt_cache_path")
+    prompt_cache = load_prompt_embedding_cache(resolve_project_path(prompt_cache_path))
     gallery = gallery_cache["embeddings"].float().to(device)
 
     with torch.inference_mode():

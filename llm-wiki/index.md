@@ -11,6 +11,8 @@ Read this index first, then open the linked pages needed for the task. Raw sourc
 - When updating project knowledge, experiments, architecture decisions, cluster commands, or results, also update [Log](log.md) with a short dated entry.
 - When several wiki updates accumulate, remind the user to push the wiki changes to GitHub so future agents and collaborators see the same context.
 - Do not rely only on chat history for important decisions. If a decision affects future work, record it in the relevant wiki page and mention it in the log.
+- When a paper or external reference materially informs a decision, add it to the wiki with a link and a one-line note explaining why it matters. Do not leave literature findings only in chat.
+- When producing the final notebook or any report, include or regenerate `final_best_system/explanations/toy_vector_correction_clip_cosine.png` and explain that CLIP retrieval ranks by cosine angle after normalization, not raw Euclidean coordinate distance.
 
 ## Core Pages
 
@@ -19,6 +21,7 @@ Read this index first, then open the linked pages needed for the task. Raw sourc
 - [Practical Full Training Cycle](../PRACTICAL_TRAINING_CYCLE.md): one verified same-person CelebA pair followed from raw `.txt` rows through attribute differences, both MLPs, cosine loss, backpropagation, and inference.
 - [Complete Group Project Guide](../PROJECT_GUIDE.md): canonical onboarding document covering the full task, files, starter code, implementation architecture, group workflow, and final checklist.
 - [Steps 1-3 CLIP Notebook](../notebooks/01_clip_steps_1_2_3.ipynb): data exploration, offline CLIP feature caches, four zero-shot arithmetic baselines, official metrics, and qualitative comparison.
+- [Final Learned Gate Pipeline Notebook](../notebooks/02_learned_gate_final_pipeline.ipynb): single self-contained submission notebook with the complete codebase inline: CLIP caches, prompt embeddings, same-identity pairs, baselines, learned gate training, final `model_plus_generic_delta_100` loading/evaluation, cosine-geometry explanation, official metrics, comparison plots, and report text.
 - [Cluster Baselines and Prompt Experiments](cluster-baselines-and-prompt-experiments.md): cluster execution, frozen CLIP caches, five arithmetic methods, official quantitative results, adaptive tangent experiment, and local binary/multi-pair prompt diagnostics.
 - [Project Overview](project-overview.md): what the assignment is asking for, in plain language.
 - [Practical Input and Output](practical-input-output.md): concrete examples of what enters the system, what it returns, and where files live.
@@ -28,6 +31,7 @@ Read this index first, then open the linked pages needed for the task. Raw sourc
 - [Method Roadmap](method-roadmap.md): practical implementation plan from baseline to improved fusion.
 - [Proposed Training Strategy](training-strategy.md): formal same-identity pair construction, residual composition network, contrastive loss, risks, and experiments.
 - [Learned Gate Cluster Runbook](learned-gate-cluster-runbook.md): exact Slurm commands, expected outputs, checkpoints, plots, and health checks for the first learned gated residual training run.
+- [Official Results and Literature Findings](official-results-and-literature-findings.md): current best official JSON results, weak queries, benchmark mismatch diagnosis, relevant CLIP/compositionality literature, and next experiment decision.
 - [CLAY Relationship and Integration Decision](clay-integration-analysis.md): whether CLAY is required, how its task differs from signed editing, and where a CLAY-inspired dynamic metric can fit the residual architecture.
 - [CLIP Data Flow](clip-data-flow.md): images, pixel tensors, text tokens, shared CLIP embeddings, tensor shapes, train/test/inference flow, and caching.
 - [MarkItDown Workflow](markitdown-workflow.md): when to use MarkItDown and how to link produced Markdown into the wiki.
@@ -54,6 +58,6 @@ The task is to build a compositional image retrieval system. Given a reference f
 
 The assignment specifically asks for a more flexible fusion mechanism than CLAY's rigid pre-SVD stacking of multiple condition embeddings. The project may be training-free or training-based, but it should be lightweight, rigorously evaluated, and reported clearly in a single Colab notebook.
 
-As of 2026-06-18, the strongest official JSON baseline is still Contrastive Sequential with Macro R@10 `0.1871`. The first learned residual gate (`gate_v1`) trained successfully but reached Macro R@10 `0.1601` on the official JSON, so it did not beat the best arithmetic baseline. Its per-query behavior motivated the new additive-gate architecture (`gate_v2`), which directly adds gated CLIP contrastive directions and uses a small residual correction. See [Proposed Training Strategy](training-strategy.md) and [Learned Gate Cluster Runbook](learned-gate-cluster-runbook.md).
+As of 2026-06-23, the strongest final system is `model_plus_generic_delta_100`: a learned gate query corrected by a generic CLIP arithmetic displacement, `q_final = normalize(q_model + 1.0 * (q_sum - source))`. It reaches official JSON Macro R@10 `0.2827` and Micro R@10 `0.2386`. The assignment vanilla baseline is `direct_sum` (Macro R@10 `0.1084`), while the strongest no-training CLIP-only baseline is `contrastive_sequential` (Macro R@10 `0.1871`). The clean local package for report assets is `/Users/kuba/deep_learning/final_best_system`, including the best checkpoint at `final_best_system/weights/best_val_official_like_at10.pt`. See [Official Results and Literature Findings](official-results-and-literature-findings.md), [Proposed Training Strategy](training-strategy.md), and [Learned Gate Cluster Runbook](learned-gate-cluster-runbook.md).
 
 Read [PROJECT_STATE_AND_SOLUTION.md](../PROJECT_STATE_AND_SOLUTION.md) for the current project snapshot, then use [PROJECT_GUIDE.md](../PROJECT_GUIDE.md) as the detailed onboarding and execution plan.

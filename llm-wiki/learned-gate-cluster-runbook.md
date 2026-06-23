@@ -14,7 +14,7 @@ The conceptual strategy is documented in [Proposed Training Strategy](training-s
 | Pair index script | `cluster/scripts/build_training_pairs.py` | Builds same-identity train/valid edit tuples with query length 1-3. |
 | Learned model core | `cluster/scripts/learned_gate_core.py` | Gate + residual MLP architecture and checkpoint helpers. |
 | Training script | `cluster/scripts/train_gate_model.py` | Trains the model, validates, logs progress, saves checkpoints and PNGs. |
-| Hpsearch runner | `cluster/scripts/run_hpsearch.py` | Runs several configs sequentially and writes a search summary. |
+| Hpsearch runner | `cluster/scripts/run_hpsearch.py` | Runs several configs sequentially, writes a search summary, and can automatically evaluate the best checkpoint on the official JSON. |
 | Official JSON evaluator | `cluster/scripts/evaluate_gate_on_json.py` | Evaluates a trained checkpoint against `celeba_evaluation.json`. |
 | Additive-gate short configs | `cluster/configs/gate_additive_short_configs.json` | Two-config smoke test for `gate_v2`, which directly adds gated CLIP contrastive directions. |
 | Additive-gate long configs | `cluster/configs/gate_additive_long_configs.json` | Ten long configs varying edit scale, gate max, residual scale, learning rate, and temperature. |
@@ -24,6 +24,13 @@ The conceptual strategy is documented in [Proposed Training Strategy](training-s
 | Sequential-gate long configs | `cluster/configs/gate_sequential_long_configs.json` | Ten long configs varying sequential gate state, edit scale, gate max, residual scale, learning rate, and temperature. |
 | Sequential-gate short job | `cluster/jobs/41_hpsearch_sequential_gate_short.sh` | Short queue smoke test for `gate_v3`. |
 | Sequential-gate long job | `cluster/jobs/42_hpsearch_sequential_gate_long.sh` | Long queue hpsearch for `gate_v3`. |
+| Prompt-v2 config | `cluster/configs/attribute_prompts_v2_photo_templates.json` | Revised prompt ensemble using more uniform photo/portrait templates and softer wording for difficult global attributes. |
+| Prompt-v2 sequential config | `cluster/configs/gate_sequential_prompt_v2_long_configs.json` | One controlled long config with the same parameters as best `seq_l007`, but using the prompt-v2 cache. |
+| Prompt-v2 long job | `cluster/jobs/43_hpsearch_sequential_prompt_v2_long.sh` | Creates the prompt-v2 text cache and trains the controlled `gate_v3` prompt ablation. |
+| Prompt-v2 overnight configs | `cluster/configs/gate_sequential_prompt_v2_overnight_configs.json` | Twelve long configs around `seq_l007` using the prompt-v2 cache; varies learning rate, temperature, source preservation, residual scale, edit scale, and gate state. |
+| Prompt-v2 overnight job | `cluster/jobs/44_hpsearch_sequential_prompt_v2_overnight.sh` | Runs the prompt-v2 overnight hpsearch after creating/reusing the prompt-v2 text cache. |
+| Official-like configs | `cluster/configs/gate_sequential_official_like_long_configs.json` | Four long configs testing mini-gallery multi-positive loss, optional attribute probe, medium MLP capacity, and wider positive selection. |
+| Official-like long job | `cluster/jobs/45_hpsearch_official_like_long.sh` | Runs the official-like multi-positive hpsearch and automatically evaluates the best checkpoint on the official JSON. |
 
 ## Slurm Corrections To Preserve
 
@@ -70,6 +77,10 @@ cd /mnt/meditech/group1/deep_learning/cluster
 | 20 | `sbatch jobs/38_plot_official_comparison.sh` | Rebuilds official comparison plots after evaluating a new gate checkpoint. | `artifacts/results/official_comparison/combined_summary.csv`, `method_comparison.csv`, and PNG plots. |
 | 21 | `sbatch jobs/41_hpsearch_sequential_gate_short.sh` | Runs the `gate_v3` learned-sequential smoke test. | `artifacts/training_runs/hpsearch_gate_v3_*_short/summary.csv`; check that both `seq_s*` configs complete. |
 | 22 | `sbatch jobs/42_hpsearch_sequential_gate_long.sh` | Runs the long `gate_v3` hpsearch. | `artifacts/training_runs/hpsearch_gate_v3_*_long/summary.csv`; select best `seq_l*` by `best_val_official_like@10`, then evaluate on JSON. |
+| 23 | `sbatch jobs/43_hpsearch_sequential_prompt_v2_long.sh` | Runs the prompt-v2 ablation with the same parameters as `seq_l007`. | `data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt`; `artifacts/training_runs/hpsearch_gate_v3_*_long/summary.csv` with `seqp2_l007`. |
+| 24 | `sbatch jobs/44_hpsearch_sequential_prompt_v2_overnight.sh` | Runs an overnight prompt-v2 hpsearch around the best `gate_v3` settings. | `artifacts/training_runs/hpsearch_gate_v3_*_long/summary.csv` with `seqp2_ov*` rows; compare against `seq_l007` and `seqp2_l007`. |
+| 25 | Automatic inside jobs `43`/`44` | After hpsearch, `run_hpsearch.py --evaluate-best-json --plot-after-json` evaluates the best checkpoint on `celeba_evaluation.json` and regenerates official plots. | `artifacts/results/gate_model/<best-run>/summary.csv`; `artifacts/results/official_comparison/combined_summary.csv`; `official_comparison_overview.png`. |
+| 26 | `sbatch jobs/45_hpsearch_official_like_long.sh` | Runs the next experiment: mini-gallery official-like multi-positive loss, optional attribute probe, and medium-capacity ablation. | `artifacts/training_runs/hpsearch_gate_v3_*_long/summary.csv` with `offmp_l*`; automatic JSON result and plots. |
 
 ## Current Learned Results
 
@@ -159,6 +170,16 @@ q   = normalize(q_n + residual_scale * delta)
 
 This directly tests whether the remaining gap is caused by the normalization schedule rather than by the learned gate itself.
 
+The first full `gate_v3` evaluation later beat the arithmetic baselines:
+
+```text
+gate_v3/seq_l007              Macro R@10 = 0.1951
+Contrastive Sequential        Macro R@10 = 0.1871
+Adaptive Tangent Sequential   Macro R@10 = 0.1869
+```
+
+The next controlled ablation is `prompt_v2`: keep the same `seq_l007` hyperparameters and train only with a revised prompt cache. This tests whether the remaining failures on `Male`, `Young`, `Chubby`, hair, and hat queries are partly caused by prompt wording rather than the sequential gate architecture.
+
 ## Interpreting Training Outputs
 
 Main files in a learned training run:
@@ -200,3 +221,49 @@ Official JSON targets to beat:
 Macro R@10 >= 0.1871
 Micro R@10 >= 0.1668
 ```
+
+Current learned target to beat:
+
+```text
+gate_v3/seqp2_ov005 Macro R@10 = 0.2117
+gate_v3/seqp2_ov005 Micro R@10 = 0.1936
+```
+
+## Hybrid Official-Like Long Run
+
+Job `45` tested pure official-like multi-positive training and found that it improves some weak queries but slightly regresses the official macro result versus `seqp2_ov005`. The follow-up job `46` uses a hybrid objective:
+
+```text
+loss_retrieval = (1 - w) * exact_info_nce + w * multipositive_info_nce
+```
+
+Run on Baldo:
+
+```bash
+cd /mnt/meditech/group1/deep_learning/cluster
+JOBID=$(sbatch jobs/46_hpsearch_hybrid_official_like_long.sh | awk '{print $4}')
+echo "$JOBID"
+squeue -j "$JOBID"
+```
+
+Monitor:
+
+```bash
+sacct -j "$JOBID" --format=JobID,JobName,Partition,State,ExitCode,Elapsed,End
+tail -f "logs/46_hpsearch_hybrid_official_like_long.sh_${JOBID}.out"
+tail -f "logs/46_hpsearch_hybrid_official_like_long.sh_${JOBID}.err"
+SEARCH=$(ls -td artifacts/training_runs/hpsearch_gate_v3_*_long | head -1)
+tail -f "$SEARCH/progress.txt"
+```
+
+After completion:
+
+```bash
+cat "$SEARCH/summary.csv"
+python3 scripts/summarize_gate_runs.py --top 80 | grep -E "hybmp|offmp|seqp2_ov005|rank"
+cat artifacts/results/official_comparison/combined_summary.csv
+python3 scripts/analyze_official_per_query.py
+cat artifacts/results/official_comparison/per_query_delta_Recallat10.csv
+```
+
+Main question: does a smaller official-like weight (`w=0.25` or `w=0.50`) keep the same-identity strengths of `seqp2_ov005` while recovering the `+Male`, `-Heavy_Makeup`, `+Eyeglasses`, and lipstick/makeup gains seen in `offmp_l004_widepos`?
