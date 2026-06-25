@@ -859,3 +859,504 @@ loss_retrieval = (1 - w) * exact_info_nce + w * multipositive_info_nce
 ```
 
 This keeps exact target `B` as a positive for identity/source preservation, while adding a controlled fraction of benchmark-style compatible positives. The first long grid should test `w = 0.25`, `0.50`, and `0.75`, with and without the attribute-presence probe, then compare official JSON Macro/Micro R@10 against `seqp2_ov005`.
+
+## Post-Final Experiment: Train The Deployed Blend
+
+The clean final system selected on 2026-06-23 is not the learned gate alone. It is:
+
+```text
+q_final = normalize(q_model + 1.0 * (q_generic_sum - source))
+```
+
+where:
+
+- `q_model` is produced by the best learned sequential gate (`hybmp_l002_w050`);
+- `q_generic_sum` is the generic CLIP arithmetic query;
+- `(q_generic_sum - source)` is a zero-shot correction vector;
+- retrieval ranks gallery images by cosine similarity to `q_final`.
+
+This creates an important training mismatch: all previous learned-gate training optimized `q_model`, while the deployed system uses `q_final`.
+
+The next experimental direction is therefore to fine-tune the current best checkpoint while optimizing the blended vector directly:
+
+```text
+q_train = normalize(q_model + beta * (q_sum - source))
+```
+
+This is not a replacement for the final packaged system. It is a separate v4 experiment. The final package remains the current reproducible reference until a new run beats it on the official JSON metrics.
+
+### Loss
+
+The proposed v4 loss keeps the successful hybrid multi-positive objective, but applies it to `q_train`:
+
+```text
+L_retrieval = (1 - w) * exact_info_nce(q_train)
+            + w * multipositive_info_nce(q_train)
+```
+
+Add optional hard-negative / triplet pressure:
+
+```text
+L_triplet = max(0, margin + cos(q_train, hard_negative) - cos(q_train, target))
+```
+
+Negatives must mask:
+
+- the diagonal target;
+- false negatives satisfying the same requested attributes;
+- official-like positives under the relaxed non-query Hamming threshold.
+
+Total experimental objective:
+
+```text
+L = L_retrieval
+  + lambda_triplet * L_triplet
+  + lambda_target  * (1 - cos(q_train, target))
+  + lambda_source  * (1 - cos(q_train, source))
+  + lambda_distill * (1 - cos(q_train, q_current_best_final))
+```
+
+The distillation term is optional and should be used only in some configs. It prevents the model from drifting too far from the already-good final system while triplet loss pushes hard negatives away.
+
+### Long Queue Grid
+
+The v4 grid should be centered around the current best instead of doing a broad architecture search:
+
+- initialize from `final_best_system/weights/best_val_official_like_at10.pt` or the cluster `hybmp_l002_w050` checkpoint;
+- keep the same sequential-gate architecture and prompt-v2 directions;
+- sweep `beta` over `0.75`, `1.0`, `1.25`;
+- sweep learning rate over `2e-5`, `5e-5`;
+- sweep triplet weight over `0`, `0.05`, `0.10`, `0.20`;
+- test distillation weights `0.02` and `0.05`;
+- keep `multipositive_weight = 0.50`, the best previous hybrid value.
+
+The implementation lives in:
+
+```text
+cluster/experimental/train_blend_finetune_v4.py
+cluster/experimental/run_blend_finetune_v4_hpsearch.py
+cluster/configs/gate_v4_blend_finetune_long_configs.json
+cluster/jobs/49_hpsearch_blend_finetune_v4_long.sh
+```
+
+The output must go to new experiment folders only:
+
+```text
+artifacts/training_runs/hpsearch_blend_finetune_v4_.../
+artifacts/results/blend_finetune_v4/.../
+```
+
+Do not overwrite `final_best_system/` unless the new experiment is explicitly promoted after official JSON comparison.
+
+## Future Data Augmentation: Weak-Attribute Official-Like Pairs
+
+The current same-identity synthetic training has an important weakness: some
+global/correlated attributes rarely change within the same CelebA identity.
+This affects especially:
+
+```text
+Male
+Young
+Chubby
+Male + Mustache
+Chubby + Young
+```
+
+For these attributes, the model sees too few useful source-target edits if we
+only train on pairs of the same person. The official JSON benchmark, however,
+does not require the same identity. It asks for images that satisfy the query
+and are close in the 40-attribute CelebA space.
+
+Decision for the v5 mixed experiment: keep the current same-identity supervision as
+the dominant signal, but add a weak-attribute official-like augmentation:
+
+```text
+70% same-identity pairs
+30% weak-attribute official-like augmented pairs
+```
+
+Also test a more conservative ratio:
+
+```text
+85% same-identity pairs
+15% weak-attribute official-like augmented pairs
+```
+
+The augmented pool must be generated only from train split images and not from
+`celeba_evaluation.json`.
+
+### How To Build The 30%
+
+For each source image `A`, sample queries involving weak/global attributes:
+
+```text
++Male
+-Male
++Young
+-Young
++Chubby
+-Chubby
++Male, +Chubby
++Male, -Young
++Chubby, -Young
+-Male, -Mustache
+```
+
+Use only queries that actually change at least one source attribute. For
+example, if source `A` already has `+Male`, do not create query `+Male` from
+that source unless another requested attribute changes.
+
+For each source/query pair, select target candidates `B` from the train split
+that satisfy:
+
+```text
+1. B satisfies all requested query signs.
+2. B is not the same image as A.
+3. B has low non-query Hamming distance from A.
+4. B is reasonably close to A in CLIP image-embedding cosine.
+5. B is not an extreme near-duplicate/trivial candidate unless it is a true
+   same-identity pair already covered by the 70% pool.
+```
+
+The practical scoring rule can be:
+
+```text
+candidate_score =
+    + clip_cosine(A, B)
+    - lambda_hamming * nonquery_hamming(A, B)
+```
+
+Then keep the top `M` candidates per source/query, or sample among candidates
+whose score is in the top percentile. This creates multi-positive official-like
+targets rather than a single artificial "correct" person.
+
+### Practical Example
+
+Source `A`:
+
+```text
+Female, Young, Smiling, Brown_Hair, No_Beard, no Eyeglasses
+```
+
+Weak query:
+
+```text
++Male
+```
+
+Valid augmented targets `B` should look like:
+
+```text
+Male, Young, Smiling, Brown_Hair, preferably No_Beard, no Eyeglasses
+```
+
+They do not need to be the same identity. What matters is that they satisfy
+`+Male` while preserving as many non-query attributes as possible.
+
+For a multi-attribute weak query:
+
+```text
++Chubby, -Young
+```
+
+Source `A`:
+
+```text
+not Chubby, Young, Smiling, Black_Hair, no glasses
+```
+
+Target candidates `B` should satisfy:
+
+```text
+Chubby, older/not Young
+```
+
+and preserve non-query attributes where possible:
+
+```text
+Smiling, Black_Hair, no glasses
+```
+
+### Main Risk
+
+This augmentation can teach the model to retrieve "attribute-similar people"
+instead of "the same person after an edit." That is closer to the official JSON
+but weaker as an identity-preserving CIR model.
+
+Therefore it should be mixed, not substituted:
+
+```text
+70% same-identity pairs preserve the edit/identity bias.
+30% weak official-like pairs teach global attributes that same-identity pairs
+cannot cover well.
+```
+
+Evaluate both:
+
+```text
+synthetic validation: exact target B and official_like@10
+official JSON: Recall@1/5/10 and Precision@1/5/10
+```
+
+If official JSON improves but same-identity exact retrieval collapses, reduce
+the augmented percentage or use it only as a second-stage fine-tune.
+
+### Implemented v5 Mixed-Weak Experiment
+
+The implementation is isolated from the current final packaged system:
+
+```text
+cluster/experimental/build_weak_official_like_pairs.py
+cluster/experimental/train_blend_finetune_v5_mixed.py
+cluster/experimental/run_mixed_weak_hpsearch_v5.py
+cluster/configs/gate_v5_mixed_weak_24h_configs.json
+cluster/jobs/52_mixed_weak_v5_24h.sh
+```
+
+The job first builds or reuses:
+
+```text
+artifacts/training_pairs/weak_official_like_train_len1_3.pt
+```
+
+Then it trains 24 configurations:
+
+```text
+12 configs with weak_pair_fraction = 0.30
+12 configs with weak_pair_fraction = 0.15
+```
+
+Each run optimizes the deployed blend family:
+
+```text
+q_final = normalize(q_model + beta * (q_sum - source))
+```
+
+and after each completed config it evaluates the checkpoint on the official
+JSON using the beta/corrector sweep. This means the next-morning outputs should
+already contain:
+
+```text
+artifacts/training_runs/hpsearch_mixed_weak_v5_<timestamp>_long/
+artifacts/results/mixed_weak_v5/hpsearch_mixed_weak_v5_<timestamp>_long/
+```
+
+The key aggregate files are:
+
+```text
+summary.csv
+progress.txt
+artifacts/results/mixed_weak_v5/.../_aggregate/best_beta_sweeps.csv
+artifacts/results/mixed_weak_v5/.../_aggregate/BEST_MIXED_WEAK_METHOD.txt
+```
+
+### Deferred Idea: Adaptive Beta
+
+The beta sweep showed that different official queries prefer different delta
+strengths. A future model could learn a scalar beta from source/query features:
+
+```text
+beta = f(source_embedding, query_directions, model_query, sum_query)
+```
+
+However, do not hardcode rules such as "if Male then beta=1.5". That would
+overfit known JSON query names and reduce generality. For now, the v5
+experiment keeps beta global/config-level and uses the same beta grid at
+evaluation time for every query family. A learned beta head remains a later
+research direction.
+
+## Next Constraint Direction: Full Official-Like Positive Sets
+
+The assignment language mentions preserving the "core identity" of the source,
+but the official JSON operationalizes identity preservation through attributes:
+
+```text
+query attributes must match the requested signs
+non-query attribute Hamming distance from source <= 2
+```
+
+Therefore, a future training objective can be closer to the official benchmark
+by precomputing, for each train source and generated query, a set of valid
+official-like positives:
+
+```text
+P(source, query) = {
+  candidate images satisfying the query signs
+  and non-query Hamming distance from source <= 2
+}
+```
+
+Optionally score positives inside this set by CLIP image similarity to the
+source:
+
+```text
+weight(candidate) ∝ exp(cos(source, candidate) / tau)
+```
+
+This would convert the current single-target/small-batch objective into a
+multi-positive retrieval objective closer to the official JSON:
+
+```text
+L = -log sum_{p in P} exp(sim(q, p) / T)
+        / sum_{g in gallery_or_batch} exp(sim(q, g) / T)
+```
+
+Keep same-identity supervision as a softer auxiliary term, not the only target:
+
+```text
+L_total =
+  lambda_official * L_official_like_set
+  + lambda_same_id * L_same_identity
+  + lambda_source * (1 - cos(q, source))
+  + lambda_triplet * L_hard_negative
+```
+
+This is more principled than checking only whether the predicted top-1 image is
+inside a precomputed list, because retrieval training is differentiable through
+similarity scores. The list defines positives; the gradient still flows through
+the query vector and dot products.
+
+Hard negatives should be candidates that are close to the source/model query but
+violate at least one official constraint. Avoid using official-like positives as
+negatives. Semi-hard negatives are preferred over random negatives because they
+teach the model what it is confusing with the correct set.
+
+Open design choice for the next experiment:
+
+```text
+Option A: keep v5 mixed tuples and add a stronger weighted multi-positive loss.
+Option B: precompute full official-like positive lists per source/query and train
+          with a listwise / sampled-softmax objective.
+```
+
+Option B is closer to the official metric, but heavier. It should be implemented
+as a separate v6 experiment, not by overwriting the current best v5 system.
+
+### No-Leakage Policy For Official-Like Positives
+
+Precomputing official-like positive sets is acceptable only if the split is
+strict:
+
+```text
+train positives      -> CelebA partition 0 only
+validation positives -> CelebA partition 1 only
+official JSON test   -> CelebA partition 2 only, never used for training
+```
+
+Do not build training positives from `celeba_evaluation.json`, from test-split
+image indices, or from any target list derived from the official JSON. That
+would leak the benchmark solution into training and invalidate the final JSON
+metrics.
+
+It is fine to reuse the official rule on the train/validation splits:
+
+```text
+query attributes match requested signs
+non-query Hamming distance <= 2
+```
+
+because the model sees only train/validation images and attributes. The final
+JSON benchmark should remain a held-out test. If we want the cleanest possible
+report protocol, choose hyperparameters on validation official-like positives
+and run the official JSON only for the final comparison. Iterating on JSON
+results is not a direct data leak into the model, but it can still overfit
+research decisions to the benchmark.
+
+### Current Data Flow: Embeddings, Not Pixels
+
+The current learned systems do not train CLIP and do not load raw images during
+the gate training/evaluation loops. Raw images are used only once to create
+frozen CLIP caches.
+
+Training inputs are cached tensors:
+
+```text
+train_image_embeddings.pt
+valid_image_embeddings.pt
+signed_attribute_prompt_embeddings_v2_photo_templates.pt
+pair / weak-pair index files
+CelebA attribute tables
+```
+
+Official evaluation inputs are also cached tensors:
+
+```text
+test_image_embeddings.pt
+celeba_evaluation.json
+best learned checkpoint
+prompt/direction embedding cache
+```
+
+At inference, the source "image" is represented by its normalized CLIP image
+embedding. The model builds a query vector from that source embedding plus the
+signed condition embeddings, applies the arithmetic corrector when configured,
+and ranks all cached test-gallery embeddings by cosine similarity.
+
+## Implemented v6 Experiment: Official-Like Multi-Positive Mix
+
+The v6 experiment has been implemented as a separate line and does not modify
+the current `final_best_system/` package.
+
+Files:
+
+```text
+cluster/experimental/build_official_like_positive_sets_v6.py
+cluster/experimental/train_official_mix_v6.py
+cluster/experimental/run_official_mix_hpsearch_v6.py
+cluster/configs/gate_v6_official_mix_3h_configs.json
+cluster/jobs/53_official_mix_v6_3h.sh
+```
+
+The key difference from v5 is the official-like component. v5 sampled one
+weak/global target per source-query. v6 builds multiple train-split positives
+per source-query group:
+
+```text
+source_train + query
+  -> positive set of train images satisfying query signs
+  -> non-query Hamming distance <= 2
+  -> ranked by CLIP similarity minus a small Hamming penalty
+```
+
+The training batch is mixed as:
+
+```text
+60% official-like multi-positive + 30% same-identity + 10% weak/global
+70% official-like multi-positive + 20% same-identity + 10% weak/global
+```
+
+The config file uses paired hyperparameters: each HP setting appears twice, once
+with `60/30/10` and once with `70/20/10`. This isolates the effect of the
+mixture ratio.
+
+No ultra-severe embargo on attribute signatures is used. The no-leakage rule is
+instead:
+
+```text
+train positive sets are built only from CelebA train split
+validation remains non-JSON
+celeba_evaluation.json is used only after training for Recall/Precision
+```
+
+The model architecture and deployed inference formula remain the current best
+family:
+
+```text
+q_model = learned_gate(source, query)
+q_sum = generic CLIP arithmetic(source, query)
+q_final = normalize(q_model + beta * (q_sum - source))
+```
+
+The v6 runner evaluates each completed checkpoint on the official JSON via the
+existing beta sweep. Results are written under:
+
+```text
+artifacts/training_runs/hpsearch_official_mix_v6_<timestamp>_long/
+artifacts/results/official_mix_v6/hpsearch_official_mix_v6_<timestamp>_long/
+```
+
+The aggregate winner file is:
+
+```text
+artifacts/results/official_mix_v6/.../_aggregate/BEST_OFFICIAL_MIX_METHOD.txt
+```

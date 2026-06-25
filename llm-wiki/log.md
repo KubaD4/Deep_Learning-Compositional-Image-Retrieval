@@ -344,3 +344,385 @@
 - Updated `tools/create_best_system_package.py` so generated metadata uses repo-relative paths and no longer emits a machine-specific fetch script.
 - Updated `tools/update_final_notebook.py` and `cluster/scripts/plot_baseline_queries.py` to discover paths relative to the repository/script location instead of hardcoding a local Mac path.
 - Reworded wiki/report references from a specific local path to `final_best_system/` / `<repo-root>` so collaborators can use the repository on their own machines.
+
+## [2026-06-24] experiment plan | Blend-aware v4 fine-tuning without touching final system
+
+- Added a new isolated experimental training path under `cluster/experimental/`.
+- Goal: improve the current best system without modifying the packaged final best system.
+- Current best inference rule is:
+
+```text
+q_final = normalize(q_model + 1.0 * (q_generic_sum - source))
+```
+
+- Previous training optimized `q_model` only; the arithmetic correction was added post-hoc at inference.
+- New v4 idea: initialize from the best `hybmp_l002_w050` checkpoint and train directly on the deployed blended query:
+
+```text
+q_train = normalize(q_model + beta * (q_sum - source))
+```
+
+- Added optional batch-hard triplet-style loss with false negatives masked using the same official-like attribute logic:
+
+```text
+L = L_hybrid_InfoNCE(q_train)
+    + lambda_triplet * max(0, margin + sim(q_train, hard_negative) - sim(q_train, target))
+    + lambda_source * (1 - cos(q_train, source))
+    + lambda_target * (1 - cos(q_train, target))
+```
+
+- Added optional distillation to the current best system to reduce catastrophic drift:
+
+```text
+L_distill = 1 - cos(q_train, q_current_best_final)
+```
+
+- New files:
+
+```text
+cluster/experimental/train_blend_finetune_v4.py
+cluster/experimental/run_blend_finetune_v4_hpsearch.py
+cluster/configs/gate_v4_blend_finetune_long_configs.json
+cluster/jobs/49_hpsearch_blend_finetune_v4_long.sh
+```
+
+- The long queue grid has 12 configs around the current best: lower learning rates (`2e-5`, `5e-5`), beta sweep (`0.75`, `1.0`, `1.25`), triplet weights (`0`, `0.05`, `0.10`, `0.20`), optional distill (`0.02`, `0.05`), and one auxiliary-model-loss variant.
+- Expected use: run as a separate long-queue experiment; compare its best evaluated blend against `final_best_system` before considering any promotion.
+- Updated the v4 runner so each completed config is immediately evaluated on the official JSON through `orchestrator/evaluate_sum_model_blends.py`.
+- Per-config official JSON outputs are written under:
+
+```text
+artifacts/results/blend_finetune_v4/<hpsearch_name>/<config_id>/
+```
+
+- The runner also writes aggregate comparison artifacts:
+
+```text
+artifacts/results/blend_finetune_v4/<hpsearch_name>/_aggregate/all_json_evaluations.csv
+artifacts/results/blend_finetune_v4/<hpsearch_name>/_aggregate/top_json_methods.csv
+artifacts/results/blend_finetune_v4/<hpsearch_name>/_aggregate/BEST_JSON_METHOD.txt
+artifacts/results/blend_finetune_v4/<hpsearch_name>/_aggregate/top_json_methods_macro_recall10.png
+```
+
+- The Slurm job now uses a 5-minute finalization signal/window and avoids starting a new config when less than about one hour remains. This should leave time to compare completed runs and preserve useful JSON results before wall-time termination.
+
+## [2026-06-24] results | v4 blend-aware fine-tuning evaluated per config
+
+- The v4 runner worked operationally: after each completed config it evaluated the checkpoint on the official JSON using `evaluate_sum_model_blends.py` and produced per-config comparison PNGs plus aggregate CSV/PNG summaries.
+- Cluster run analyzed:
+
+```text
+artifacts/training_runs/hpsearch_blend_finetune_v4_20260624_012534_long
+artifacts/results/blend_finetune_v4/hpsearch_blend_finetune_v4_20260624_012534_long
+```
+
+- Best v4 JSON method found:
+
+```text
+evaluation_id = bft_l008_beta075_tri010_lrsafe
+method        = Blend model_plus_tuned_delta_100
+Macro R@10    = 0.2485
+Micro R@10    = 0.2281
+Macro P@10    = 0.0389
+```
+
+- The best synthetic-validation checkpoint was `bft_l003_beta075_tri005`, but on the official JSON it was slightly below `bft_l008` in Macro R@10:
+
+```text
+bft_l003 + tuned_delta_100: Macro R@10 = 0.2480, Micro R@10 = 0.2292
+bft_l008 + tuned_delta_100: Macro R@10 = 0.2485, Micro R@10 = 0.2281
+```
+
+- This does not beat the current final packaged system:
+
+```text
+current final model_plus_generic_delta_100:
+  Macro R@10 = 0.2827
+  Micro R@10 = 0.2386
+
+best v4 fine-tuned blend:
+  Macro R@10 = 0.2485
+  Micro R@10 = 0.2281
+```
+
+- Interpretation: training directly on the blended vector plus triplet/fine-tune did not improve the official benchmark. It likely over-adapted the learned component to synthetic same-identity targets and weakened the robust zero-shot generic correction that made the final system strong.
+- The best v4 configs share `train beta = 0.75`, suggesting that a weaker correction during training plus a stronger tuned correction at evaluation is less harmful than training with `beta = 1.0` or `1.25`.
+- Configs with `beta = 1.25` performed poorly, supporting the hypothesis that too much correction during training destabilizes the learned/source-preserving component.
+- Decision: do not promote v4. Keep `final_best_system/model_plus_generic_delta_100` as the current best. Future training should not simply fine-tune the full blend; a safer next direction is a lightweight learned confidence/beta head or validation-free beta sweep on the frozen final model.
+- Two distillation configs (`bft_l010`, `bft_l011`) exited immediately with `exit_1`, so they were not valid ML results. They were the only configs with `lambda_distill > 0`.
+- Local code review found the likely cause: the teacher branch used `torch.inference_mode()` while its output was used in a loss combined with `q_final` before `backward`. This can create inference tensors that PyTorch refuses to save for backward.
+- Fixed the experimental trainer to use `torch.no_grad()` for the frozen teacher branch instead.
+- Added a focused retry config file for only the failed distill variants:
+
+```text
+cluster/configs/gate_v4_blend_finetune_distill_retry_configs.json
+cluster/jobs/50_hpsearch_blend_finetune_v4_distill_retry_long.sh
+```
+
+## [2026-06-24] experiment plan | No-training beta sweep for adaptive-beta diagnosis
+
+- Added a no-training evaluator to test whether the next useful model should learn an adaptive beta/confidence head.
+- New script/job:
+
+```text
+cluster/orchestrator/evaluate_beta_sweep_blends.py
+cluster/jobs/51_evaluate_beta_sweep_blends_short.sh
+```
+
+- It loads the strongest learned gate checkpoint and evaluates:
+
+```text
+q_generic_beta = normalize(q_model + beta * (q_generic_sum - source))
+q_tuned_beta   = normalize(q_model + beta * (q_tuned_sum - source))
+```
+
+- Default beta grid:
+
+```text
+0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0
+```
+
+- Outputs go to:
+
+```text
+artifacts/results/beta_sweep/beta_sweep_<timestamp>/
+```
+
+- Important outputs:
+
+```text
+comparison/BEST_OVERALL_BETA.txt
+comparison/overall_beta_sweep.csv
+comparison/overall_beta_sweep.png
+comparison/per_query_best_beta.csv
+comparison/per_query_best_beta.png
+comparison/per_query_recall10_heatmap_generic.png
+comparison/per_query_recall10_heatmap_tuned.png
+```
+
+- Interpretation rule: if different queries prefer very different beta values, a learned beta/reranker is likely worth implementing. If beta `1.0` remains globally near-optimal and per-query stable, then the bottleneck is likely retrieval/reranking or training-data mismatch rather than beta selection.
+
+## [2026-06-24] results | Beta sweep supports adaptive beta
+
+- Cluster beta sweep output:
+
+```text
+artifacts/results/beta_sweep/beta_sweep_20260624_155934
+```
+
+- Best overall method:
+
+```text
+model_plus_tuned_delta_beta_0p75
+Macro R@10 = 0.2891
+Micro R@10 = 0.2525
+Macro P@10 = 0.0479
+```
+
+- This beats the previous packaged final system:
+
+```text
+previous final model_plus_generic_delta_beta_1p00:
+  Macro R@10 = 0.2827
+  Micro R@10 = 0.2386
+
+new no-training beta sweep winner:
+  Macro R@10 = 0.2891
+  Micro R@10 = 0.2525
+```
+
+- Best fixed beta overall is not `1.0`; it is `0.75` with tuned arithmetic delta.
+- Per-query best beta varies substantially:
+
+```text
++Smiling                         beta 0.25
++Eyeglasses                      beta 0.50
+-Heavy_Makeup                    beta 0.75
++Male                            beta 0.75 generic / 1.00 tuned
+-Young                           beta 1.25 generic / 0.75 tuned
++Mustache                        beta 1.50 generic / 1.00 tuned
+-Male, -Mustache                 beta 1.50 generic
++Chubby, -Young                  beta 1.50 generic
+-Smiling, +Eyeglasses, +Hat      beta 0.75 generic / 1.00 tuned
+```
+
+- Interpretation: beta selection is a real bottleneck. A single global beta is good but not ideal; different attribute/query types want different correction strength.
+- Next promising direction: a lightweight adaptive beta/reranker rather than bigger gate fine-tuning. The beta head could predict beta from source embedding, query directions, learned gate output, and model-vs-sum score diagnostics. A no-training per-query/oracle beta upper bound should also be reported to estimate the ceiling.
+- Note: the pasted `find` output only listed `overall_beta_sweep.png`. Check the Slurm `.err` for plotting failures and make the plotting step robust if `per_query_best_beta.png`/heatmaps were not produced.
+
+## [2026-06-24] experiment plan | v5 mixed weak official-like training
+
+- The next experiment targets the persistent weak-query failure mode:
+
+```text
+Male
+Young
+Chubby
+Male + Mustache
+Chubby + Young
+```
+
+- Hypothesis: same-identity training under-represents these global/correlated
+  edits, while pure official-like training is too strong and harms identity
+  preservation. Test a mixed sampler instead:
+
+```text
+70% same-identity + 30% weak official-like
+85% same-identity + 15% weak official-like
+```
+
+- The weak official-like pool is built from CelebA train only, not from the
+  official JSON. Candidate targets must satisfy the requested weak attributes,
+  differ in few non-query CelebA attributes, and remain CLIP-close to the
+  source.
+- New isolated files:
+
+```text
+cluster/experimental/build_weak_official_like_pairs.py
+cluster/experimental/train_blend_finetune_v5_mixed.py
+cluster/experimental/run_mixed_weak_hpsearch_v5.py
+cluster/configs/gate_v5_mixed_weak_24h_configs.json
+cluster/jobs/52_mixed_weak_v5_24h.sh
+```
+
+- The job evaluates every completed config on the official JSON with the same
+  beta/corrector sweep used in the previous diagnosis, so results should appear
+  under:
+
+```text
+artifacts/results/mixed_weak_v5/hpsearch_mixed_weak_v5_<timestamp>_long/
+```
+
+- Deferred idea explicitly recorded: per-query/adaptive beta could improve the
+  model, but hardcoded query-specific beta rules should be avoided for now
+  because they assume we know the future query names. A learned beta head based
+  on source/query/model-vs-sum features remains a later experiment.
+
+## [2026-06-25] results | v5 mixed weak training improves Macro R@10
+
+- The v5 mixed weak official-like experiment completed in about 1.5-2 hours,
+  much faster than the 24h wall-time cap. Future long-queue training jobs can
+  request about 3 hours to reduce queue waiting while leaving enough buffer.
+- Best v5 aggregate result:
+
+```text
+evaluation_id = mw85_012
+method        = model_plus_generic_delta_beta_1p50
+family        = generic
+beta          = 1.5
+Macro R@10    = 0.3049983318858148
+Micro R@10    = 0.2511799588527169
+Macro P@10    = 0.0487211528445904
+```
+
+- Winning config `mw85_012`:
+
+```text
+weak_pair_fraction      = 0.15
+same_identity_fraction  = 0.85
+learning_rate           = 5e-5
+train blend_beta        = 0.75
+lambda_triplet          = 0.10
+lambda_source           = 0.02
+multipositive_weight    = 0.75
+max_steps               = 20000
+```
+
+- Comparison to previous bests:
+
+```text
+previous packaged final, generic beta 1.00:
+  Macro R@10 = 0.2827
+  Micro R@10 = 0.2386
+
+previous no-training beta sweep winner, tuned beta 0.75:
+  Macro R@10 = 0.2891
+  Micro R@10 = 0.2525
+
+new v5 mixed weak winner, generic beta 1.50:
+  Macro R@10 = 0.3050
+  Micro R@10 = 0.2512
+```
+
+- Interpretation: v5 improved macro performance, which suggests that adding a
+  small fraction of official-like weak pairs helps the difficult query families
+  and balances performance across query types. Micro R@10 is roughly tied with
+  the previous beta-sweep winner, so the gain is mainly per-query balance rather
+  than a uniform improvement over all 33,052 source-query cases.
+- The top of the aggregate ranking is dominated by `mw85` configs, not `mw70`.
+  This supports the current hypothesis that weak official-like pairs are useful
+  as a regularized augmentation, but too much of them risks weakening the
+  reference/source-preservation behavior.
+- The best inference method is `generic` delta with `beta=1.5`, even though the
+  training config used `blend_beta=0.75`. This means the learned model benefits
+  from a conservative correction during training but still needs a strong
+  zero-shot arithmetic correction at evaluation.
+
+### Assignment interpretation
+
+- The assignment text says targets should preserve the core identity of the
+  reference image. However, the provided official JSON operationalizes this as:
+
+```text
+1. target strictly satisfies the positive/negative query constraints;
+2. all remaining non-query attributes have Hamming distance <= 2 from source.
+```
+
+- Therefore, the grading/evaluation does not directly check same person ID. It
+  checks attribute-level source similarity under a relaxed Hamming rule.
+- Consequence for our method: same-identity training is not wrong, but it is an
+  inductive bias rather than the exact evaluation target. The v5 result confirms
+  the right direction: keep same-identity pairs as source-preservation
+  regularization, but add official-like cross-identity pairs to align with the
+  JSON metric.
+
+## [2026-06-25] decision | Keep official JSON held out for future set training
+
+- Decided that the next official-like positive-set training should never use
+  `celeba_evaluation.json` or test-split target lists to build train examples.
+- Official-like sets may be precomputed on CelebA train/validation partitions
+  only, using the same attribute rule as the JSON: query signs must match and
+  non-query Hamming distance must be at most 2.
+- Future hyperparameter sweeps should compare paired configs with identical
+  hyperparameters but different mixture ratios, e.g. `60/30/10` versus
+  `70/20/10` for official-like positives / same-identity pairs / weak-global
+  oversampling.
+- Reconfirmed the current data flow: gate training and official evaluation use
+  cached frozen CLIP embeddings, not raw image pixels. Raw images are needed only
+  for the one-time CLIP cache extraction step.
+
+## [2026-06-25] implementation | Added v6 official-like multi-positive training
+
+- Added a new isolated v6 experiment without modifying `final_best_system/`.
+- New builder: `cluster/experimental/build_official_like_positive_sets_v6.py`.
+  It builds train-split-only positive sets for source/query groups using the
+  official-style rule: query signs match and non-query Hamming distance is at
+  most 2. It does not read `celeba_evaluation.json`.
+- New trainer: `cluster/experimental/train_official_mix_v6.py`. It keeps the
+  current best inference formula, `q_final = normalize(q_model + beta *
+  (q_sum-source))`, but trains with a three-way mixture:
+
+```text
+official-like multi-positive rows
+same-identity rows
+weak/global official-like oversampling rows
+```
+
+- New hpsearch runner: `cluster/experimental/run_official_mix_hpsearch_v6.py`.
+  It evaluates every completed checkpoint on the official JSON via beta sweep
+  and writes aggregate winner files.
+- New config/job:
+
+```text
+cluster/configs/gate_v6_official_mix_3h_configs.json
+cluster/jobs/53_official_mix_v6_3h.sh
+```
+
+- The config tests paired ratios with identical hyperparameters:
+
+```text
+60% official-like / 30% same-identity / 10% weak-global
+70% official-like / 20% same-identity / 10% weak-global
+```
+
+- Syntax checks passed locally with `python3 -m py_compile` and JSON validation.

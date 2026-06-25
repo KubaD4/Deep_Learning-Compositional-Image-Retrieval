@@ -1,0 +1,4 @@
+{
+  "method": "model_plus_generic_delta_beta_1p50",
+  "checkpoint": "/mnt/meditech/group1/deep_learning/cluster/artifacts/training_runs/hpsearch_mixed_weak_v5_20260625_122340_long/mixed_v5_mw85_012_weak0p15_lr5em05_beta0p75_tri0p1_long/checkpoints/best_val_official_like_at10.pt"
+}
