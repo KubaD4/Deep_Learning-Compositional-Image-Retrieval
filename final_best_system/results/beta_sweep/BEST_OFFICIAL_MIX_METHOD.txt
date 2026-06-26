@@ -1,0 +1,7 @@
+evaluation_id=v6_60_001
+method=model_plus_generic_delta_beta_1p50
+family=generic
+beta=1.5
+macro_Recall@10=0.3914723202994217
+micro_Recall@10=0.3136572673363185
+macro_Precision@10=0.0628853882537901

@@ -1,0 +1,161 @@
+{
+  "query_id": 5,
+  "query": "+Blond_Hair",
+  "source_index": 3,
+  "source_filename": "182641.jpg",
+  "top_indices": [
+    11084,
+    18761,
+    10657,
+    17565,
+    13382,
+    15773,
+    6234,
+    13310,
+    12903,
+    7849
+  ],
+  "top_filenames": [
+    "193722.jpg",
+    "201399.jpg",
+    "193295.jpg",
+    "200203.jpg",
+    "196020.jpg",
+    "198411.jpg",
+    "188872.jpg",
+    "195948.jpg",
+    "195541.jpg",
+    "190487.jpg"
+  ],
+  "top_status": [
+    {
+      "index": 11084,
+      "filename": "193722.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Blond_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 18761,
+      "filename": "201399.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 10657,
+      "filename": "193295.jpg",
+      "status": "official_json_valid",
+      "official_valid": true,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "JSON VALID"
+    },
+    {
+      "index": 17565,
+      "filename": "200203.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 13382,
+      "filename": "196020.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 15773,
+      "filename": "198411.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Blond_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 6234,
+      "filename": "188872.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Blond_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 13310,
+      "filename": "195948.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Blond_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 12903,
+      "filename": "195541.jpg",
+      "status": "official_json_valid",
+      "official_valid": true,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "JSON VALID"
+    },
+    {
+      "index": 7849,
+      "filename": "190487.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    }
+  ],
+  "valid_targets_in_top_k": [
+    10657,
+    12903
+  ],
+  "shown_valid_targets": [
+    10657,
+    12903,
+    308,
+    708,
+    1099,
+    1434,
+    2741,
+    3114,
+    3594,
+    3703
+  ],
+  "shown_valid_filenames": [
+    "193295.jpg",
+    "195541.jpg",
+    "182946.jpg",
+    "183346.jpg",
+    "183737.jpg",
+    "184072.jpg",
+    "185379.jpg",
+    "185752.jpg",
+    "186232.jpg",
+    "186341.jpg"
+  ],
+  "num_valid_targets_for_source": 55,
+  "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
+  "output_png": "final_best_system/results/qualitative_examples/query_05_source_3_top10.png"
+}

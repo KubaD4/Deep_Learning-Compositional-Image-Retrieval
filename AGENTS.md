@@ -62,6 +62,7 @@ After conversion:
 - The expected model backbone for the final report is HuggingFace `openai/clip-vit-base-patch32`.
 - Report Recall@K and Precision@K at K = 1, 5, and 10. Recall@K is the primary metric.
 - The final deliverable is a single self-contained Google Colab notebook with code and report-style Markdown.
+- There must be exactly one canonical final-best package: `final_best_system/`. When a better model is found, update this folder in place. Do not create `final_best_system_v2`, `final_best_system_v6_candidate`, or similar duplicate final folders unless the user explicitly asks for a temporary backup.
 
 ## Maintenance Checklist
 

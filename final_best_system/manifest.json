@@ -1,12 +1,11 @@
 {
   "best_primary_system": {
     "name": "model_plus_generic_delta_beta_1p50",
-    "reason": "Highest current Macro Recall@10 after v5 mixed-weak training and beta sweep.",
+    "reason": "Highest current Macro Recall@10 after v6 official-mix training and beta sweep.",
     "formula": "q_final = normalize(q_model + 1.5 * (q_generic_sum - source))",
-    "macro_Recall@10": 0.3049983318858148,
-    "micro_Recall@10": 0.25117995885271693,
-    "macro_Precision@10": 0.048721152844590436,
-    "micro_Precision@10": 0.03856045019968488
+    "macro_Recall@10": 0.3914723202994217,
+    "micro_Recall@10": 0.3136572673363185,
+    "macro_Precision@10": 0.0628853882537901
   },
   "assignment_vanilla_baseline": {
     "name": "direct_sum",
@@ -23,11 +22,17 @@
   "checkpoint": {
     "local_path": "final_best_system/weights/best_val_official_like_at10.pt",
     "prompt_cache": "final_best_system/embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
-    "note": "The final system uses this learned gate checkpoint plus the generic CLIP arithmetic delta branch with beta=1.5."
+    "note": "The final system uses the v6 official-mix learned gate checkpoint plus the generic CLIP arithmetic delta branch with beta=1.5.",
+    "source_cluster_run": "artifacts/training_runs/hpsearch_official_mix_v6_20260626_033308_long/official_mix_v6_v6_60_001_off0p6_same0p3_weak0p1_lr5em05_beta0p75_long/checkpoints/best_val_official_like_at10.pt"
   },
   "assignment_metrics": {
     "primary": "Recall@K for K=1,5,10",
     "secondary": "Precision@K for K=1,5,10",
     "reported_here": "macro and micro versions are both reported; macro is query-balanced."
+  },
+  "correction_ablation": {
+    "without_sum": "final_best_system/results/final_best_model_only",
+    "with_sum": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
+    "report": "final_best_system/results/correction_ablation"
   }
 }

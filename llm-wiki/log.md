@@ -726,3 +726,146 @@ cluster/jobs/53_official_mix_v6_3h.sh
 ```
 
 - Syntax checks passed locally with `python3 -m py_compile` and JSON validation.
+
+## [2026-06-26] analysis | Recall hit-rate vs Precision density and qualitative viewer
+
+- Rechecked the assignment metric definition: Recall@K is a hit-rate, i.e. 1 if
+  at least one official-valid target is retrieved in top K, otherwise 0. This
+  matches the current project implementation.
+- Precision@K remains the density of valid targets in the top K. Therefore the
+  best system can have good Recall@10 while still having low Precision@10: it
+  often finds at least one valid target, but the rest of the nearest CLIP
+  neighbours can be visually plausible yet fail the official attribute/Hamming
+  constraints.
+- Added qualitative viewer:
+
+```text
+final_best_system/code/show_json_retrieval_example.py
+```
+
+- The script reads the final system `retrievals.jsonl`, the official
+  `celeba_evaluation.json`, and the test embedding cache filenames. It renders
+  source + top-k retrievals, coloring official-valid targets in green and
+  invalid retrieved images in red.
+- First smoke test: query 12 (`-Smiling, +Eyeglasses, +Wearing_Hat`) produced an
+  example with 2 valid targets in top 10, saved under:
+
+```text
+final_best_system/results/qualitative_examples/
+```
+
+- Updated hypothesis: the next improvement should likely be a two-stage system:
+  retrieve a large candidate pool with `q_final`, then rerank/filter candidates
+  using learned attribute-query satisfaction and source-preservation estimates.
+  A ground-truth Hamming filter should only be used as an analysis upper bound,
+  not as the final fair inference path.
+
+## [2026-06-26] experiment | Oracle top-500 Hamming/query filter
+
+- Updated the qualitative viewer so each example renders two blocks:
+
+```text
+top: source + top-k predicted by the final system
+bottom: official-valid JSON targets for the same source/query
+```
+
+- Added diagnostic-only script:
+
+```text
+final_best_system/code/test_oracle_top500_rerank.py
+```
+
+- This script recomputes the final vector:
+
+```text
+q_final = normalize(q_model + beta * (q_sum - source))
+```
+
+  then retrieves top 500 by cosine and filters candidates with the official-style
+  rule: requested attributes must match and non-query Hamming distance must be
+  <= 2.
+- Important caveat: this uses CelebA ground-truth attributes at inference time,
+  so it is an oracle/upper-bound diagnostic, not the fair final method.
+- Smoke test on query 13, source 3977 (`+Wearing_Lipstick, -Heavy_Makeup,
+  +Smiling`) supports the hypothesis:
+
+```text
+original final system top-10: 1 official-valid target
+oracle top-500 filtered top-10: 6 official-valid targets
+```
+
+- Interpretation: for this case, `q_final` retrieves a broad pool containing
+  useful valid targets, but raw cosine ranking alone does not place enough of
+  them in the final top 10. A fair next-stage model should approximate this
+  oracle filter with learned attribute/source-preservation predictors instead
+  of reading test labels.
+
+## [2026-06-26] analysis | Top-pool size sweep and stricter preservation hypothesis
+
+- User ran the oracle filter with different top-pool sizes. Full-JSON results:
+
+| Top pool | Macro pool hit rate | Avg filtered candidates/pool | Macro P@10 | Micro P@10 |
+| ---: | ---: | ---: | ---: | ---: |
+| 25 | 0.5735 | 1.2293 | 0.1225 | 0.1035 |
+| 50 | 0.7035 | 2.0068 | 0.1958 | 0.1726 |
+| 500 | 0.9629 | 8.2648 | 0.5706 | 0.5747 |
+
+- Deduction: valid official targets are often present in the broader
+  neighbourhood of `q_final`, but they are sparse and not necessarily among the
+  first 25/50 cosine neighbours. This supports a two-stage direction: broad
+  candidate generation with `q_final`, then learned reranking/filtering.
+- The oracle filter is not a valid final inference method because it uses
+  ground-truth CelebA attributes at inference time. It is valid only as an
+  upper-bound diagnostic.
+- Qualitative inspection suggests the final system often preserves visual
+  identity/source similarity better than some JSON-valid targets. Some rejected
+  predictions appear semantically plausible but fail the strict official
+  Hamming rule.
+- Future training ablation: try stricter source-preservation positives with
+  non-query Hamming <= 1. Do not fully replace the official Hamming <= 2 target,
+  because the assignment evaluation accepts <= 2. Prefer a mixed objective:
+
+```text
+main official-like positives: Hamming <= 2
+preservation-focused positives/regularizer: Hamming <= 1
+same-identity pairs: smaller source-preservation regularizer
+```
+
+- Updated final pipeline notebooks with an appendix for qualitative retrieval
+  and oracle-pool diagnostic:
+
+```text
+notebooks/02_learned_gate_final_pipeline.ipynb
+cluster/notebooks/02_learned_gate_final_pipeline.ipynb
+```
+
+## [2026-06-26] implementation | Qualitative viewer now separates JSON-valid, query-ok, and query-fail
+
+- Updated:
+
+```text
+final_best_system/code/show_json_retrieval_example.py
+```
+
+- The qualitative PNGs now use four colors:
+
+```text
+blue        = source/input image
+light green = official-valid JSON target
+yellow      = satisfies requested query attributes, but is not JSON-valid
+red         = fails at least one requested query attribute
+```
+
+- The script reads `list_attr_celeba.txt`, aligns attributes to the test
+  embedding filenames, parses the query signs, and annotates every predicted
+  top-k image with query-status metadata.
+- Regenerated all existing qualitative examples under:
+
+```text
+final_best_system/results/qualitative_examples/
+```
+
+- Example motivation: for `+Blond_Hair`, some retrieved faces are visually
+  plausible and query-ok but not JSON-valid because they fail the official
+  non-query Hamming/source-preservation rule. Other retrieved faces are marked
+  red because the CelebA label says they do not satisfy `+Blond_Hair` at all.

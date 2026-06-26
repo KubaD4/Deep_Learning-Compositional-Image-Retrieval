@@ -1,7 +1,0 @@
-evaluation_id=mw85_012
-method=model_plus_generic_delta_beta_1p50
-family=generic
-beta=1.5
-macro_Recall@10=0.3049983318858148
-micro_Recall@10=0.2511799588527169
-macro_Precision@10=0.0487211528445904

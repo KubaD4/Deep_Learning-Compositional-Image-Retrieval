@@ -14,24 +14,24 @@ q_sum = generic CLIP arithmetic(source, query)
 q_final = normalize(q_model + 1.5 * (q_sum - source))
 ```
 
-This is the v5 mixed-weak learned gate checkpoint plus the generic CLIP arithmetic displacement corrector.
+This is the v6 official-mix learned gate checkpoint plus the generic CLIP arithmetic displacement corrector.
 
 ## Current Values
 
 ```text
 Assignment baseline Macro Recall@10:   0.108424
 Strong CLIP baseline Macro Recall@10:  0.187076
-Final system Macro Recall@10:          0.304998
+Final system Macro Recall@10:          0.391472
 
-Final vs assignment baseline:          181.30%
-Final vs strong CLIP baseline:         63.03%
+Final vs assignment baseline:          261.06%
+Final vs strong CLIP baseline:         109.26%
 
 Assignment baseline Micro Recall@10:   0.124773
 Strong CLIP baseline Micro Recall@10:  0.166525
-Final system Micro Recall@10:          0.251180
+Final system Micro Recall@10:          0.313657
 
-Final vs assignment baseline:          101.31%
-Final vs strong CLIP baseline:         50.84%
+Final vs assignment baseline:          151.38%
+Final vs strong CLIP baseline:         88.35%
 ```
 
 ## Important Files
@@ -40,6 +40,8 @@ Final vs strong CLIP baseline:         50.84%
 - `embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt`: prompt cache used by the checkpoint.
 - `results/final_best_model_plus_generic_delta_beta_1p50/summary.csv`: official JSON aggregate metrics.
 - `results/final_best_model_plus_generic_delta_beta_1p50/per_query_metrics.csv`: official JSON per-query metrics.
+- `results/final_best_model_only/summary.csv`: official JSON aggregate metrics for the learned gate without the corrective sum.
+- `results/correction_ablation/`: report plots comparing assignment baseline, learned gate only, and learned gate with corrective sum.
 - `results/clean_report/overall_metrics_three_systems.png`: clean report plot for all official metrics.
 - `results/clean_report/per_query_recall10_three_systems.png`: per-query Recall@10 plot.
 - `results/clean_report/per_query_recall10_improvement.png`: per-query improvement plot.

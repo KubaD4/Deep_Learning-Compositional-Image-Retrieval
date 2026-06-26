@@ -1,0 +1,4 @@
+{
+  "method": "model_only",
+  "checkpoint": "final_best_system/weights/best_val_official_like_at10.pt"
+}

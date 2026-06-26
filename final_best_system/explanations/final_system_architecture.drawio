@@ -1,0 +1,212 @@
+<?xml version="1.0" ?>
+<mxfile host="app.diagrams.net" agent="Codex" version="24.7.17">
+  <diagram name="Final CIR architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1040" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="D0" value="Inputs &amp;amp; official data" style="swimlane;html=1;startSize=34;rounded=1;whiteSpace=wrap;fontStyle=1;fontSize=16;fontFamily=Helvetica;horizontal=1;fillColor=#FFF4D8;strokeColor=#B58A20;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="290" height="980" as="geometry"/>
+        </mxCell>
+        <mxCell id="C0" value="Frozen CLIP feature space" style="swimlane;html=1;startSize=34;rounded=1;whiteSpace=wrap;fontStyle=1;fontSize=16;fontFamily=Helvetica;horizontal=1;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="330" height="980" as="geometry"/>
+        </mxCell>
+        <mxCell id="T0" value="Training pair factory" style="swimlane;html=1;startSize=34;rounded=1;whiteSpace=wrap;fontStyle=1;fontSize=16;fontFamily=Helvetica;horizontal=1;fillColor=#EAF7EA;strokeColor=#3A8C45;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="720" y="20" width="330" height="980" as="geometry"/>
+        </mxCell>
+        <mxCell id="M0" value="Learned sequential gate" style="swimlane;html=1;startSize=34;rounded=1;whiteSpace=wrap;fontStyle=1;fontSize=16;fontFamily=Helvetica;horizontal=1;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="20" width="340" height="980" as="geometry"/>
+        </mxCell>
+        <mxCell id="F0" value="Final inference &amp;amp; evaluation" style="swimlane;html=1;startSize=34;rounded=1;whiteSpace=wrap;fontStyle=1;fontSize=16;fontFamily=Helvetica;horizontal=1;fillColor=#FFECEC;strokeColor=#C75555;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1470" y="20" width="380" height="980" as="geometry"/>
+        </mxCell>
+        <mxCell id="D1" value="&lt;b&gt;CelebA images&lt;/b&gt;&lt;br&gt;Source image s_img&lt;br&gt;Gallery/test images&lt;br&gt;Used only through frozen CLIP image embeddings" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFF4D8;strokeColor=#B58A20;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="75" width="240" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="D2" value="&lt;b&gt;Attributes + identities&lt;/b&gt;&lt;br&gt;40 binary CelebA attributes&lt;br&gt;identity_CelebA links images of same person&lt;br&gt;Used to build synthetic edit pairs" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFF4D8;strokeColor=#B58A20;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="205" width="240" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="D3" value="&lt;b&gt;Official JSON evaluation&lt;/b&gt;&lt;br&gt;Input: source image + signed query edits&lt;br&gt;Ground truth: valid target image set&lt;br&gt;Used only after training for Precision/Recall@K" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFF4D8;strokeColor=#B58A20;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="350" width="240" height="135" as="geometry"/>
+        </mxCell>
+        <mxCell id="D4" value="&lt;b&gt;Query format&lt;/b&gt;&lt;br&gt;We do not train on arbitrary free text&lt;br&gt;A query is parsed as signed edits: +Smiling, -Young, ...&lt;br&gt;Each edit maps to an attribute direction" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFF4D8;strokeColor=#B58A20;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="510" width="240" height="135" as="geometry"/>
+        </mxCell>
+        <mxCell id="C1" value="&lt;b&gt;CLIP image encoder&lt;/b&gt;&lt;br&gt;Frozen openai/clip-vit-base-patch32&lt;br&gt;Computes normalized image vectors&lt;br&gt;No fine-tuning of CLIP weights" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="75" width="255" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="C2" value="&lt;b&gt;Image embedding cache&lt;/b&gt;&lt;br&gt;source vector: s&lt;br&gt;gallery matrix: V = {v_i}&lt;br&gt;Retrieval uses cosine(q, v_i)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="210" width="255" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="C3" value="&lt;b&gt;CLIP text encoder&lt;/b&gt;&lt;br&gt;Frozen text encoder&lt;br&gt;Used offline to build prompt caches&lt;br&gt;Text embeddings are normalized" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="350" width="255" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="C4" value="&lt;b&gt;Prompt ensemble per attribute&lt;/b&gt;&lt;br&gt;For each attribute A:&lt;br&gt;2-5 positive prompts: &amp;quot;photo of a face with A&amp;quot;...&lt;br&gt;2-5 negative/opposite prompts: &amp;quot;photo of a face without A&amp;quot;...&lt;br&gt;Normalize every prompt embedding" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="475" width="255" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="C5" value="&lt;b&gt;Signed prompt direction bank v2&lt;/b&gt;&lt;br&gt;t_A+ = normalize(mean(normalized positive prompts))&lt;br&gt;t_A- = normalize(mean(normalized negative prompts))&lt;br&gt;d_A = normalize(t_A+ - t_A-)&lt;br&gt;+A uses d_A, -A uses -d_A" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="660" width="255" height="165" as="geometry"/>
+        </mxCell>
+        <mxCell id="C6" value="&lt;b&gt;Generic CLIP direction bank&lt;/b&gt;&lt;br&gt;attribute_text_embeddings.pt&lt;br&gt;Older zero-shot contrastive directions&lt;br&gt;Used by the final correction branch, not by the gate" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E8F2FF;strokeColor=#2D6DB2;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="850" width="255" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="T1" value="&lt;b&gt;Same-identity edit pairs&lt;/b&gt;&lt;br&gt;Pick two images A and B of same celebrity&lt;br&gt;Query = attributes that changed from A to B&lt;br&gt;Target = image B&lt;br&gt;Teaches identity/source preservation" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EAF7EA;strokeColor=#3A8C45;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="75" width="255" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="T2" value="&lt;b&gt;Weak/global official-like pairs&lt;/b&gt;&lt;br&gt;Extra signal for weak attributes:&lt;br&gt;Male, Young, Chubby and correlated edits&lt;br&gt;Target chosen by attribute compatibility, not necessarily same identity" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EAF7EA;strokeColor=#3A8C45;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="245" width="255" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="T3" value="&lt;b&gt;Official-like multi-positive sets&lt;/b&gt;&lt;br&gt;Experimental v6 path&lt;br&gt;Built only from train split, official JSON excluded&lt;br&gt;Target set satisfies query attrs&lt;br&gt;Other attributes within Hamming &amp;lt;= 2" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EAF7EA;strokeColor=#3A8C45;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="400" width="255" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="T4" value="&lt;b&gt;Batch mixer / sampler&lt;/b&gt;&lt;br&gt;Mixes pair families during training&lt;br&gt;Final v5: same-identity + weak official-like augmentation&lt;br&gt;v6 test: 60/30/10 or 70/20/10 official-like/same/weak" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EAF7EA;strokeColor=#3A8C45;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="575" width="255" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="T5" value="&lt;b&gt;Training supervision&lt;/b&gt;&lt;br&gt;Positive: target B or compatible target set&lt;br&gt;Negatives: other batch targets&lt;br&gt;False-negative masking by attribute similarity when available" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EAF7EA;strokeColor=#3A8C45;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="745" width="255" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="M1" value="&lt;b&gt;Model inputs&lt;/b&gt;&lt;br&gt;s = source image embedding&lt;br&gt;ordered edit directions d_1...d_n&lt;br&gt;condition_mode = signed_direction&lt;br&gt;mask handles variable query length" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="75" width="260" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="M2" value="&lt;b&gt;Gate features for each edit j&lt;/b&gt;&lt;br&gt;Uses current query state q_{j-1}&lt;br&gt;concat(q, d_j, q*d_j, |q-d_j|)&lt;br&gt;This lets the gate condition the edit on the source/current face" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="230" width="260" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="M3" value="&lt;b&gt;Sequential gate MLP&lt;/b&gt;&lt;br&gt;Predicts alpha_j in [0, gate_max]&lt;br&gt;alpha_j = how strongly to apply edit j&lt;br&gt;Not a class probability; it is a CLIP-space edit weight" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="395" width="260" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="M4" value="&lt;b&gt;Sequential CLIP-space update&lt;/b&gt;&lt;br&gt;q_0 = s&lt;br&gt;q_j = normalize(q_{j-1} + edit_scale * alpha_j * d_j)&lt;br&gt;Normalization after every edit mirrors contrastive_sequential baseline" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="545" width="260" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="M5" value="&lt;b&gt;Residual refinement&lt;/b&gt;&lt;br&gt;Aggregates weighted edits&lt;br&gt;Small residual MLP predicts r&lt;br&gt;q_model = normalize(q_n + residual_scale * r)&lt;br&gt;Keeps movement small but learnable" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="715" width="260" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="M6" value="&lt;b&gt;Training losses&lt;/b&gt;&lt;br&gt;Contrastive/InfoNCE retrieval loss&lt;br&gt;Target cosine term pulls q_model toward positives&lt;br&gt;Source preservation term limits identity drift&lt;br&gt;Triplet / multi-positive variants tested in later runs" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F1ECFF;strokeColor=#7A55C7;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="890" width="260" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="F1" value="&lt;b&gt;Learned branch&lt;/b&gt;&lt;br&gt;Load best checkpoint&lt;br&gt;Apply sequential gate to source + query edits&lt;br&gt;Output: q_model" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFECEC;strokeColor=#C75555;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="75" width="300" height="105" as="geometry"/>
+        </mxCell>
+        <mxCell id="F2" value="&lt;b&gt;Generic arithmetic branch&lt;/b&gt;&lt;br&gt;Uses generic CLIP direction bank&lt;br&gt;q_sum = normalize(s + Σ sign * d_generic_A)&lt;br&gt;This branch is zero-shot and often strong for global directions" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFECEC;strokeColor=#C75555;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="205" width="300" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="F3" value="&lt;b&gt;Delta correction&lt;/b&gt;&lt;br&gt;delta = q_sum - s&lt;br&gt;Interpretation: &amp;quot;where generic CLIP arithmetic wants to move from the source&amp;quot;&lt;br&gt;Final winner uses beta = 1.5" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFECEC;strokeColor=#C75555;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="355" width="300" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="F4" value="&lt;b&gt;Final retrieval vector&lt;/b&gt;&lt;br&gt;q_final = normalize(q_model + 1.5 * delta)&lt;br&gt;Because retrieval uses cosine similarity, direction/angle matters more than absolute coordinate magnitude" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFECEC;strokeColor=#C75555;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="510" width="300" height="125" as="geometry"/>
+        </mxCell>
+        <mxCell id="F5" value="&lt;b&gt;Top-k retrieval&lt;/b&gt;&lt;br&gt;Compute cosine(q_final, v_i) for every gallery image&lt;br&gt;Sort descending by cosine score&lt;br&gt;Return top 1, top 5, top 10" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F4F4F4;strokeColor=#777777;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="660" width="300" height="115" as="geometry"/>
+        </mxCell>
+        <mxCell id="F6" value="&lt;b&gt;Official metrics and report&lt;/b&gt;&lt;br&gt;Compare top-k with official valid target set&lt;br&gt;Recall@1/5/10 and Precision@1/5/10&lt;br&gt;Macro = average per query; Micro = average over all source-query cases&lt;br&gt;Plots + CSV in final_best_system/results" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F4F4F4;strokeColor=#777777;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="800" width="300" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="B1" value="&lt;b&gt;Baselines&lt;/b&gt;&lt;br&gt;Assignment vanilla: direct_sum&lt;br&gt;Strong zero-shot: contrastive_sequential&lt;br&gt;Final system is compared against both" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#999999;strokeWidth=2;fontSize=13;fontFamily=Helvetica;align=left;verticalAlign=top;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="45" y="820" width="240" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="E1" value="images" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D1" target="C1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E2" value="cache" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C1" target="C2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E3" value="s" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C2" target="M1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E4" value="gallery V" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C2" target="F5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E5" value="identity + attrs" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D2" target="T1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E6" value="attrs" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D2" target="T2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E7" value="attrs" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D2" target="T3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E8" value="attribute names" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D2" target="C4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E9" value="official GT" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D3" target="F6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E10" value="signed edits" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D4" target="M1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E11" value="signed edits" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="D4" target="F2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E12" value="embed prompts" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C3" target="C4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E13" value="mean + normalize + subtract" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C4" target="C5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E14" value="d_j" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C5" target="M1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E15" value="d_generic" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C6" target="F2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E16" value="pairs" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="T1" target="T4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E17" value="pairs" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="T2" target="T4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E18" value="sets" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="T3" target="T4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E19" value="batch" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="T4" target="T5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E20" value="positives/negatives" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="T5" target="M6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E21" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M1" target="M2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E22" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M2" target="M3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E23" value="alpha_j" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M3" target="M4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E24" value="q_n" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M4" target="M5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E25" value="q_model" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M5" target="M6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E26" value="learn weights" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M6" target="M5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E27" value="checkpoint output" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="M5" target="F1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E28" value="q_model" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="F1" target="F4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E29" value="q_sum" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="F2" target="F3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E30" value="source s" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="C2" target="F3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E31" value="beta * delta" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="F3" target="F4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E32" value="q_final" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="F4" target="F5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E33" value="top-k" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="F5" target="F6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="E34" value="comparison" style="endArrow=block;html=1;rounded=1;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="B1" target="F6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,162 @@
+{
+  "query_id": 9,
+  "query": "+Black_Hair, -Wavy_Hair",
+  "source_index": 10,
+  "source_filename": "182648.jpg",
+  "top_indices": [
+    8635,
+    11575,
+    9068,
+    82,
+    16684,
+    10709,
+    16872,
+    3558,
+    16243,
+    10143
+  ],
+  "top_filenames": [
+    "191273.jpg",
+    "194213.jpg",
+    "191706.jpg",
+    "182720.jpg",
+    "199322.jpg",
+    "193347.jpg",
+    "199510.jpg",
+    "186196.jpg",
+    "198881.jpg",
+    "192781.jpg"
+  ],
+  "top_status": [
+    {
+      "index": 8635,
+      "filename": "191273.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Black_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 11575,
+      "filename": "194213.jpg",
+      "status": "official_json_valid",
+      "official_valid": true,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "JSON VALID"
+    },
+    {
+      "index": 9068,
+      "filename": "191706.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Black_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 82,
+      "filename": "182720.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 16684,
+      "filename": "199322.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 10709,
+      "filename": "193347.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 16872,
+      "filename": "199510.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Black_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 3558,
+      "filename": "186196.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 16243,
+      "filename": "198881.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Wavy_Hair"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 10143,
+      "filename": "192781.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Black_Hair"
+      ],
+      "short_label": "query FAIL"
+    }
+  ],
+  "valid_targets_in_top_k": [
+    11575
+  ],
+  "shown_valid_targets": [
+    11575,
+    1819,
+    2072,
+    2079,
+    2308,
+    3230,
+    5081,
+    7388,
+    7418,
+    7534
+  ],
+  "shown_valid_filenames": [
+    "194213.jpg",
+    "184457.jpg",
+    "184710.jpg",
+    "184717.jpg",
+    "184946.jpg",
+    "185868.jpg",
+    "187719.jpg",
+    "190026.jpg",
+    "190056.jpg",
+    "190172.jpg"
+  ],
+  "num_valid_targets_for_source": 27,
+  "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
+  "output_png": "final_best_system/results/qualitative_examples/query_09_source_10_top10.png"
+}

@@ -1,0 +1,168 @@
+{
+  "query_id": 13,
+  "query": "+Wearing_Lipstick, -Heavy_Makeup, +Smiling",
+  "source_index": 3977,
+  "source_filename": "186615.jpg",
+  "top_indices": [
+    17193,
+    7832,
+    1040,
+    5564,
+    2208,
+    10971,
+    14445,
+    2515,
+    15483,
+    2351
+  ],
+  "top_filenames": [
+    "199831.jpg",
+    "190470.jpg",
+    "183678.jpg",
+    "188202.jpg",
+    "184846.jpg",
+    "193609.jpg",
+    "197083.jpg",
+    "185153.jpg",
+    "198121.jpg",
+    "184989.jpg"
+  ],
+  "top_status": [
+    {
+      "index": 17193,
+      "filename": "199831.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Wearing_Lipstick"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 7832,
+      "filename": "190470.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Wearing_Lipstick"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 1040,
+      "filename": "183678.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Heavy_Makeup"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 5564,
+      "filename": "188202.jpg",
+      "status": "official_json_valid",
+      "official_valid": true,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "JSON VALID"
+    },
+    {
+      "index": 2208,
+      "filename": "184846.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Wearing_Lipstick"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 10971,
+      "filename": "193609.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "+Wearing_Lipstick"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 14445,
+      "filename": "197083.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Heavy_Makeup"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 2515,
+      "filename": "185153.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 15483,
+      "filename": "198121.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Heavy_Makeup"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 2351,
+      "filename": "184989.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Heavy_Makeup"
+      ],
+      "short_label": "query FAIL"
+    }
+  ],
+  "valid_targets_in_top_k": [
+    5564
+  ],
+  "shown_valid_targets": [
+    5564,
+    450,
+    999,
+    2443,
+    2920,
+    3512,
+    3739,
+    3840,
+    4862,
+    5813
+  ],
+  "shown_valid_filenames": [
+    "188202.jpg",
+    "183088.jpg",
+    "183637.jpg",
+    "185081.jpg",
+    "185558.jpg",
+    "186150.jpg",
+    "186377.jpg",
+    "186478.jpg",
+    "187500.jpg",
+    "188451.jpg"
+  ],
+  "num_valid_targets_for_source": 33,
+  "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
+  "output_png": "final_best_system/results/qualitative_examples/query_13_source_3977_top10.png"
+}

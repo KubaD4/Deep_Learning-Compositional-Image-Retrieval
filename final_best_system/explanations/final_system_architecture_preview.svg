@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1040" viewBox="0 0 1900 1040">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#444"/></marker></defs>
+<style>text{font-family:Helvetica,Arial,sans-serif}.title{font-size:16px;font-weight:700}.body{font-size:11px}.small{font-size:10px}.edge{stroke:#444;stroke-width:2;fill:none;marker-end:url(#arrow)}</style>
+<rect x="20" y="20" width="290" height="980" rx="12" fill="#FFF4D8" stroke="#B58A20" stroke-width="2" opacity="0.55"/>
+<text x="34" y="44" class="title" fill="#222">Inputs &amp; official data</text>
+<rect x="350" y="20" width="330" height="980" rx="12" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2" opacity="0.55"/>
+<text x="364" y="44" class="title" fill="#222">Frozen CLIP feature space</text>
+<rect x="720" y="20" width="330" height="980" rx="12" fill="#EAF7EA" stroke="#3A8C45" stroke-width="2" opacity="0.55"/>
+<text x="734" y="44" class="title" fill="#222">Training pair factory</text>
+<rect x="1090" y="20" width="340" height="980" rx="12" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2" opacity="0.55"/>
+<text x="1104" y="44" class="title" fill="#222">Learned sequential gate</text>
+<rect x="1470" y="20" width="380" height="980" rx="12" fill="#FFECEC" stroke="#C75555" stroke-width="2" opacity="0.55"/>
+<text x="1484" y="44" class="title" fill="#222">Final inference &amp; evaluation</text>
+<path class="edge" d="M 165.0 127.5 L 507.5 130.0" opacity="0.45"/>
+<path class="edge" d="M 507.5 130.0 L 507.5 262.5" opacity="0.45"/>
+<path class="edge" d="M 507.5 262.5 L 1255.0 140.0" opacity="0.45"/>
+<path class="edge" d="M 507.5 262.5 L 1650.0 717.5" opacity="0.45"/>
+<path class="edge" d="M 165.0 265.0 L 877.5 147.5" opacity="0.45"/>
+<path class="edge" d="M 165.0 265.0 L 877.5 310.0" opacity="0.45"/>
+<path class="edge" d="M 165.0 265.0 L 877.5 475.0" opacity="0.45"/>
+<path class="edge" d="M 165.0 265.0 L 507.5 555.0" opacity="0.45"/>
+<path class="edge" d="M 165.0 417.5 L 1650.0 880.0" opacity="0.45"/>
+<path class="edge" d="M 165.0 577.5 L 1255.0 140.0" opacity="0.45"/>
+<path class="edge" d="M 165.0 577.5 L 1650.0 267.5" opacity="0.45"/>
+<path class="edge" d="M 507.5 400.0 L 507.5 555.0" opacity="0.45"/>
+<path class="edge" d="M 507.5 555.0 L 507.5 742.5" opacity="0.45"/>
+<path class="edge" d="M 507.5 742.5 L 1255.0 140.0" opacity="0.45"/>
+<path class="edge" d="M 507.5 902.5 L 1650.0 267.5" opacity="0.45"/>
+<path class="edge" d="M 877.5 147.5 L 877.5 647.5" opacity="0.45"/>
+<path class="edge" d="M 877.5 310.0 L 877.5 647.5" opacity="0.45"/>
+<path class="edge" d="M 877.5 475.0 L 877.5 647.5" opacity="0.45"/>
+<path class="edge" d="M 877.5 647.5 L 877.5 810.0" opacity="0.45"/>
+<path class="edge" d="M 877.5 810.0 L 1255.0 935.0" opacity="0.45"/>
+<path class="edge" d="M 1255.0 140.0 L 1255.0 300.0" opacity="0.45"/>
+<path class="edge" d="M 1255.0 300.0 L 1255.0 457.5" opacity="0.45"/>
+<path class="edge" d="M 1255.0 457.5 L 1255.0 617.5" opacity="0.45"/>
+<path class="edge" d="M 1255.0 617.5 L 1255.0 790.0" opacity="0.45"/>
+<path class="edge" d="M 1255.0 790.0 L 1255.0 935.0" opacity="0.45"/>
+<path class="edge" d="M 1255.0 935.0 L 1255.0 790.0" opacity="0.45"/>
+<path class="edge" d="M 1255.0 790.0 L 1650.0 127.5" opacity="0.45"/>
+<path class="edge" d="M 1650.0 127.5 L 1650.0 572.5" opacity="0.45"/>
+<path class="edge" d="M 1650.0 267.5 L 1650.0 420.0" opacity="0.45"/>
+<path class="edge" d="M 507.5 262.5 L 1650.0 420.0" opacity="0.45"/>
+<path class="edge" d="M 1650.0 420.0 L 1650.0 572.5" opacity="0.45"/>
+<path class="edge" d="M 1650.0 572.5 L 1650.0 717.5" opacity="0.45"/>
+<path class="edge" d="M 1650.0 717.5 L 1650.0 880.0" opacity="0.45"/>
+<path class="edge" d="M 165.0 885.0 L 1650.0 880.0" opacity="0.45"/>
+<rect x="45" y="75" width="240" height="105" rx="10" fill="#FFF4D8" stroke="#B58A20" stroke-width="2"/>
+<text x="55" y="97" class="title" fill="#222">CelebA images</text>
+<text x="55" y="112" class="body" fill="#222">Source image s_img</text>
+<text x="55" y="127" class="body" fill="#222">Gallery/test images</text>
+<text x="55" y="142" class="body" fill="#222">Used only through frozen CLIP image embeddings</text>
+<rect x="45" y="205" width="240" height="120" rx="10" fill="#FFF4D8" stroke="#B58A20" stroke-width="2"/>
+<text x="55" y="227" class="title" fill="#222">Attributes + identities</text>
+<text x="55" y="242" class="body" fill="#222">40 binary CelebA attributes</text>
+<text x="55" y="257" class="body" fill="#222">identity_CelebA links images of same person</text>
+<text x="55" y="272" class="body" fill="#222">Used to build synthetic edit pairs</text>
+<rect x="45" y="350" width="240" height="135" rx="10" fill="#FFF4D8" stroke="#B58A20" stroke-width="2"/>
+<text x="55" y="372" class="title" fill="#222">Official JSON evaluation</text>
+<text x="55" y="387" class="body" fill="#222">Input: source image + signed query edits</text>
+<text x="55" y="402" class="body" fill="#222">Ground truth: valid target image set</text>
+<text x="55" y="417" class="body" fill="#222">Used only after training for Precision/Recall@K</text>
+<rect x="45" y="510" width="240" height="135" rx="10" fill="#FFF4D8" stroke="#B58A20" stroke-width="2"/>
+<text x="55" y="532" class="title" fill="#222">Query format</text>
+<text x="55" y="547" class="body" fill="#222">We do not train on arbitrary free text</text>
+<text x="55" y="562" class="body" fill="#222">A query is parsed as signed edits: +Smiling, -Young, ...</text>
+<text x="55" y="577" class="body" fill="#222">Each edit maps to an attribute direction</text>
+<rect x="380" y="75" width="255" height="110" rx="10" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2"/>
+<text x="390" y="97" class="title" fill="#222">CLIP image encoder</text>
+<text x="390" y="112" class="body" fill="#222">Frozen openai/clip-vit-base-patch32</text>
+<text x="390" y="127" class="body" fill="#222">Computes normalized image vectors</text>
+<text x="390" y="142" class="body" fill="#222">No fine-tuning of CLIP weights</text>
+<rect x="380" y="210" width="255" height="105" rx="10" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2"/>
+<text x="390" y="232" class="title" fill="#222">Image embedding cache</text>
+<text x="390" y="247" class="body" fill="#222">source vector: s</text>
+<text x="390" y="262" class="body" fill="#222">gallery matrix: V = {v_i}</text>
+<text x="390" y="277" class="body" fill="#222">Retrieval uses cosine(q, v_i)</text>
+<rect x="380" y="350" width="255" height="100" rx="10" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2"/>
+<text x="390" y="372" class="title" fill="#222">CLIP text encoder</text>
+<text x="390" y="387" class="body" fill="#222">Frozen text encoder</text>
+<text x="390" y="402" class="body" fill="#222">Used offline to build prompt caches</text>
+<text x="390" y="417" class="body" fill="#222">Text embeddings are normalized</text>
+<rect x="380" y="475" width="255" height="160" rx="10" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2"/>
+<text x="390" y="497" class="title" fill="#222">Prompt ensemble per attribute</text>
+<text x="390" y="512" class="body" fill="#222">For each attribute A:</text>
+<text x="390" y="527" class="body" fill="#222">2-5 positive prompts: &amp;quot;photo of a face with A&amp;quot;...</text>
+<text x="390" y="542" class="body" fill="#222">2-5 negative/opposite prompts: &amp;quot;photo of a face without A&amp;quot;...</text>
+<text x="390" y="557" class="body" fill="#222">Normalize every prompt embedding</text>
+<rect x="380" y="660" width="255" height="165" rx="10" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2"/>
+<text x="390" y="682" class="title" fill="#222">Signed prompt direction bank v2</text>
+<text x="390" y="697" class="body" fill="#222">t_A+ = normalize(mean(normalized positive prompts))</text>
+<text x="390" y="712" class="body" fill="#222">t_A- = normalize(mean(normalized negative prompts))</text>
+<text x="390" y="727" class="body" fill="#222">d_A = normalize(t_A+ - t_A-)</text>
+<text x="390" y="742" class="body" fill="#222">+A uses d_A, -A uses -d_A</text>
+<rect x="380" y="850" width="255" height="105" rx="10" fill="#E8F2FF" stroke="#2D6DB2" stroke-width="2"/>
+<text x="390" y="872" class="title" fill="#222">Generic CLIP direction bank</text>
+<text x="390" y="887" class="body" fill="#222">attribute_text_embeddings.pt</text>
+<text x="390" y="902" class="body" fill="#222">Older zero-shot contrastive directions</text>
+<text x="390" y="917" class="body" fill="#222">Used by the final correction branch, not by the gate</text>
+<rect x="750" y="75" width="255" height="145" rx="10" fill="#EAF7EA" stroke="#3A8C45" stroke-width="2"/>
+<text x="760" y="97" class="title" fill="#222">Same-identity edit pairs</text>
+<text x="760" y="112" class="body" fill="#222">Pick two images A and B of same celebrity</text>
+<text x="760" y="127" class="body" fill="#222">Query = attributes that changed from A to B</text>
+<text x="760" y="142" class="body" fill="#222">Target = image B</text>
+<text x="760" y="157" class="body" fill="#222">Teaches identity/source preservation</text>
+<rect x="750" y="245" width="255" height="130" rx="10" fill="#EAF7EA" stroke="#3A8C45" stroke-width="2"/>
+<text x="760" y="267" class="title" fill="#222">Weak/global official-like pairs</text>
+<text x="760" y="282" class="body" fill="#222">Extra signal for weak attributes:</text>
+<text x="760" y="297" class="body" fill="#222">Male, Young, Chubby and correlated edits</text>
+<text x="760" y="312" class="body" fill="#222">Target chosen by attribute compatibility, not necessarily same identity</text>
+<rect x="750" y="400" width="255" height="150" rx="10" fill="#EAF7EA" stroke="#3A8C45" stroke-width="2"/>
+<text x="760" y="422" class="title" fill="#222">Official-like multi-positive sets</text>
+<text x="760" y="437" class="body" fill="#222">Experimental v6 path</text>
+<text x="760" y="452" class="body" fill="#222">Built only from train split, official JSON excluded</text>
+<text x="760" y="467" class="body" fill="#222">Target set satisfies query attrs</text>
+<text x="760" y="482" class="body" fill="#222">Other attributes within Hamming &amp;lt;= 2</text>
+<rect x="750" y="575" width="255" height="145" rx="10" fill="#EAF7EA" stroke="#3A8C45" stroke-width="2"/>
+<text x="760" y="597" class="title" fill="#222">Batch mixer / sampler</text>
+<text x="760" y="612" class="body" fill="#222">Mixes pair families during training</text>
+<text x="760" y="627" class="body" fill="#222">Final v5: same-identity + weak official-like augmentation</text>
+<text x="760" y="642" class="body" fill="#222">v6 test: 60/30/10 or 70/20/10 official-like/same/weak</text>
+<rect x="750" y="745" width="255" height="130" rx="10" fill="#EAF7EA" stroke="#3A8C45" stroke-width="2"/>
+<text x="760" y="767" class="title" fill="#222">Training supervision</text>
+<text x="760" y="782" class="body" fill="#222">Positive: target B or compatible target set</text>
+<text x="760" y="797" class="body" fill="#222">Negatives: other batch targets</text>
+<text x="760" y="812" class="body" fill="#222">False-negative masking by attribute similarity when available</text>
+<rect x="1125" y="75" width="260" height="130" rx="10" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2"/>
+<text x="1135" y="97" class="title" fill="#222">Model inputs</text>
+<text x="1135" y="112" class="body" fill="#222">s = source image embedding</text>
+<text x="1135" y="127" class="body" fill="#222">ordered edit directions d_1...d_n</text>
+<text x="1135" y="142" class="body" fill="#222">condition_mode = signed_direction</text>
+<text x="1135" y="157" class="body" fill="#222">mask handles variable query length</text>
+<rect x="1125" y="230" width="260" height="140" rx="10" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2"/>
+<text x="1135" y="252" class="title" fill="#222">Gate features for each edit j</text>
+<text x="1135" y="267" class="body" fill="#222">Uses current query state q_{j-1}</text>
+<text x="1135" y="282" class="body" fill="#222">concat(q, d_j, q*d_j, |q-d_j|)</text>
+<text x="1135" y="297" class="body" fill="#222">This lets the gate condition the edit on the source/current face</text>
+<rect x="1125" y="395" width="260" height="125" rx="10" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2"/>
+<text x="1135" y="417" class="title" fill="#222">Sequential gate MLP</text>
+<text x="1135" y="432" class="body" fill="#222">Predicts alpha_j in [0, gate_max]</text>
+<text x="1135" y="447" class="body" fill="#222">alpha_j = how strongly to apply edit j</text>
+<text x="1135" y="462" class="body" fill="#222">Not a class probability; it is a CLIP-space edit weight</text>
+<rect x="1125" y="545" width="260" height="145" rx="10" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2"/>
+<text x="1135" y="567" class="title" fill="#222">Sequential CLIP-space update</text>
+<text x="1135" y="582" class="body" fill="#222">q_0 = s</text>
+<text x="1135" y="597" class="body" fill="#222">q_j = normalize(q_{j-1} + edit_scale * alpha_j * d_j)</text>
+<text x="1135" y="612" class="body" fill="#222">Normalization after every edit mirrors contrastive_sequential baseline</text>
+<rect x="1125" y="715" width="260" height="150" rx="10" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2"/>
+<text x="1135" y="737" class="title" fill="#222">Residual refinement</text>
+<text x="1135" y="752" class="body" fill="#222">Aggregates weighted edits</text>
+<text x="1135" y="767" class="body" fill="#222">Small residual MLP predicts r</text>
+<text x="1135" y="782" class="body" fill="#222">q_model = normalize(q_n + residual_scale * r)</text>
+<text x="1135" y="797" class="body" fill="#222">Keeps movement small but learnable</text>
+<rect x="1125" y="890" width="260" height="90" rx="10" fill="#F1ECFF" stroke="#7A55C7" stroke-width="2"/>
+<text x="1135" y="912" class="title" fill="#222">Training losses</text>
+<text x="1135" y="927" class="body" fill="#222">Contrastive/InfoNCE retrieval loss</text>
+<text x="1135" y="942" class="body" fill="#222">Target cosine term pulls q_model toward positives</text>
+<text x="1135" y="957" class="body" fill="#222">Source preservation term limits identity drift</text>
+<text x="1135" y="972" class="body" fill="#222">Triplet / multi-positive variants tested in later runs</text>
+<rect x="1500" y="75" width="300" height="105" rx="10" fill="#FFECEC" stroke="#C75555" stroke-width="2"/>
+<text x="1510" y="97" class="title" fill="#222">Learned branch</text>
+<text x="1510" y="112" class="body" fill="#222">Load best checkpoint</text>
+<text x="1510" y="127" class="body" fill="#222">Apply sequential gate to source + query edits</text>
+<text x="1510" y="142" class="body" fill="#222">Output: q_model</text>
+<rect x="1500" y="205" width="300" height="125" rx="10" fill="#FFECEC" stroke="#C75555" stroke-width="2"/>
+<text x="1510" y="227" class="title" fill="#222">Generic arithmetic branch</text>
+<text x="1510" y="242" class="body" fill="#222">Uses generic CLIP direction bank</text>
+<text x="1510" y="257" class="body" fill="#222">q_sum = normalize(s + Σ sign * d_generic_A)</text>
+<text x="1510" y="272" class="body" fill="#222">This branch is zero-shot and often strong for global directions</text>
+<rect x="1500" y="355" width="300" height="130" rx="10" fill="#FFECEC" stroke="#C75555" stroke-width="2"/>
+<text x="1510" y="377" class="title" fill="#222">Delta correction</text>
+<text x="1510" y="392" class="body" fill="#222">delta = q_sum - s</text>
+<text x="1510" y="407" class="body" fill="#222">Interpretation: &amp;quot;where generic CLIP arithmetic wants to move from the source&amp;quot;</text>
+<text x="1510" y="422" class="body" fill="#222">Final winner uses beta = 1.5</text>
+<rect x="1500" y="510" width="300" height="125" rx="10" fill="#FFECEC" stroke="#C75555" stroke-width="2"/>
+<text x="1510" y="532" class="title" fill="#222">Final retrieval vector</text>
+<text x="1510" y="547" class="body" fill="#222">q_final = normalize(q_model + 1.5 * delta)</text>
+<text x="1510" y="562" class="body" fill="#222">Because retrieval uses cosine similarity, direction/angle matters more than absolute coordinate magnitude</text>
+<rect x="1500" y="660" width="300" height="115" rx="10" fill="#F4F4F4" stroke="#777777" stroke-width="2"/>
+<text x="1510" y="682" class="title" fill="#222">Top-k retrieval</text>
+<text x="1510" y="697" class="body" fill="#222">Compute cosine(q_final, v_i) for every gallery image</text>
+<text x="1510" y="712" class="body" fill="#222">Sort descending by cosine score</text>
+<text x="1510" y="727" class="body" fill="#222">Return top 1, top 5, top 10</text>
+<rect x="1500" y="800" width="300" height="160" rx="10" fill="#F4F4F4" stroke="#777777" stroke-width="2"/>
+<text x="1510" y="822" class="title" fill="#222">Official metrics and report</text>
+<text x="1510" y="837" class="body" fill="#222">Compare top-k with official valid target set</text>
+<text x="1510" y="852" class="body" fill="#222">Recall@1/5/10 and Precision@1/5/10</text>
+<text x="1510" y="867" class="body" fill="#222">Macro = average per query; Micro = average over all source-query cases</text>
+<text x="1510" y="882" class="body" fill="#222">Plots + CSV in final_best_system/results</text>
+<rect x="45" y="820" width="240" height="130" rx="10" fill="#FFFFFF" stroke="#999999" stroke-width="2"/>
+<text x="55" y="842" class="title" fill="#222">Baselines</text>
+<text x="55" y="857" class="body" fill="#222">Assignment vanilla: direct_sum</text>
+<text x="55" y="872" class="body" fill="#222">Strong zero-shot: contrastive_sequential</text>
+<text x="55" y="887" class="body" fill="#222">Final system is compared against both</text>
+</svg>

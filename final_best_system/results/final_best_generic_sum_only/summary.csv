@@ -1,0 +1,2 @@
+method,checkpoint,query_entries,source_query_cases,macro_Recall@1,macro_Recall@5,macro_Recall@10,macro_Precision@1,macro_Precision@5,macro_Precision@10,micro_Recall@1,micro_Recall@5,micro_Recall@10,micro_Precision@1,micro_Precision@5,micro_Precision@10
+generic_sum_only,final_best_system/weights/best_val_official_like_at10.pt,14,33052,0.03646944934605339,0.10664544558324833,0.1544682602435093,0.03646944934605339,0.0264927583214232,0.022163936655296538,0.03385574246641655,0.1073762555972407,0.16368147162047683,0.03385574246641655,0.027223768607043414,0.023738351688248675

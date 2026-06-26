@@ -95,6 +95,24 @@ number of valid retrieved top-K indices / K
 
 Average both metrics over all source images for each query, then present per-query tables. It is also useful to report macro averages across queries.
 
+Important interpretation: in this assignment, Recall@K is explicitly a hit-rate, not classical IR recall over all valid targets. If a source/query has 80 valid targets and the system retrieves exactly one valid target in the top 10, Recall@10 is 1 but Precision@10 is 0.1. Therefore:
+
+```text
+high Recall@10 + low Precision@10
+= the query vector often reaches a valid region,
+  but many of the remaining nearest neighbours are not official-valid targets.
+```
+
+This is the current behavior of the best learned system. The next likely improvement is not only to make a better single `q_final`, but to use a two-stage retrieval:
+
+```text
+1. retrieve a larger candidate pool with q_final, e.g. top 100/top 500 by cosine;
+2. rerank or filter candidates using attribute-query satisfaction and non-query Hamming/source-preservation estimates;
+3. return the final top 10.
+```
+
+For fair final evaluation, any reranker should avoid using the official test JSON target lists directly. A safe version would learn/predict attribute satisfaction from train data, while an oracle Hamming filter can be used only as an analysis upper bound.
+
 ## Evaluation Loop Sketch
 
 ```python
