@@ -1,62 +1,171 @@
 # Final Best System Package
 
-This is the single canonical final-best package for the current project.
+This folder is the canonical final-best package for the project. It is designed to run from a cloned repository without relying on `/Users/kuba/...` or the Baldo cluster path.
 
 ## Winner
 
-`model_plus_generic_delta_beta_1p50`
-
-Formula:
-
 ```text
-q_model = learned_gate(source, query)
-q_sum = generic CLIP arithmetic(source, query)
-q_final = normalize(q_model + 1.5 * (q_sum - source))
+current_A_query_hardh2_accuracy
 ```
 
-This is the v6 official-mix learned gate checkpoint plus the generic CLIP arithmetic displacement corrector.
+The system has two stages.
 
-## Current Values
+Stage 1: hybrid compositional retrieval vector:
 
 ```text
-Assignment baseline Macro Recall@10:   0.108424
-Strong CLIP baseline Macro Recall@10:  0.187076
-Final system Macro Recall@10:          0.391472
+q_model  = learned sequential gate(source, signed query)
+q_sum    = CLIP arithmetic composition(source, signed query)
+q_hybrid = normalize(q_model + 1.25 * (q_sum - source))
+```
 
-Final vs assignment baseline:          261.06%
-Final vs strong CLIP baseline:         109.26%
+Stage 2: calibrated CelebA attribute probe reranking:
 
-Assignment baseline Micro Recall@10:   0.124773
-Strong CLIP baseline Micro Recall@10:  0.166525
-Final system Micro Recall@10:          0.313657
+```text
+1. retrieve top-500 candidates with q_hybrid
+2. predict candidate/source attributes with the trained probe
+3. promote candidates that satisfy:
+   - requested query attributes
+   - predicted non-query Hamming distance <= 2
+4. if fewer than top-10 pass, fill the remaining slots with q_hybrid ranking
+```
 
-Final vs assignment baseline:          151.38%
-Final vs strong CLIP baseline:         88.35%
+## Current Official JSON Values
+
+```text
+Macro Recall@10     0.47297151547368665
+Micro Recall@10     0.4088406147888176
+Macro Precision@10  0.08570375640709439
+Micro Precision@10  0.07119085078058791
+avg kept from 500   32.70156117632821
+```
+
+The saved aggregate is:
+
+```text
+results/probe_reranker_v2_calibrated/A_cal_query_hardh2_accuracy/summary.csv
 ```
 
 ## Important Files
 
-- `weights/best_val_official_like_at10.pt`: best learned gate checkpoint.
-- `embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt`: prompt cache used by the checkpoint.
-- `results/final_best_model_plus_generic_delta_beta_1p50/summary.csv`: official JSON aggregate metrics.
-- `results/final_best_model_plus_generic_delta_beta_1p50/per_query_metrics.csv`: official JSON per-query metrics.
-- `results/final_best_model_only/summary.csv`: official JSON aggregate metrics for the learned gate without the corrective sum.
-- `results/correction_ablation/`: report plots comparing assignment baseline, learned gate only, and learned gate with corrective sum.
-- `results/clean_report/overall_metrics_three_systems.png`: clean report plot for all official metrics.
-- `results/clean_report/per_query_recall10_three_systems.png`: per-query Recall@10 plot.
-- `results/clean_report/per_query_recall10_improvement.png`: per-query improvement plot.
-- `code/run_final_evaluation.sh`: reruns the final evaluation from the repository caches.
+- `weights/best_val_official_like_at10.pt`: best v7 learned gate checkpoint.
+- `weights/best_probe.pt`: copy of the final CelebA attribute probe checkpoint.
+- `results/probe_reranker_v2_calibrated/probe/best_probe.pt`: probe checkpoint used by the evaluator.
+- `results/probe_reranker_v2_calibrated/probe/calibrated_thresholds.pt`: per-attribute calibrated thresholds.
+- `results/probe_reranker_v2_calibrated/probe/test_probe_probs.pt`: cached probe probabilities for CelebA test images.
+- `data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt`: test gallery CLIP image embeddings.
+- `data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt`: prompt cache used by the learned gate.
+- `data/celeba/annotations/list_attr_celeba.txt`: CelebA attributes used by probe/Hamming checks.
+- `data/celeba_evaluation.json`: official evaluation JSON.
 
-## Rerun
+## Setup
 
 From the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r final_best_system/code/requirements.txt
+```
+
+The final metrics can be recomputed with the packaged tensors and annotations. Rendering image grids additionally requires the CelebA aligned image folder:
+
+```text
+celeba/img_align_celeba/
+```
+
+If your images are elsewhere, pass `--images-dir /path/to/img_align_celeba`.
+
+## Smoke Test
+
+```bash
+bash final_best_system/code/run_current_best_smoke.sh
+```
+
+This runs one source-query case on CPU and prints progress plus a summary. The metric values in the smoke test are not meaningful; it only verifies that the full package loads correctly.
+
+## Full Local Evaluation
+
+```bash
+bash final_best_system/code/run_current_best_full_eval.sh
+```
+
+or:
 
 ```bash
 bash final_best_system/code/run_final_evaluation.sh
 ```
 
-The runner expects the repository `cluster/data` caches to exist, especially `test_image_embeddings.pt` and the CelebA annotations/evaluation JSON.
+On CPU this is slower than the cluster run because it evaluates all official source-query cases.
+
+## Official JSON Visualization
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --query-id 5 \
+  --source-index 3 \
+  --top-k 10
+```
+
+The script draws:
+
+- blue: source image;
+- light green: official JSON-valid target;
+- yellow: satisfies requested query attributes but is not official JSON-valid;
+- red: fails at least one requested query attribute.
+
+## Free Known-Attribute Query
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 47 \
+  --free-query "+Eyeglasses" \
+  --top-k 10 \
+  --top-pool 50
+```
+
+Known attributes are checked with CelebA labels/probe logic.
+
+## Free Open-Vocabulary Query
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 47 \
+  --free-query "+Sunglasses" \
+  --top-k 10 \
+  --top-pool 50
+```
+
+Unknown attributes are converted into CLIP directions using prompt pairs such as:
+
+```text
+a portrait photo of a face with sunglasses
+a portrait photo of a face without sunglasses
+```
+
+Open-vocabulary conditions are qualitative only because CelebA has no official labels for them.
+
+## Mixed Multi-Attribute Query
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 66 \
+  --free-query "-visible teeth +Eyeglasses" \
+  --top-k 10 \
+  --top-pool 50
+```
+
+Known attributes can be mixed with open-vocabulary attributes. The learned gate handles the known prompt-cache directions; unknown concepts use CLIP text-difference directions.
+
+## Generated Free-Query Outputs
+
+Local free-query visualizations are intentionally ignored by git:
+
+```text
+results/free_query_examples/
+```
+
+Regenerate them from `show_json_retrieval_example.py` whenever needed.
 
 ## Macro vs Micro
 
-Macro average computes the metric per query first, then averages the 14 query scores equally. Micro average pools all source-query cases together, so queries with more source images count more.
+Macro averages compute each metric per query first, then average the 14 query scores equally. Micro averages pool all source-query cases together, so queries with more source images count more.

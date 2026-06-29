@@ -4,30 +4,39 @@
   "source_index": 3977,
   "source_filename": "186615.jpg",
   "top_indices": [
+    7049,
     17193,
     7832,
     1040,
-    5564,
-    2208,
-    10971,
     14445,
-    2515,
+    8992,
+    2351,
+    5564,
     15483,
-    2351
+    2208
   ],
   "top_filenames": [
+    "189687.jpg",
     "199831.jpg",
     "190470.jpg",
     "183678.jpg",
-    "188202.jpg",
-    "184846.jpg",
-    "193609.jpg",
     "197083.jpg",
-    "185153.jpg",
+    "191630.jpg",
+    "184989.jpg",
+    "188202.jpg",
     "198121.jpg",
-    "184989.jpg"
+    "184846.jpg"
   ],
   "top_status": [
+    {
+      "index": 7049,
+      "filename": "189687.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
     {
       "index": 17193,
       "filename": "199831.jpg",
@@ -62,37 +71,6 @@
       "short_label": "query FAIL"
     },
     {
-      "index": 5564,
-      "filename": "188202.jpg",
-      "status": "official_json_valid",
-      "official_valid": true,
-      "query_ok": true,
-      "failed_query_conditions": [],
-      "short_label": "JSON VALID"
-    },
-    {
-      "index": 2208,
-      "filename": "184846.jpg",
-      "status": "query_fail",
-      "official_valid": false,
-      "query_ok": false,
-      "failed_query_conditions": [
-        "+Wearing_Lipstick"
-      ],
-      "short_label": "query FAIL"
-    },
-    {
-      "index": 10971,
-      "filename": "193609.jpg",
-      "status": "query_fail",
-      "official_valid": false,
-      "query_ok": false,
-      "failed_query_conditions": [
-        "+Wearing_Lipstick"
-      ],
-      "short_label": "query FAIL"
-    },
-    {
       "index": 14445,
       "filename": "197083.jpg",
       "status": "query_fail",
@@ -104,13 +82,33 @@
       "short_label": "query FAIL"
     },
     {
-      "index": 2515,
-      "filename": "185153.jpg",
+      "index": 8992,
+      "filename": "191630.jpg",
       "status": "query_ok_not_json",
       "official_valid": false,
       "query_ok": true,
       "failed_query_conditions": [],
       "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 2351,
+      "filename": "184989.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Heavy_Makeup"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 5564,
+      "filename": "188202.jpg",
+      "status": "official_json_valid",
+      "official_valid": true,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "JSON VALID"
     },
     {
       "index": 15483,
@@ -124,13 +122,13 @@
       "short_label": "query FAIL"
     },
     {
-      "index": 2351,
-      "filename": "184989.jpg",
+      "index": 2208,
+      "filename": "184846.jpg",
       "status": "query_fail",
       "official_valid": false,
       "query_ok": false,
       "failed_query_conditions": [
-        "-Heavy_Makeup"
+        "+Wearing_Lipstick"
       ],
       "short_label": "query FAIL"
     }
@@ -163,6 +161,6 @@
     "188451.jpg"
   ],
   "num_valid_targets_for_source": 33,
-  "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
-  "output_png": "final_best_system/results/qualitative_examples/query_13_source_3977_top10.png"
+  "method_dir": "/Users/kuba/deep_learning/final_best_system/results/probe_reranker_v2_calibrated/A_cal_query_hardh2_accuracy",
+  "output_png": "/Users/kuba/deep_learning/final_best_system/results/qualitative_examples/query_13_source_3977_top10.png"
 }

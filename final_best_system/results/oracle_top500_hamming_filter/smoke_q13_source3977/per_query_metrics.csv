@@ -1,0 +1,2 @@
+query_id,query,sources,avg_filtered_candidates_in_pool,pool_hit_rate,Recall@1,Recall@5,Recall@10,Precision@1,Precision@5,Precision@10
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",1,1.0,1.0,1.0,1.0,1.0,1.0,0.2,0.1

@@ -1,11 +1,20 @@
 {
   "best_primary_system": {
-    "name": "model_plus_generic_delta_beta_1p50",
-    "reason": "Highest current Macro Recall@10 after v6 official-mix training and beta sweep.",
-    "formula": "q_final = normalize(q_model + 1.5 * (q_generic_sum - source))",
-    "macro_Recall@10": 0.3914723202994217,
-    "micro_Recall@10": 0.3136572673363185,
-    "macro_Precision@10": 0.0628853882537901
+    "name": "current_A_query_hardh2_accuracy",
+    "reason": "Highest current official JSON Macro Recall@10 after v7 hybrid retrieval plus calibrated probe reranking.",
+    "stage_1_formula": "q_hybrid = normalize(q_model + 1.25 * (q_sum - source))",
+    "stage_2_rule": "retrieve top-500 with q_hybrid, promote candidates satisfying calibrated query attributes and predicted non-query Hamming <= 2, then fill remaining top-10 slots with original q_hybrid ranking",
+    "macro_Recall@10": 0.47297151547368665,
+    "micro_Recall@10": 0.4088406147888176,
+    "macro_Precision@10": 0.08570375640709439,
+    "avg_kept_from_500": 32.70156117632821
+  },
+  "hybrid_compositional_core": {
+    "name": "q_hybrid_v7",
+    "formula": "q_hybrid = normalize(q_model + 1.25 * (q_sum - source))",
+    "macro_Recall@10": 0.39698439353876375,
+    "micro_Recall@10": 0.32839162531768123,
+    "macro_Precision@10": 0.06608954997851167
   },
   "assignment_vanilla_baseline": {
     "name": "direct_sum",
@@ -19,20 +28,23 @@
     "macro_Recall@10": 0.18707577909100628,
     "micro_Recall@10": 0.1665254750090766
   },
-  "checkpoint": {
-    "local_path": "final_best_system/weights/best_val_official_like_at10.pt",
-    "prompt_cache": "final_best_system/embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
-    "note": "The final system uses the v6 official-mix learned gate checkpoint plus the generic CLIP arithmetic delta branch with beta=1.5.",
-    "source_cluster_run": "artifacts/training_runs/hpsearch_official_mix_v6_20260626_033308_long/official_mix_v6_v6_60_001_off0p6_same0p3_weak0p1_lr5em05_beta0p75_long/checkpoints/best_val_official_like_at10.pt"
+  "local_artifacts": {
+    "gate_checkpoint": "final_best_system/weights/best_val_official_like_at10.pt",
+    "probe_checkpoint": "final_best_system/results/probe_reranker_v2_calibrated/probe/best_probe.pt",
+    "calibrated_thresholds": "final_best_system/results/probe_reranker_v2_calibrated/probe/calibrated_thresholds.pt",
+    "test_probe_probs": "final_best_system/results/probe_reranker_v2_calibrated/probe/test_probe_probs.pt",
+    "test_image_embeddings": "final_best_system/data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt",
+    "prompt_cache": "final_best_system/data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
+    "evaluation_json": "final_best_system/data/celeba_evaluation.json",
+    "attribute_annotations": "final_best_system/data/celeba/annotations/list_attr_celeba.txt"
+  },
+  "runners": {
+    "smoke": "final_best_system/code/run_current_best_smoke.sh",
+    "full_eval": "final_best_system/code/run_current_best_full_eval.sh"
   },
   "assignment_metrics": {
     "primary": "Recall@K for K=1,5,10",
     "secondary": "Precision@K for K=1,5,10",
-    "reported_here": "macro and micro versions are both reported; macro is query-balanced."
-  },
-  "correction_ablation": {
-    "without_sum": "final_best_system/results/final_best_model_only",
-    "with_sum": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
-    "report": "final_best_system/results/correction_ablation"
+    "reported_here": "macro and micro versions are both reported; macro is query-balanced"
   }
 }

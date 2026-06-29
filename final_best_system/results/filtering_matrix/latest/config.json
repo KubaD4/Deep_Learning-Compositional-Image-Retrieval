@@ -1,0 +1,19 @@
+{
+  "checkpoint": "/Users/kuba/deep_learning/final_best_system/weights/best_val_official_like_at10.pt",
+  "probe_results": "/Users/kuba/deep_learning/final_best_system/results/probe_reranker_v2_calibrated",
+  "probe_checkpoint": "/Users/kuba/deep_learning/final_best_system/results/probe_reranker_v2_calibrated/probe/best_probe.pt",
+  "output_root": "final_best_system/results/filtering_matrix/latest",
+  "device": "auto",
+  "source_batch_size": 256,
+  "top_pools": [
+    500,
+    200,
+    100
+  ],
+  "top_k": 10,
+  "beta": 1.25,
+  "max_hamming": 2,
+  "threshold_objective": "accuracy",
+  "query_ids": null,
+  "max_sources_per_query": 0
+}

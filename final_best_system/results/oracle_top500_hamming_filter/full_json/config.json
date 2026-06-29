@@ -1,0 +1,15 @@
+{
+  "checkpoint": "final_best_system/weights/best_val_official_like_at10.pt",
+  "prompt_cache": "final_best_system/embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
+  "output_dir": "final_best_system/results/oracle_top500_hamming_filter/full_json",
+  "device": "auto",
+  "source_batch_size": 128,
+  "top_pool": 25,
+  "top_k": 10,
+  "beta": 1.5,
+  "max_hamming": 2,
+  "query_ids": null,
+  "source_index": null,
+  "max_sources_per_query": 0,
+  "fill_to_k": false
+}

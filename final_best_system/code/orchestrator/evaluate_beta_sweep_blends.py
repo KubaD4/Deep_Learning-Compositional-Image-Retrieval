@@ -31,11 +31,12 @@ import torch
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_ROOT = ROOT.parent
 SCRIPTS = ROOT / "scripts"
 ORCH = ROOT / "orchestrator"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(ORCH))
-os.environ.setdefault("DL_PROJECT_ROOT", str(ROOT))
+os.environ.setdefault("DL_PROJECT_ROOT", str(PACKAGE_ROOT))
 
 import evaluate_orchestrated_router as router  # noqa: E402
 import evaluate_sum_model_blends as blends  # noqa: E402

@@ -35,3 +35,7 @@ __pycache__/
 .venv/
 .DS_Store
 .ipynb_checkpoints/
+
+# Locally generated qualitative experiments. Recreate them from
+# final_best_system/code/show_json_retrieval_example.py when needed.
+final_best_system/results/free_query_examples/

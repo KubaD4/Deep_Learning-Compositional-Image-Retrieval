@@ -37,7 +37,7 @@ import torch
 
 
 ROOT = Path(__file__).resolve().parents[2]
-PROJECT_DATA_ROOT = ROOT / "cluster"
+PROJECT_DATA_ROOT = ROOT / "final_best_system"
 CODE_ROOT = ROOT / "final_best_system" / "code"
 SCRIPTS = CODE_ROOT / "scripts"
 ORCH = CODE_ROOT / "orchestrator"

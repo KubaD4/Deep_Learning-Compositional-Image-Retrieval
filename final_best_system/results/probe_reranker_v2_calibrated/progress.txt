@@ -1,0 +1,270 @@
+[2026-06-27 02:01:52] START probe_reranker_v2_calibrated output=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152
+[2026-06-27 02:01:52] args={"beta": null, "checkpoint": null, "device": "cuda", "flip_batch_size": 256, "flip_workers": 8, "force": false, "max_probe_configs": 0, "max_sources_per_query": 0, "output_root": null, "probe_batch_size": 2048, "probe_checkpoint": null, "probe_dropout": 0.1, "probe_epochs": 8, "probe_hidden_dims": "1024,512", "probe_hpsearch": true, "probe_lr": 0.0003, "probe_max_steps": 0, "probe_use_flip": false, "probe_weight_decay": 0.0001, "query_ids": null, "random_probe_smoke": false, "skip_probe_training": false, "source_batch_size": 256, "threshold_max": 0.95, "threshold_min": 0.05, "threshold_objectives": ["f1", "balanced_accuracy", "accuracy", "precision_recall_mid"], "threshold_step": 0.025, "time_budget_seconds": 17400, "top_k": 10, "top_pool": 500}
+[2026-06-27 02:01:57] REUSE flipped train embeddings /mnt/meditech/group1/deep_learning/cluster/data/celeba/embeddings/openai_clip_vit_b32/train_image_embeddings_flipped.pt
+[2026-06-27 02:01:59] PROBE train start config=p001_base_noflip hidden=(512, 256) dropout=0.1 lr=0.0003 flip=False train=162770 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:02:02] PROBE epoch config=p001_base_noflip epoch=1 step=80 train_loss=0.7130 valid_bce=0.3456 valid_f1=0.6254 valid_acc=0.8345
+[2026-06-27 02:02:02] PROBE BEST config=p001_base_noflip epoch=1 valid_bce=0.3456 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p001_base_noflip/best_probe.pt
+[2026-06-27 02:02:03] PROBE epoch config=p001_base_noflip epoch=2 step=160 train_loss=0.5041 valid_bce=0.3157 valid_f1=0.6496 valid_acc=0.8503
+[2026-06-27 02:02:03] PROBE BEST config=p001_base_noflip epoch=2 valid_bce=0.3157 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p001_base_noflip/best_probe.pt
+[2026-06-27 02:02:05] PROBE epoch config=p001_base_noflip epoch=3 step=240 train_loss=0.4784 valid_bce=0.3058 valid_f1=0.6584 valid_acc=0.8559
+[2026-06-27 02:02:05] PROBE BEST config=p001_base_noflip epoch=3 valid_bce=0.3058 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p001_base_noflip/best_probe.pt
+[2026-06-27 02:02:07] PROBE epoch config=p001_base_noflip epoch=4 step=320 train_loss=0.4666 valid_bce=0.3097 valid_f1=0.6570 valid_acc=0.8527
+[2026-06-27 02:02:09] PROBE epoch config=p001_base_noflip epoch=5 step=400 train_loss=0.4587 valid_bce=0.3085 valid_f1=0.6576 valid_acc=0.8535
+[2026-06-27 02:02:11] PROBE epoch config=p001_base_noflip epoch=6 step=480 train_loss=0.4525 valid_bce=0.3019 valid_f1=0.6639 valid_acc=0.8568
+[2026-06-27 02:02:11] PROBE BEST config=p001_base_noflip epoch=6 valid_bce=0.3019 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p001_base_noflip/best_probe.pt
+[2026-06-27 02:02:13] PROBE epoch config=p001_base_noflip epoch=7 step=560 train_loss=0.4477 valid_bce=0.2947 valid_f1=0.6676 valid_acc=0.8601
+[2026-06-27 02:02:13] PROBE BEST config=p001_base_noflip epoch=7 valid_bce=0.2947 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p001_base_noflip/best_probe.pt
+[2026-06-27 02:02:15] PROBE epoch config=p001_base_noflip epoch=8 step=640 train_loss=0.4433 valid_bce=0.2954 valid_f1=0.6681 valid_acc=0.8600
+[2026-06-27 02:02:15] PROBE train start config=p002_wide_noflip hidden=(1024, 512) dropout=0.1 lr=0.0003 flip=False train=162770 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:02:17] PROBE epoch config=p002_wide_noflip epoch=1 step=80 train_loss=0.6401 valid_bce=0.3280 valid_f1=0.6433 valid_acc=0.8428
+[2026-06-27 02:02:17] PROBE BEST config=p002_wide_noflip epoch=1 valid_bce=0.3280 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p002_wide_noflip/best_probe.pt
+[2026-06-27 02:02:19] PROBE epoch config=p002_wide_noflip epoch=2 step=160 train_loss=0.4754 valid_bce=0.3022 valid_f1=0.6592 valid_acc=0.8585
+[2026-06-27 02:02:19] PROBE BEST config=p002_wide_noflip epoch=2 valid_bce=0.3022 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p002_wide_noflip/best_probe.pt
+[2026-06-27 02:02:21] PROBE epoch config=p002_wide_noflip epoch=3 step=240 train_loss=0.4574 valid_bce=0.2990 valid_f1=0.6642 valid_acc=0.8589
+[2026-06-27 02:02:21] PROBE BEST config=p002_wide_noflip epoch=3 valid_bce=0.2990 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p002_wide_noflip/best_probe.pt
+[2026-06-27 02:02:23] PROBE epoch config=p002_wide_noflip epoch=4 step=320 train_loss=0.4476 valid_bce=0.3003 valid_f1=0.6642 valid_acc=0.8579
+[2026-06-27 02:02:25] PROBE epoch config=p002_wide_noflip epoch=5 step=400 train_loss=0.4401 valid_bce=0.2981 valid_f1=0.6651 valid_acc=0.8591
+[2026-06-27 02:02:25] PROBE BEST config=p002_wide_noflip epoch=5 valid_bce=0.2981 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p002_wide_noflip/best_probe.pt
+[2026-06-27 02:02:27] PROBE epoch config=p002_wide_noflip epoch=6 step=480 train_loss=0.4345 valid_bce=0.3004 valid_f1=0.6663 valid_acc=0.8570
+[2026-06-27 02:02:29] PROBE epoch config=p002_wide_noflip epoch=7 step=560 train_loss=0.4295 valid_bce=0.2874 valid_f1=0.6735 valid_acc=0.8634
+[2026-06-27 02:02:29] PROBE BEST config=p002_wide_noflip epoch=7 valid_bce=0.2874 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p002_wide_noflip/best_probe.pt
+[2026-06-27 02:02:31] PROBE epoch config=p002_wide_noflip epoch=8 step=640 train_loss=0.4255 valid_bce=0.2894 valid_f1=0.6731 valid_acc=0.8624
+[2026-06-27 02:02:31] PROBE train start config=p003_compact_noflip hidden=(256, 128) dropout=0.05 lr=0.0005 flip=False train=162770 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:02:33] PROBE epoch config=p003_compact_noflip epoch=1 step=80 train_loss=0.7086 valid_bce=0.3499 valid_f1=0.6243 valid_acc=0.8315
+[2026-06-27 02:02:33] PROBE BEST config=p003_compact_noflip epoch=1 valid_bce=0.3499 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p003_compact_noflip/best_probe.pt
+[2026-06-27 02:02:35] PROBE epoch config=p003_compact_noflip epoch=2 step=160 train_loss=0.5034 valid_bce=0.3141 valid_f1=0.6494 valid_acc=0.8513
+[2026-06-27 02:02:35] PROBE BEST config=p003_compact_noflip epoch=2 valid_bce=0.3141 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p003_compact_noflip/best_probe.pt
+[2026-06-27 02:02:36] PROBE epoch config=p003_compact_noflip epoch=3 step=240 train_loss=0.4781 valid_bce=0.3063 valid_f1=0.6583 valid_acc=0.8549
+[2026-06-27 02:02:36] PROBE BEST config=p003_compact_noflip epoch=3 valid_bce=0.3063 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p003_compact_noflip/best_probe.pt
+[2026-06-27 02:02:38] PROBE epoch config=p003_compact_noflip epoch=4 step=320 train_loss=0.4667 valid_bce=0.3110 valid_f1=0.6562 valid_acc=0.8519
+[2026-06-27 02:02:40] PROBE epoch config=p003_compact_noflip epoch=5 step=400 train_loss=0.4592 valid_bce=0.3070 valid_f1=0.6578 valid_acc=0.8550
+[2026-06-27 02:02:42] PROBE epoch config=p003_compact_noflip epoch=6 step=480 train_loss=0.4529 valid_bce=0.3058 valid_f1=0.6615 valid_acc=0.8544
+[2026-06-27 02:02:42] PROBE BEST config=p003_compact_noflip epoch=6 valid_bce=0.3058 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p003_compact_noflip/best_probe.pt
+[2026-06-27 02:02:44] PROBE epoch config=p003_compact_noflip epoch=7 step=560 train_loss=0.4485 valid_bce=0.2966 valid_f1=0.6674 valid_acc=0.8587
+[2026-06-27 02:02:44] PROBE BEST config=p003_compact_noflip epoch=7 valid_bce=0.2966 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p003_compact_noflip/best_probe.pt
+[2026-06-27 02:02:46] PROBE epoch config=p003_compact_noflip epoch=8 step=640 train_loss=0.4448 valid_bce=0.2948 valid_f1=0.6685 valid_acc=0.8600
+[2026-06-27 02:02:46] PROBE BEST config=p003_compact_noflip epoch=8 valid_bce=0.2948 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p003_compact_noflip/best_probe.pt
+[2026-06-27 02:02:46] PROBE train start config=p004_base_flip hidden=(512, 256) dropout=0.1 lr=0.0003 flip=True train=325540 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:02:48] PROBE epoch config=p004_base_flip epoch=1 step=159 train_loss=0.6106 valid_bce=0.3253 valid_f1=0.6432 valid_acc=0.8444
+[2026-06-27 02:02:48] PROBE BEST config=p004_base_flip epoch=1 valid_bce=0.3253 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:02:50] PROBE epoch config=p004_base_flip epoch=2 step=318 train_loss=0.4735 valid_bce=0.3074 valid_f1=0.6579 valid_acc=0.8545
+[2026-06-27 02:02:50] PROBE BEST config=p004_base_flip epoch=2 valid_bce=0.3074 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:02:52] PROBE epoch config=p004_base_flip epoch=3 step=477 train_loss=0.4563 valid_bce=0.3014 valid_f1=0.6625 valid_acc=0.8567
+[2026-06-27 02:02:52] PROBE BEST config=p004_base_flip epoch=3 valid_bce=0.3014 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:02:54] PROBE epoch config=p004_base_flip epoch=4 step=636 train_loss=0.4459 valid_bce=0.2980 valid_f1=0.6661 valid_acc=0.8579
+[2026-06-27 02:02:54] PROBE BEST config=p004_base_flip epoch=4 valid_bce=0.2980 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:02:56] PROBE epoch config=p004_base_flip epoch=5 step=795 train_loss=0.4383 valid_bce=0.2925 valid_f1=0.6706 valid_acc=0.8610
+[2026-06-27 02:02:56] PROBE BEST config=p004_base_flip epoch=5 valid_bce=0.2925 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:02:59] PROBE epoch config=p004_base_flip epoch=6 step=954 train_loss=0.4323 valid_bce=0.2931 valid_f1=0.6699 valid_acc=0.8602
+[2026-06-27 02:03:01] PROBE epoch config=p004_base_flip epoch=7 step=1113 train_loss=0.4271 valid_bce=0.2916 valid_f1=0.6706 valid_acc=0.8611
+[2026-06-27 02:03:01] PROBE BEST config=p004_base_flip epoch=7 valid_bce=0.2916 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:03:03] PROBE epoch config=p004_base_flip epoch=8 step=1272 train_loss=0.4226 valid_bce=0.2874 valid_f1=0.6740 valid_acc=0.8629
+[2026-06-27 02:03:03] PROBE BEST config=p004_base_flip epoch=8 valid_bce=0.2874 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p004_base_flip/best_probe.pt
+[2026-06-27 02:03:03] PROBE train start config=p005_wide_flip hidden=(1024, 512) dropout=0.1 lr=0.0003 flip=True train=325540 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:03:05] PROBE epoch config=p005_wide_flip epoch=1 step=159 train_loss=0.5570 valid_bce=0.3135 valid_f1=0.6528 valid_acc=0.8512
+[2026-06-27 02:03:05] PROBE BEST config=p005_wide_flip epoch=1 valid_bce=0.3135 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p005_wide_flip/best_probe.pt
+[2026-06-27 02:03:07] PROBE epoch config=p005_wide_flip epoch=2 step=318 train_loss=0.4531 valid_bce=0.3020 valid_f1=0.6624 valid_acc=0.8571
+[2026-06-27 02:03:07] PROBE BEST config=p005_wide_flip epoch=2 valid_bce=0.3020 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p005_wide_flip/best_probe.pt
+[2026-06-27 02:03:09] PROBE epoch config=p005_wide_flip epoch=3 step=477 train_loss=0.4380 valid_bce=0.2933 valid_f1=0.6687 valid_acc=0.8611
+[2026-06-27 02:03:09] PROBE BEST config=p005_wide_flip epoch=3 valid_bce=0.2933 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p005_wide_flip/best_probe.pt
+[2026-06-27 02:03:11] PROBE epoch config=p005_wide_flip epoch=4 step=636 train_loss=0.4280 valid_bce=0.2884 valid_f1=0.6728 valid_acc=0.8628
+[2026-06-27 02:03:11] PROBE BEST config=p005_wide_flip epoch=4 valid_bce=0.2884 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p005_wide_flip/best_probe.pt
+[2026-06-27 02:03:13] PROBE epoch config=p005_wide_flip epoch=5 step=795 train_loss=0.4202 valid_bce=0.2891 valid_f1=0.6742 valid_acc=0.8627
+[2026-06-27 02:03:16] PROBE epoch config=p005_wide_flip epoch=6 step=954 train_loss=0.4139 valid_bce=0.2835 valid_f1=0.6779 valid_acc=0.8654
+[2026-06-27 02:03:16] PROBE BEST config=p005_wide_flip epoch=6 valid_bce=0.2835 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p005_wide_flip/best_probe.pt
+[2026-06-27 02:03:18] PROBE epoch config=p005_wide_flip epoch=7 step=1113 train_loss=0.4080 valid_bce=0.2849 valid_f1=0.6766 valid_acc=0.8643
+[2026-06-27 02:03:20] PROBE epoch config=p005_wide_flip epoch=8 step=1272 train_loss=0.4026 valid_bce=0.2811 valid_f1=0.6806 valid_acc=0.8664
+[2026-06-27 02:03:20] PROBE BEST config=p005_wide_flip epoch=8 valid_bce=0.2811 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p005_wide_flip/best_probe.pt
+[2026-06-27 02:03:20] PROBE train start config=p006_compact_flip hidden=(256, 128) dropout=0.05 lr=0.0005 flip=True train=325540 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:03:22] PROBE epoch config=p006_compact_flip epoch=1 step=159 train_loss=0.6077 valid_bce=0.3242 valid_f1=0.6433 valid_acc=0.8454
+[2026-06-27 02:03:22] PROBE BEST config=p006_compact_flip epoch=1 valid_bce=0.3242 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:24] PROBE epoch config=p006_compact_flip epoch=2 step=318 train_loss=0.4731 valid_bce=0.3099 valid_f1=0.6560 valid_acc=0.8533
+[2026-06-27 02:03:24] PROBE BEST config=p006_compact_flip epoch=2 valid_bce=0.3099 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:26] PROBE epoch config=p006_compact_flip epoch=3 step=477 train_loss=0.4568 valid_bce=0.2993 valid_f1=0.6632 valid_acc=0.8586
+[2026-06-27 02:03:26] PROBE BEST config=p006_compact_flip epoch=3 valid_bce=0.2993 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:28] PROBE epoch config=p006_compact_flip epoch=4 step=636 train_loss=0.4466 valid_bce=0.2961 valid_f1=0.6674 valid_acc=0.8592
+[2026-06-27 02:03:28] PROBE BEST config=p006_compact_flip epoch=4 valid_bce=0.2961 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:30] PROBE epoch config=p006_compact_flip epoch=5 step=795 train_loss=0.4396 valid_bce=0.2953 valid_f1=0.6689 valid_acc=0.8595
+[2026-06-27 02:03:30] PROBE BEST config=p006_compact_flip epoch=5 valid_bce=0.2953 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:32] PROBE epoch config=p006_compact_flip epoch=6 step=954 train_loss=0.4342 valid_bce=0.2919 valid_f1=0.6712 valid_acc=0.8609
+[2026-06-27 02:03:32] PROBE BEST config=p006_compact_flip epoch=6 valid_bce=0.2919 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:35] PROBE epoch config=p006_compact_flip epoch=7 step=1113 train_loss=0.4292 valid_bce=0.2918 valid_f1=0.6704 valid_acc=0.8610
+[2026-06-27 02:03:35] PROBE BEST config=p006_compact_flip epoch=7 valid_bce=0.2918 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:37] PROBE epoch config=p006_compact_flip epoch=8 step=1272 train_loss=0.4256 valid_bce=0.2890 valid_f1=0.6738 valid_acc=0.8625
+[2026-06-27 02:03:37] PROBE BEST config=p006_compact_flip epoch=8 valid_bce=0.2890 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p006_compact_flip/best_probe.pt
+[2026-06-27 02:03:37] PROBE train start config=p007_base_low_lr_flip hidden=(512, 256) dropout=0.1 lr=0.0001 flip=True train=325540 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:03:39] PROBE epoch config=p007_base_low_lr_flip epoch=1 step=159 train_loss=0.7611 valid_bce=0.3725 valid_f1=0.6044 valid_acc=0.8216
+[2026-06-27 02:03:39] PROBE BEST config=p007_base_low_lr_flip epoch=1 valid_bce=0.3725 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:41] PROBE epoch config=p007_base_low_lr_flip epoch=2 step=318 train_loss=0.5236 valid_bce=0.3258 valid_f1=0.6425 valid_acc=0.8452
+[2026-06-27 02:03:41] PROBE BEST config=p007_base_low_lr_flip epoch=2 valid_bce=0.3258 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:43] PROBE epoch config=p007_base_low_lr_flip epoch=3 step=477 train_loss=0.4899 valid_bce=0.3201 valid_f1=0.6484 valid_acc=0.8471
+[2026-06-27 02:03:43] PROBE BEST config=p007_base_low_lr_flip epoch=3 valid_bce=0.3201 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:45] PROBE epoch config=p007_base_low_lr_flip epoch=4 step=636 train_loss=0.4758 valid_bce=0.3133 valid_f1=0.6536 valid_acc=0.8512
+[2026-06-27 02:03:45] PROBE BEST config=p007_base_low_lr_flip epoch=4 valid_bce=0.3133 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:47] PROBE epoch config=p007_base_low_lr_flip epoch=5 step=795 train_loss=0.4672 valid_bce=0.3084 valid_f1=0.6578 valid_acc=0.8534
+[2026-06-27 02:03:47] PROBE BEST config=p007_base_low_lr_flip epoch=5 valid_bce=0.3084 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:49] PROBE epoch config=p007_base_low_lr_flip epoch=6 step=954 train_loss=0.4608 valid_bce=0.3056 valid_f1=0.6594 valid_acc=0.8548
+[2026-06-27 02:03:49] PROBE BEST config=p007_base_low_lr_flip epoch=6 valid_bce=0.3056 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:51] PROBE epoch config=p007_base_low_lr_flip epoch=7 step=1113 train_loss=0.4558 valid_bce=0.3031 valid_f1=0.6616 valid_acc=0.8561
+[2026-06-27 02:03:51] PROBE BEST config=p007_base_low_lr_flip epoch=7 valid_bce=0.3031 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:54] PROBE epoch config=p007_base_low_lr_flip epoch=8 step=1272 train_loss=0.4513 valid_bce=0.3017 valid_f1=0.6626 valid_acc=0.8571
+[2026-06-27 02:03:54] PROBE BEST config=p007_base_low_lr_flip epoch=8 valid_bce=0.3017 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p007_base_low_lr_flip/best_probe.pt
+[2026-06-27 02:03:54] PROBE train start config=p008_wide_low_dropout_flip hidden=(1024, 512) dropout=0.05 lr=0.0001 flip=True train=325540 valid=19867 epochs=8 batch=2048
+[2026-06-27 02:03:56] PROBE epoch config=p008_wide_low_dropout_flip epoch=1 step=159 train_loss=0.6650 valid_bce=0.3325 valid_f1=0.6367 valid_acc=0.8405
+[2026-06-27 02:03:56] PROBE BEST config=p008_wide_low_dropout_flip epoch=1 valid_bce=0.3325 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:03:58] PROBE epoch config=p008_wide_low_dropout_flip epoch=2 step=318 train_loss=0.4760 valid_bce=0.3119 valid_f1=0.6550 valid_acc=0.8520
+[2026-06-27 02:03:58] PROBE BEST config=p008_wide_low_dropout_flip epoch=2 valid_bce=0.3119 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:04:00] PROBE epoch config=p008_wide_low_dropout_flip epoch=3 step=477 train_loss=0.4577 valid_bce=0.3045 valid_f1=0.6603 valid_acc=0.8559
+[2026-06-27 02:04:00] PROBE BEST config=p008_wide_low_dropout_flip epoch=3 valid_bce=0.3045 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:04:02] PROBE epoch config=p008_wide_low_dropout_flip epoch=4 step=636 train_loss=0.4488 valid_bce=0.3023 valid_f1=0.6627 valid_acc=0.8567
+[2026-06-27 02:04:02] PROBE BEST config=p008_wide_low_dropout_flip epoch=4 valid_bce=0.3023 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:04:04] PROBE epoch config=p008_wide_low_dropout_flip epoch=5 step=795 train_loss=0.4424 valid_bce=0.2993 valid_f1=0.6657 valid_acc=0.8582
+[2026-06-27 02:04:04] PROBE BEST config=p008_wide_low_dropout_flip epoch=5 valid_bce=0.2993 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:04:06] PROBE epoch config=p008_wide_low_dropout_flip epoch=6 step=954 train_loss=0.4373 valid_bce=0.2966 valid_f1=0.6673 valid_acc=0.8597
+[2026-06-27 02:04:06] PROBE BEST config=p008_wide_low_dropout_flip epoch=6 valid_bce=0.2966 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:04:09] PROBE epoch config=p008_wide_low_dropout_flip epoch=7 step=1113 train_loss=0.4329 valid_bce=0.2968 valid_f1=0.6678 valid_acc=0.8590
+[2026-06-27 02:04:11] PROBE epoch config=p008_wide_low_dropout_flip epoch=8 step=1272 train_loss=0.4292 valid_bce=0.2914 valid_f1=0.6712 valid_acc=0.8619
+[2026-06-27 02:04:11] PROBE BEST config=p008_wide_low_dropout_flip epoch=8 valid_bce=0.2914 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/p008_wide_low_dropout_flip/best_probe.pt
+[2026-06-27 02:04:11] PROBE HPSEARCH BEST config=p005_wide_flip bce=0.2810846269130707 f1=0.6806033849716187 checkpoint=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe/best_probe.pt
+[2026-06-27 02:04:13] CALIBRATION predicting validation attributes
+[2026-06-27 02:04:14] CALIBRATION complete best_by_macro_f1={'objective': 'f1', 'macro_accuracy': 0.9005688428878784, 'macro_balanced_accuracy': 0.8432718515396118, 'macro_precision': 0.6865765452384949, 'macro_recall': 0.7827802896499634, 'macro_f1': 0.7280132174491882, 'micro_accuracy': 0.9005687832832336}
+[2026-06-27 02:04:14] CHECKPOINT best_v7 /mnt/meditech/group1/deep_learning/cluster/artifacts/training_runs/hpsearch_hamming_weighted_v7_20260626_163418_long/hamming_weighted_v7_v7_70_001_h2_0p75_off0p7_same0p2_weak0p1_h20p75_lr5em05_beta0p75_long/checkpoints/best_val_official_like_at10.pt json_macro_R10=0.3969843935387637 beta=1.25
+[2026-06-27 02:04:16] PROBE predicting test attributes
+[2026-06-27 02:04:19] EVAL query=1/14 sources=256/4786
+[2026-06-27 02:04:21] EVAL query=1/14 sources=512/4786
+[2026-06-27 02:04:24] EVAL query=1/14 sources=768/4786
+[2026-06-27 02:04:27] EVAL query=1/14 sources=1024/4786
+[2026-06-27 02:04:29] EVAL query=1/14 sources=1280/4786
+[2026-06-27 02:04:32] EVAL query=1/14 sources=1536/4786
+[2026-06-27 02:04:35] EVAL query=1/14 sources=1792/4786
+[2026-06-27 02:04:38] EVAL query=1/14 sources=2048/4786
+[2026-06-27 02:04:40] EVAL query=1/14 sources=2304/4786
+[2026-06-27 02:04:43] EVAL query=1/14 sources=2560/4786
+[2026-06-27 02:04:46] EVAL query=1/14 sources=2816/4786
+[2026-06-27 02:04:48] EVAL query=1/14 sources=3072/4786
+[2026-06-27 02:04:51] EVAL query=1/14 sources=3328/4786
+[2026-06-27 02:04:54] EVAL query=1/14 sources=3584/4786
+[2026-06-27 02:04:57] EVAL query=1/14 sources=3840/4786
+[2026-06-27 02:04:59] EVAL query=1/14 sources=4096/4786
+[2026-06-27 02:05:02] EVAL query=1/14 sources=4352/4786
+[2026-06-27 02:05:05] EVAL query=1/14 sources=4608/4786
+[2026-06-27 02:05:07] EVAL query=1/14 sources=4786/4786
+[2026-06-27 02:05:09] EVAL query=2/14 sources=256/2196
+[2026-06-27 02:05:12] EVAL query=2/14 sources=512/2196
+[2026-06-27 02:05:15] EVAL query=2/14 sources=768/2196
+[2026-06-27 02:05:17] EVAL query=2/14 sources=1024/2196
+[2026-06-27 02:05:20] EVAL query=2/14 sources=1280/2196
+[2026-06-27 02:05:23] EVAL query=2/14 sources=1536/2196
+[2026-06-27 02:05:26] EVAL query=2/14 sources=1792/2196
+[2026-06-27 02:05:28] EVAL query=2/14 sources=2048/2196
+[2026-06-27 02:05:30] EVAL query=2/14 sources=2196/2196
+[2026-06-27 02:05:32] EVAL query=3/14 sources=256/4087
+[2026-06-27 02:05:35] EVAL query=3/14 sources=512/4087
+[2026-06-27 02:05:38] EVAL query=3/14 sources=768/4087
+[2026-06-27 02:05:40] EVAL query=3/14 sources=1024/4087
+[2026-06-27 02:05:43] EVAL query=3/14 sources=1280/4087
+[2026-06-27 02:05:46] EVAL query=3/14 sources=1536/4087
+[2026-06-27 02:05:48] EVAL query=3/14 sources=1792/4087
+[2026-06-27 02:05:51] EVAL query=3/14 sources=2048/4087
+[2026-06-27 02:05:54] EVAL query=3/14 sources=2304/4087
+[2026-06-27 02:05:56] EVAL query=3/14 sources=2560/4087
+[2026-06-27 02:05:59] EVAL query=3/14 sources=2816/4087
+[2026-06-27 02:06:02] EVAL query=3/14 sources=3072/4087
+[2026-06-27 02:06:05] EVAL query=3/14 sources=3328/4087
+[2026-06-27 02:06:07] EVAL query=3/14 sources=3584/4087
+[2026-06-27 02:06:10] EVAL query=3/14 sources=3840/4087
+[2026-06-27 02:06:13] EVAL query=3/14 sources=4087/4087
+[2026-06-27 02:06:15] EVAL query=4/14 sources=256/1595
+[2026-06-27 02:06:18] EVAL query=4/14 sources=512/1595
+[2026-06-27 02:06:20] EVAL query=4/14 sources=768/1595
+[2026-06-27 02:06:23] EVAL query=4/14 sources=1024/1595
+[2026-06-27 02:06:26] EVAL query=4/14 sources=1280/1595
+[2026-06-27 02:06:28] EVAL query=4/14 sources=1536/1595
+[2026-06-27 02:06:29] EVAL query=4/14 sources=1595/1595
+[2026-06-27 02:06:32] EVAL query=5/14 sources=256/5355
+[2026-06-27 02:06:34] EVAL query=5/14 sources=512/5355
+[2026-06-27 02:06:37] EVAL query=5/14 sources=768/5355
+[2026-06-27 02:06:40] EVAL query=5/14 sources=1024/5355
+[2026-06-27 02:06:43] EVAL query=5/14 sources=1280/5355
+[2026-06-27 02:06:45] EVAL query=5/14 sources=1536/5355
+[2026-06-27 02:06:48] EVAL query=5/14 sources=1792/5355
+[2026-06-27 02:06:51] EVAL query=5/14 sources=2048/5355
+[2026-06-27 02:06:53] EVAL query=5/14 sources=2304/5355
+[2026-06-27 02:06:56] EVAL query=5/14 sources=2560/5355
+[2026-06-27 02:06:59] EVAL query=5/14 sources=2816/5355
+[2026-06-27 02:07:01] EVAL query=5/14 sources=3072/5355
+[2026-06-27 02:07:04] EVAL query=5/14 sources=3328/5355
+[2026-06-27 02:07:06] EVAL query=5/14 sources=3584/5355
+[2026-06-27 02:07:09] EVAL query=5/14 sources=3840/5355
+[2026-06-27 02:07:12] EVAL query=5/14 sources=4096/5355
+[2026-06-27 02:07:14] EVAL query=5/14 sources=4352/5355
+[2026-06-27 02:07:17] EVAL query=5/14 sources=4608/5355
+[2026-06-27 02:07:20] EVAL query=5/14 sources=4864/5355
+[2026-06-27 02:07:22] EVAL query=5/14 sources=5120/5355
+[2026-06-27 02:07:25] EVAL query=5/14 sources=5355/5355
+[2026-06-27 02:07:27] EVAL query=6/14 sources=256/5469
+[2026-06-27 02:07:30] EVAL query=6/14 sources=512/5469
+[2026-06-27 02:07:33] EVAL query=6/14 sources=768/5469
+[2026-06-27 02:07:36] EVAL query=6/14 sources=1024/5469
+[2026-06-27 02:07:38] EVAL query=6/14 sources=1280/5469
+[2026-06-27 02:07:41] EVAL query=6/14 sources=1536/5469
+[2026-06-27 02:07:44] EVAL query=6/14 sources=1792/5469
+[2026-06-27 02:07:47] EVAL query=6/14 sources=2048/5469
+[2026-06-27 02:07:49] EVAL query=6/14 sources=2304/5469
+[2026-06-27 02:07:52] EVAL query=6/14 sources=2560/5469
+[2026-06-27 02:07:55] EVAL query=6/14 sources=2816/5469
+[2026-06-27 02:07:57] EVAL query=6/14 sources=3072/5469
+[2026-06-27 02:08:00] EVAL query=6/14 sources=3328/5469
+[2026-06-27 02:08:03] EVAL query=6/14 sources=3584/5469
+[2026-06-27 02:08:05] EVAL query=6/14 sources=3840/5469
+[2026-06-27 02:08:08] EVAL query=6/14 sources=4096/5469
+[2026-06-27 02:08:11] EVAL query=6/14 sources=4352/5469
+[2026-06-27 02:08:13] EVAL query=6/14 sources=4608/5469
+[2026-06-27 02:08:16] EVAL query=6/14 sources=4864/5469
+[2026-06-27 02:08:19] EVAL query=6/14 sources=5120/5469
+[2026-06-27 02:08:21] EVAL query=6/14 sources=5376/5469
+[2026-06-27 02:08:22] EVAL query=6/14 sources=5469/5469
+[2026-06-27 02:08:25] EVAL query=7/14 sources=256/301
+[2026-06-27 02:08:25] EVAL query=7/14 sources=301/301
+[2026-06-27 02:08:28] EVAL query=8/14 sources=256/5355
+[2026-06-27 02:08:31] EVAL query=8/14 sources=512/5355
+[2026-06-27 02:08:33] EVAL query=8/14 sources=768/5355
+[2026-06-27 02:08:36] EVAL query=8/14 sources=1024/5355
+[2026-06-27 02:08:39] EVAL query=8/14 sources=1280/5355
+[2026-06-27 02:08:41] EVAL query=8/14 sources=1536/5355
+[2026-06-27 02:08:44] EVAL query=8/14 sources=1792/5355
+[2026-06-27 02:08:47] EVAL query=8/14 sources=2048/5355
+[2026-06-27 02:08:50] EVAL query=8/14 sources=2304/5355
+[2026-06-27 02:08:52] EVAL query=8/14 sources=2560/5355
+[2026-06-27 02:08:55] EVAL query=8/14 sources=2816/5355
+[2026-06-27 02:08:58] EVAL query=8/14 sources=3072/5355
+[2026-06-27 02:09:00] EVAL query=8/14 sources=3328/5355
+[2026-06-27 02:09:03] EVAL query=8/14 sources=3584/5355
+[2026-06-27 02:09:06] EVAL query=8/14 sources=3840/5355
+[2026-06-27 02:09:08] EVAL query=8/14 sources=4096/5355
+[2026-06-27 02:09:11] EVAL query=8/14 sources=4352/5355
+[2026-06-27 02:09:14] EVAL query=8/14 sources=4608/5355
+[2026-06-27 02:09:16] EVAL query=8/14 sources=4864/5355
+[2026-06-27 02:09:19] EVAL query=8/14 sources=5120/5355
+[2026-06-27 02:09:22] EVAL query=8/14 sources=5355/5355
+[2026-06-27 02:09:24] EVAL query=9/14 sources=256/612
+[2026-06-27 02:09:27] EVAL query=9/14 sources=512/612
+[2026-06-27 02:09:28] EVAL query=9/14 sources=612/612
+[2026-06-27 02:09:31] EVAL query=10/14 sources=256/2572
+[2026-06-27 02:09:33] EVAL query=10/14 sources=512/2572
+[2026-06-27 02:09:36] EVAL query=10/14 sources=768/2572
+[2026-06-27 02:09:39] EVAL query=10/14 sources=1024/2572
+[2026-06-27 02:09:41] EVAL query=10/14 sources=1280/2572
+[2026-06-27 02:09:44] EVAL query=10/14 sources=1536/2572
+[2026-06-27 02:09:47] EVAL query=10/14 sources=1792/2572
+[2026-06-27 02:09:49] EVAL query=10/14 sources=2048/2572
+[2026-06-27 02:09:52] EVAL query=10/14 sources=2304/2572
+[2026-06-27 02:09:55] EVAL query=10/14 sources=2560/2572
+[2026-06-27 02:09:55] EVAL query=10/14 sources=2572/2572
+[2026-06-27 02:09:55] EVAL query=11/14 sources=27/27
+[2026-06-27 02:09:58] EVAL query=12/14 sources=256/584
+[2026-06-27 02:10:00] EVAL query=12/14 sources=512/584
+[2026-06-27 02:10:01] EVAL query=12/14 sources=584/584
+[2026-06-27 02:10:02] EVAL query=13/14 sources=79/79
+[2026-06-27 02:10:02] EVAL query=14/14 sources=34/34
+[2026-06-27 02:10:13] COMPLETE probe reranker v2 calibrated output=/mnt/meditech/group1/deep_learning/cluster/artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152

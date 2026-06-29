@@ -4,33 +4,33 @@
   "source_index": 452,
   "source_filename": "183090.jpg",
   "top_indices": [
-    543,
-    473,
-    19436,
-    17988,
-    11149,
-    3107,
-    12633,
-    8173,
     10182,
-    6611
+    2282,
+    17475,
+    543,
+    19436,
+    473,
+    8173,
+    17020,
+    3483,
+    5347
   ],
   "top_filenames": [
-    "183181.jpg",
-    "183111.jpg",
-    "202074.jpg",
-    "200626.jpg",
-    "193787.jpg",
-    "185745.jpg",
-    "195271.jpg",
-    "190811.jpg",
     "192820.jpg",
-    "189249.jpg"
+    "184920.jpg",
+    "200113.jpg",
+    "183181.jpg",
+    "202074.jpg",
+    "183111.jpg",
+    "190811.jpg",
+    "199658.jpg",
+    "186121.jpg",
+    "187985.jpg"
   ],
   "top_status": [
     {
-      "index": 543,
-      "filename": "183181.jpg",
+      "index": 10182,
+      "filename": "192820.jpg",
       "status": "query_ok_not_json",
       "official_valid": false,
       "query_ok": true,
@@ -38,8 +38,26 @@
       "short_label": "query OK, not JSON"
     },
     {
-      "index": 473,
-      "filename": "183111.jpg",
+      "index": 2282,
+      "filename": "184920.jpg",
+      "status": "official_json_valid",
+      "official_valid": true,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "JSON VALID"
+    },
+    {
+      "index": 17475,
+      "filename": "200113.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 543,
+      "filename": "183181.jpg",
       "status": "query_ok_not_json",
       "official_valid": false,
       "query_ok": true,
@@ -56,37 +74,8 @@
       "short_label": "query OK, not JSON"
     },
     {
-      "index": 17988,
-      "filename": "200626.jpg",
-      "status": "official_json_valid",
-      "official_valid": true,
-      "query_ok": true,
-      "failed_query_conditions": [],
-      "short_label": "JSON VALID"
-    },
-    {
-      "index": 11149,
-      "filename": "193787.jpg",
-      "status": "query_fail",
-      "official_valid": false,
-      "query_ok": false,
-      "failed_query_conditions": [
-        "-Male"
-      ],
-      "short_label": "query FAIL"
-    },
-    {
-      "index": 3107,
-      "filename": "185745.jpg",
-      "status": "query_ok_not_json",
-      "official_valid": false,
-      "query_ok": true,
-      "failed_query_conditions": [],
-      "short_label": "query OK, not JSON"
-    },
-    {
-      "index": 12633,
-      "filename": "195271.jpg",
+      "index": 473,
+      "filename": "183111.jpg",
       "status": "query_ok_not_json",
       "official_valid": false,
       "query_ok": true,
@@ -103,8 +92,8 @@
       "short_label": "query OK, not JSON"
     },
     {
-      "index": 10182,
-      "filename": "192820.jpg",
+      "index": 17020,
+      "filename": "199658.jpg",
       "status": "query_ok_not_json",
       "official_valid": false,
       "query_ok": true,
@@ -112,8 +101,17 @@
       "short_label": "query OK, not JSON"
     },
     {
-      "index": 6611,
-      "filename": "189249.jpg",
+      "index": 3483,
+      "filename": "186121.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 5347,
+      "filename": "187985.jpg",
       "status": "query_ok_not_json",
       "official_valid": false,
       "query_ok": true,
@@ -122,33 +120,33 @@
     }
   ],
   "valid_targets_in_top_k": [
-    17988
+    2282
   ],
   "shown_valid_targets": [
-    17988,
-    392,
     2282,
+    392,
     2668,
     7529,
     9201,
     12819,
     14496,
     16399,
+    17988,
     18680
   ],
   "shown_valid_filenames": [
-    "200626.jpg",
-    "183030.jpg",
     "184920.jpg",
+    "183030.jpg",
     "185306.jpg",
     "190167.jpg",
     "191839.jpg",
     "195457.jpg",
     "197134.jpg",
     "199037.jpg",
+    "200626.jpg",
     "201318.jpg"
   ],
   "num_valid_targets_for_source": 10,
-  "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
-  "output_png": "final_best_system/results/qualitative_examples/query_10_source_452_top10.png"
+  "method_dir": "/Users/kuba/deep_learning/final_best_system/results/probe_reranker_v2_calibrated/A_cal_query_hardh2_accuracy",
+  "output_png": "/Users/kuba/deep_learning/final_best_system/results/qualitative_examples/query_10_source_452_top10.png"
 }

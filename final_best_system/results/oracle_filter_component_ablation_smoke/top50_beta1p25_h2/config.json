@@ -1,0 +1,16 @@
+{
+  "checkpoint": "/Users/kuba/deep_learning/final_best_system/weights/best_val_official_like_at10.pt",
+  "prompt_cache": "/Users/kuba/deep_learning/final_best_system/embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
+  "output_dir": "final_best_system/results/oracle_filter_component_ablation_smoke",
+  "device": "auto",
+  "source_batch_size": 3,
+  "top_pool": 50,
+  "top_k": 10,
+  "beta": 1.25,
+  "max_hamming": 2,
+  "query_ids": [
+    0,
+    1
+  ],
+  "max_sources_per_query": 3
+}

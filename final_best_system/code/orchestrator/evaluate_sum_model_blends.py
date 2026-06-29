@@ -36,10 +36,11 @@ import torch.nn.functional as F
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_ROOT = ROOT.parent
 SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 sys.path.insert(0, str(ROOT / "orchestrator"))
-os.environ.setdefault("DL_PROJECT_ROOT", str(ROOT))
+os.environ.setdefault("DL_PROJECT_ROOT", str(PACKAGE_ROOT))
 
 import evaluate_orchestrated_router as router
 from learned_gate_core import condition_embeddings, load_model_checkpoint, load_prompt_embedding_cache

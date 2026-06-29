@@ -1,0 +1,5 @@
+method=A_cal_query_hardh2_accuracy
+macro_Recall@10=0.4729715154736866
+micro_Recall@10=0.4088406147888176
+macro_Precision@10=0.0857037564070943
+avg_kept_in_pool=32.70156117632821

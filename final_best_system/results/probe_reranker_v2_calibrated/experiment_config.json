@@ -1,0 +1,250 @@
+{
+  "checkpoint": "final_best_system/weights/best_val_official_like_at10.pt",
+  "probe_checkpoint": "final_best_system/results/probe_reranker_v2_calibrated/probe/best_probe.pt",
+  "probe_valid_metrics": {
+    "bce": 0.2810846269130707,
+    "macro_accuracy": 0.8664066195487976,
+    "macro_precision": 0.5798136591911316,
+    "macro_recall": 0.8922732472419739,
+    "macro_f1": 0.6806033849716187,
+    "micro_accuracy": 0.8664066195487976
+  },
+  "model_id": "openai/clip-vit-base-patch32",
+  "beta": 1.25,
+  "top_pool": 500,
+  "top_k": 10,
+  "methods": [
+    {
+      "name": "baseline_q_final_top10",
+      "kind": "baseline",
+      "objective": "f1",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_only_f1",
+      "kind": "query_only",
+      "objective": "f1",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_hardh2_f1",
+      "kind": "query_hard_hamming",
+      "objective": "f1",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq010_lh010_ls005_f1",
+      "kind": "soft",
+      "objective": "f1",
+      "lambda_query": 0.1,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq015_lh010_ls005_f1",
+      "kind": "soft",
+      "objective": "f1",
+      "lambda_query": 0.15,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh010_ls005_f1",
+      "kind": "hybrid",
+      "objective": "f1",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh015_ls005_f1",
+      "kind": "hybrid",
+      "objective": "f1",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.15,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_only_balancedaccuracy",
+      "kind": "query_only",
+      "objective": "balanced_accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_hardh2_balancedaccuracy",
+      "kind": "query_hard_hamming",
+      "objective": "balanced_accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq010_lh010_ls005_balancedaccuracy",
+      "kind": "soft",
+      "objective": "balanced_accuracy",
+      "lambda_query": 0.1,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq015_lh010_ls005_balancedaccuracy",
+      "kind": "soft",
+      "objective": "balanced_accuracy",
+      "lambda_query": 0.15,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh010_ls005_balancedaccuracy",
+      "kind": "hybrid",
+      "objective": "balanced_accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh015_ls005_balancedaccuracy",
+      "kind": "hybrid",
+      "objective": "balanced_accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.15,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_only_accuracy",
+      "kind": "query_only",
+      "objective": "accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_hardh2_accuracy",
+      "kind": "query_hard_hamming",
+      "objective": "accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq010_lh010_ls005_accuracy",
+      "kind": "soft",
+      "objective": "accuracy",
+      "lambda_query": 0.1,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq015_lh010_ls005_accuracy",
+      "kind": "soft",
+      "objective": "accuracy",
+      "lambda_query": 0.15,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh010_ls005_accuracy",
+      "kind": "hybrid",
+      "objective": "accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh015_ls005_accuracy",
+      "kind": "hybrid",
+      "objective": "accuracy",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.15,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_only_precisionrecallmid",
+      "kind": "query_only",
+      "objective": "precision_recall_mid",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "A_cal_query_hardh2_precisionrecallmid",
+      "kind": "query_hard_hamming",
+      "objective": "precision_recall_mid",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.0,
+      "lambda_source": 0.0,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq010_lh010_ls005_precisionrecallmid",
+      "kind": "soft",
+      "objective": "precision_recall_mid",
+      "lambda_query": 0.1,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "B_cal_soft_lq015_lh010_ls005_precisionrecallmid",
+      "kind": "soft",
+      "objective": "precision_recall_mid",
+      "lambda_query": 0.15,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh010_ls005_precisionrecallmid",
+      "kind": "hybrid",
+      "objective": "precision_recall_mid",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.1,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    },
+    {
+      "name": "C_cal_hybrid_lh015_ls005_precisionrecallmid",
+      "kind": "hybrid",
+      "objective": "precision_recall_mid",
+      "lambda_query": 0.0,
+      "lambda_hamming": 0.15,
+      "lambda_source": 0.05,
+      "hard_hamming_limit": 2.0
+    }
+  ],
+  "threshold_objectives": [
+    "f1",
+    "balanced_accuracy",
+    "accuracy",
+    "precision_recall_mid"
+  ],
+  "notes": "Calibrated probe reranking. JSON is used only for final metric computation."
+}

@@ -113,6 +113,143 @@ This is the current behavior of the best learned system. The next likely improve
 
 For fair final evaluation, any reranker should avoid using the official test JSON target lists directly. A safe version would learn/predict attribute satisfaction from train data, while an oracle Hamming filter can be used only as an analysis upper bound.
 
+## Probe-Based Reranking Experiment
+
+The next fair approximation of the oracle top-pool filter is a learned CelebA
+attribute probe. The probe is trained only from CelebA train/valid attributes
+and never from `celeba_evaluation.json`.
+
+Pipeline:
+
+```text
+source image + signed query
+  -> frozen final system q_final = normalize(q_model + beta * (q_sum - source))
+  -> retrieve top-500 by CLIP cosine
+  -> probe predicts 40 CelebA attribute probabilities for source and candidates
+  -> rerank/filter the top-500 using predicted query satisfaction and predicted
+     non-query Hamming preservation
+  -> evaluate final top-10 against the official JSON
+```
+
+Implemented variants:
+
+```text
+A. probe hard filter
+   keep candidate only if predicted query is satisfied and predicted
+   non-query Hamming <= 2
+
+B. probe soft reranker
+   score = cosine(q_final, candidate)
+         + lambda_query * predicted_query_score
+         - lambda_hamming * predicted_nonquery_hamming
+         + lambda_source * cosine(source, candidate)
+
+C. probe hybrid
+   hard-filter only query satisfaction, then soft-rerank with predicted
+   Hamming/source preservation
+```
+
+Probe training can optionally use horizontal-flip augmentation. This is safe
+because flipping faces does not change CelebA attribute labels such as hair
+colour, glasses, smile, gender annotation, or age annotation. The flip is
+implemented by creating a separate CLIP embedding cache:
+
+```text
+data/celeba/embeddings/openai_clip_vit_b32/train_image_embeddings_flipped.pt
+```
+
+Important: this is still not an oracle filter. At inference it uses predicted
+attributes, so it can fail when the probe misclassifies attributes such as
+`Young`, `Male`, `Chubby`, hair colour, or makeup.
+
+Completed result, 2026-06-27:
+
+```text
+Baseline q_final top-10:
+  Macro Recall@10     0.39698
+  Micro Recall@10     0.32839
+  Macro Precision@10  0.06609
+
+Best learned-probe reranker:
+  method              C_hybrid_t050_lh010_ls005
+  Macro Recall@10     0.42042
+  Micro Recall@10     0.34682
+  Macro Precision@10  0.07146
+```
+
+Interpretation: the learned CelebA probe improves both Recall@10 and
+Precision@10 over the frozen hybrid vector alone. The best variant is not a
+strict hard Hamming filter; it is a hybrid stage that hard-filters query
+satisfaction at a permissive threshold and then softly rewards lower predicted
+Hamming distance/source similarity.
+
+The CLIP prompt-only version of the same idea was tested as a no-training
+alternative. It was essentially neutral:
+
+```text
+Best CLIP-prompt filter:
+  method              B_clip_soft_lq010_lh005_ls000_valid_f1
+  Macro Recall@10     0.39856
+  Micro Recall@10     0.32770
+  Macro Precision@10  0.06578
+```
+
+This is only marginally above baseline in macro Recall and slightly below in
+micro Recall/Precision, so CLIP prompt-only attribute estimates are useful as a
+diagnostic but not strong enough to drive the final reranker.
+
+Calibrated probe result, 2026-06-27:
+
+```text
+Best calibrated learned-probe reranker:
+  method              A_cal_query_hardh2_accuracy
+  Macro Recall@10     0.47297
+  Micro Recall@10     0.40884
+  Macro Precision@10  0.08570
+  avg kept from 500   32.70
+```
+
+This version calibrates one threshold per CelebA attribute on the validation
+split instead of using a fixed `0.5` threshold. The winning threshold objective
+is validation accuracy, which favors more precise attribute decisions. That
+made a hard predicted-Hamming filter viable:
+
+```text
+keep candidate if:
+  predicted query attributes are satisfied
+  predicted non-query Hamming distance <= 2
+```
+
+Compared with the frozen hybrid vector alone, the calibrated probe improves:
+
+```text
+Macro Recall@10     0.39698 -> 0.47297
+Micro Recall@10     0.32839 -> 0.40884
+Macro Precision@10  0.06609 -> 0.08570
+```
+
+Interpretation: the bottleneck in v1 was partly threshold calibration. Once the
+probe uses per-attribute thresholds, its predictions become precise enough for
+a hard official-style query/Hamming filter to improve the final top-10.
+
+## Hamming Preservation Training Ablation
+
+The official target rule remains non-query Hamming distance `<= 2`; this should
+not be replaced by `<= 1` during final evaluation. A stricter preservation
+signal can still be tested during training by using a weighted positive loss:
+
+```text
+query satisfied and non-query Hamming <= 1 -> strong positive
+query satisfied and non-query Hamming == 2 -> softer positive
+query failed or non-query Hamming > 2 -> not positive
+```
+
+This tests whether the model can improve Precision@K by preferring more
+source-preserving valid candidates, without changing the assignment metric.
+The experimental implementation is `v7 Hamming-weighted official-like
+training`; it uses train-split CelebA attributes only and does not use the JSON
+target lists during training.
+
 ## Evaluation Loop Sketch
 
 ```python
@@ -132,6 +269,36 @@ for query_item in annotations:
 ```
 
 Important: exclude the source image itself if the retrieval corpus includes it and it would trivially rank at the top.
+
+## Weighted Probe Reranking Follow-Up
+
+The calibrated probe experiment showed that a strict predicted-Hamming filter is
+brittle, while query filtering is more reliable. The next fair evaluation
+variant keeps the final hybrid compositional vector fixed and changes only the
+reranking of its top-500 candidates:
+
+```text
+q_hybrid = normalize(q_model + beta * (q_sum - source))
+
+score(candidate) =
+    cosine(q_hybrid, candidate)
+  + lambda_query * calibrated_query_margin(candidate)
+  - lambda_hamming * weighted_predicted_hamming(source, candidate)
+  + lambda_source * cosine(source, candidate)
+```
+
+`weighted_predicted_hamming` uses the probe's per-attribute reliability so that
+weak subjective attributes such as `Oval_Face`, `Pointy_Nose`, or `Big_Lips`
+count less than reliable attributes such as `Smiling`, `Young`, or
+`Wearing_Lipstick`. The official JSON is still used only after retrieval to
+compute `Recall@1/5/10` and `Precision@1/5/10`.
+
+Implementation:
+
+```text
+cluster/experimental/evaluate_weighted_probe_reranker.py
+cluster/jobs/62_evaluate_weighted_probe_reranker_short.sh
+```
 
 ## First Completed Official Baselines
 

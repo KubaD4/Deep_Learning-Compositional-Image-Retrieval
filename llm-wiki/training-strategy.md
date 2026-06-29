@@ -1360,3 +1360,48 @@ The aggregate winner file is:
 ```text
 artifacts/results/official_mix_v6/.../_aggregate/BEST_OFFICIAL_MIX_METHOD.txt
 ```
+
+## Probe/Reranker v1: Second Stage After `q_final`
+
+This is not a replacement for the final gate model. It is a fair version of the
+oracle top-pool filtering idea:
+
+```text
+frozen final system -> top-500 candidates -> learned CelebA probe -> rerank/filter
+```
+
+Training data:
+
+```text
+input  = frozen CLIP image embedding
+label  = 40 CelebA binary attributes from list_attr_celeba.txt
+split  = train for fitting, valid for model selection
+```
+
+Optional augmentation:
+
+```text
+horizontal flip image -> CLIP embedding -> same attribute label
+```
+
+Unsafe augmentations such as colour jitter are intentionally not used because
+they can change labels like `Blond_Hair`, `Brown_Hair`, `Pale_Skin`, or visual
+makeup cues.
+
+Evaluation variants:
+
+```text
+A hard filter:
+  predicted query satisfied AND predicted non-query Hamming <= 2
+
+B soft reranker:
+  cosine(q_final, candidate)
+  + query satisfaction reward
+  - predicted Hamming penalty
+  + source similarity reward
+
+C hybrid:
+  hard query satisfaction filter + soft Hamming/source rerank
+```
+
+The official JSON remains held out from training and probe selection.

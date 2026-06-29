@@ -13,6 +13,7 @@ Read this index first, then open the linked pages needed for the task. Raw sourc
 - Do not rely only on chat history for important decisions. If a decision affects future work, record it in the relevant wiki page and mention it in the log.
 - When a paper or external reference materially informs a decision, add it to the wiki with a link and a one-line note explaining why it matters. Do not leave literature findings only in chat.
 - When producing the final notebook or any report, include or regenerate `final_best_system/explanations/toy_vector_correction_clip_cosine.png` and explain that CLIP retrieval ranks by cosine angle after normalization, not raw Euclidean coordinate distance.
+- When producing the final notebook/report, keep the framing in [Method Roadmap](method-roadmap.md): report `gate + CLIP arithmetic correction` as the core hybrid-compositionality method, and describe any probe/filter/reranker as an optional system-level extension built on top of that hybrid query vector.
 
 ## Core Pages
 

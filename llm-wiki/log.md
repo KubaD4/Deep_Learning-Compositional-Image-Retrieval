@@ -869,3 +869,1161 @@ final_best_system/results/qualitative_examples/
   plausible and query-ok but not JSON-valid because they fail the official
   non-query Hamming/source-preservation rule. Other retrieved faces are marked
   red because the CelebA label says they do not satisfy `+Blond_Hair` at all.
+
+## [2026-06-26] implementation | v7 Hamming-weighted official-like training
+
+- Added a new experimental branch of the training code without modifying the
+  current final system:
+
+```text
+cluster/experimental/train_official_mix_v7_weighted.py
+cluster/experimental/run_official_mix_hpsearch_v7_weighted.py
+cluster/configs/gate_v7_hamming_weighted_3h_configs.json
+cluster/jobs/54_hamming_weighted_v7_3h.sh
+cluster/jobs/55_hamming_weighted_v7_smoke_short.sh
+```
+
+- Motivation: v6 improved the final model substantially, but Precision@10 is
+  still low. Oracle top-pool diagnostics show that valid targets are often in a
+  larger neighbourhood but sparse. The next training hypothesis is therefore to
+  keep the official `Hamming <= 2` objective while softly preferring candidates
+  that preserve non-query attributes more strongly.
+- v7 keeps the official-like positive set construction unchanged and still
+  avoids JSON leakage. The official JSON target lists remain reserved for
+  post-training evaluation only.
+- Training loss change:
+
+```text
+positive weight = 1.0 if query is satisfied and non-query Hamming <= 1
+positive weight = w2  if query is satisfied and non-query Hamming == 2
+positive weight = 0.0 otherwise
+```
+
+- The HP grid reuses the strongest v6 hyperparameter families and varies:
+
+```text
+w2 in {0.75, 0.50, 0.25, 0.00}
+base configs in {v6_60_001, v6_70_001, v6_70_006}
+```
+
+- Interpretation of the ablation:
+
+```text
+w2 = 0.75 -> mild preservation bias, Hamming==2 still almost fully positive
+w2 = 0.50 -> balanced official/preservation objective
+w2 = 0.25 -> stronger preservation preference
+w2 = 0.00 -> Hamming==2 examples are neutral in multi-positive loss, not negatives
+```
+
+- The exact target loss is still present, so the model is not trained to reject
+  official `Hamming == 2` targets. The weighted multi-positive branch only
+  changes how strongly additional official-like positives are pulled toward the
+  query.
+
+## [2026-06-26] implementation | Probe/reranker v1 for fair top-pool filtering
+
+- Added an experimental second-stage reranker without modifying the current
+  final system:
+
+```text
+cluster/experimental/probe_reranker_v1.py
+cluster/jobs/56_probe_reranker_v1_5h.sh
+cluster/jobs/57_probe_reranker_v1_random_smoke_short.sh
+```
+
+- Purpose: approximate the previous oracle Hamming filter without using true
+  test attributes at inference. The frozen final system first retrieves a
+  top-pool by cosine; then a CelebA attribute probe predicts source/candidate
+  attributes and drives hard/soft/hybrid reranking.
+- Probe labels come from CelebA `list_attr_celeba.txt` for train/valid splits.
+  The official JSON is used only after inference to compute Recall@K and
+  Precision@K.
+- Added optional horizontal-flip augmentation for probe training. The code
+  creates/reuses:
+
+```text
+data/celeba/embeddings/openai_clip_vit_b32/train_image_embeddings_flipped.pt
+```
+
+  This augmentation preserves attributes, unlike colour jitter or other image
+  transforms that could change labels such as hair colour.
+- The long job performs:
+
+```text
+1. create/reuse flipped train embeddings;
+2. train multiple probe MLP configs;
+3. select the best probe by validation BCE/F1, not by JSON;
+4. freeze final q_final system;
+5. evaluate baseline_q_final_top10, hard filter, soft rerank, and hybrid rerank;
+6. write summaries, per-query metrics, retrieval JSONL, and PNG plots.
+```
+
+- Two local smoke tests passed before cluster launch:
+
+```text
+random probe smoke:
+  gate checkpoint + corrective sum + q_final + random probe +
+  hard/soft/hybrid filtering + JSON metrics + plots
+
+one-step training smoke:
+  BCE loss + AdamW + checkpoint save + same full evaluation path
+```
+
+- Expected output root:
+
+```text
+artifacts/results/probe_reranker_v1/probe_reranker_v1_<timestamp>/
+```
+
+- Key files to inspect after the run:
+
+```text
+progress.txt
+probe/hpsearch_summary.csv
+probe/per_attribute_metrics.csv
+comparison/BEST_PROBE_RERANKER_METHOD.txt
+comparison/combined_summary.csv
+comparison/combined_per_query_metrics.csv
+comparison/*.png
+```
+
+## [2026-06-26] diagnostic | CLIP zero-shot attribute estimation baseline
+
+- Added a local diagnostic script:
+
+```text
+scripts/evaluate_clip_attribute_zeroshot.py
+```
+
+- Purpose: test whether frozen `openai/clip-vit-base-patch32` can estimate
+  CelebA attributes directly from prompt similarity, before relying on a
+  trained attribute probe.
+- The script compares positive/negative prompt ensembles against CelebA
+  `list_attr_celeba.txt`, using either cached CLIP image embeddings or direct
+  HF image encoding. It evaluates:
+
+```text
+score = cos(image, positive_prompt_prototype)
+      - cos(image, negative_prompt_prototype)
+
+thresholds:
+  zero      -> raw positive-vs-negative preference
+  valid_f1  -> per-attribute threshold calibrated on validation F1
+  valid_acc -> per-attribute threshold calibrated on validation accuracy
+```
+
+- Full local test on CelebA test split, using validation-calibrated F1
+  thresholds:
+
+```text
+macro_accuracy = 0.6861
+macro_balanced_accuracy = 0.6497
+macro_precision = 0.4228
+macro_recall = 0.7033
+macro_f1 = 0.4916
+micro_accuracy = 0.6861
+```
+
+- Strong attributes under prompt-only CLIP:
+
+```text
+Male F1=0.987
+No_Beard F1=0.923
+Young F1=0.902
+Smiling F1=0.870
+Eyeglasses F1=0.835
+```
+
+- Weak attributes under prompt-only CLIP:
+
+```text
+Chubby F1=0.199
+Sideburns F1=0.129
+Rosy_Cheeks F1=0.132
+Double_Chin F1=0.195
+5_o_Clock_Shadow F1=0.195
+```
+
+- Interpretation: CLIP prompt-only can be a useful diagnostic/proxy for some
+  high-level or visually explicit attributes, but it is not reliable enough as
+  the only reranker signal. A trained CelebA probe is still justified,
+  especially for rare/subtle attributes and for calibrated top-pool filtering.
+
+## [2026-06-26] implementation | CLIP prompt-only top-pool filter v1
+
+- Added a no-training second-stage experiment:
+
+```text
+cluster/experimental/clip_prompt_filter_v1.py
+cluster/jobs/58_clip_prompt_filter_v1_short.sh
+```
+
+- Purpose: test whether CLIP prompt-only attribute estimates are already good
+  enough to filter/rerank the top-pool returned by the best learned system.
+- Pipeline:
+
+```text
+best v7/final q_final
+  -> retrieve top-500 by cosine
+  -> estimate attributes with CLIP prompt ensemble
+  -> filter/rerank with predicted query satisfaction and predicted Hamming
+  -> evaluate Recall@K and Precision@K on official JSON
+```
+
+- Chosen top-pool:
+
+```text
+top_pool = 500
+```
+
+  Motivation: previous oracle diagnostics showed top-500 has much higher
+  chance of containing official-valid targets than top-50/top-25. This run
+  should test the filter quality, not be bottlenecked by a too-small pool.
+
+- Implemented methods:
+
+```text
+baseline_q_final_top10
+A_clip_query_only_valid_f1
+A_clip_query_hamming2_valid_f1
+A_clip_query_hamming5_valid_f1
+B_clip_soft_lq*_lh*_*
+C_clip_hybrid_lh*_*
+```
+
+- Diagnostics written per method:
+
+```text
+summary.csv
+per_query_metrics.csv
+retrievals.jsonl
+avg_kept_in_pool
+avg_query_ok_in_pool
+avg_pred_hamming_in_pool
+avg_official_valids_in_top_pool
+```
+
+- Local smoke test passed on a tiny subset, covering checkpoint loading,
+  q_model, corrective sum, q_final, CLIP prompt scoring, filtering, JSON
+  metrics, CSVs, and PNG plots.
+
+## [2026-06-27] report framing | Separate hybrid compositionality from reranker extensions
+
+- Added a reminder to [Method Roadmap](method-roadmap.md) and [Index](index.md)
+  for future report/notebook writing.
+- The core assignment-facing hybrid compositionality method should be reported
+  as:
+
+```text
+q_model  = learned gate / sequential composer(source, signed query)
+q_sum    = explicit CLIP arithmetic composition(source, signed query)
+q_hybrid = normalize(q_model + beta * (q_sum - source))
+```
+
+- Probe filters, CLIP prompt filters, oracle diagnostics, and future rerankers
+  should be framed as complete-system extensions built on top of the hybrid
+  query vector, not as replacements for the hybrid compositionality method.
+- If those extensions are included in the final report, show two result levels:
+
+```text
+1. hybrid compositionality alone
+2. complete hybrid + reranker/filter system
+```
+
+- Rationale: the assignment asks for hybrid compositionality, while the later
+  filtering/reranking work addresses a broader retrieval-system problem:
+  improving the final top-k precision by selecting cleaner candidates after the
+  hybrid vector has retrieved a broad candidate pool.
+
+## [2026-06-27] result | Probe reranker beats CLIP prompt-only filtering
+
+- Finished and inspected the long/short second-stage filtering jobs.
+- Baseline frozen hybrid system (`q_final` top-10 from best v7 checkpoint):
+
+```text
+Macro Recall@10     0.39698
+Micro Recall@10     0.32839
+Macro Precision@10  0.06609
+```
+
+- CLIP prompt-only top-pool filter best method:
+
+```text
+B_clip_soft_lq010_lh005_ls000_valid_f1
+Macro Recall@10     0.39856
+Micro Recall@10     0.32770
+Macro Precision@10  0.06578
+```
+
+- Interpretation: prompt-only CLIP attribute estimates are not reliable enough
+  for final filtering. They are useful for diagnostics and sanity checks, but
+  hard filters remove too many useful candidates and soft scores are nearly
+  neutral.
+
+- Learned CelebA probe/reranker best method:
+
+```text
+C_hybrid_t050_lh010_ls005
+Macro Recall@10     0.42042
+Micro Recall@10     0.34682
+Macro Precision@10  0.07146
+```
+
+- Best probe config:
+
+```text
+p005_wide_flip
+hidden_dims = 1024-512
+dropout     = 0.1
+lr          = 0.0003
+flip aug    = true
+valid macro_f1 = 0.6809
+```
+
+- Relative improvement of best probe reranker over frozen hybrid top-10:
+
+```text
+Macro Recall@10     +5.9%
+Micro Recall@10     +5.6%
+Macro Precision@10  +8.1%
+```
+
+- Finding: the fair, learned approximation of the oracle filter works better
+  than CLIP prompt-only scoring. The useful strategy is not a strict hard
+  Hamming filter; it is a permissive query filter plus soft Hamming/source
+  rerank over a broad top-500 pool.
+
+## [2026-06-27] implementation | Calibrated probe reranker v2
+
+- Added an experimental calibrated probe reranker:
+
+```text
+cluster/experimental/probe_reranker_v2_calibrated.py
+cluster/jobs/59_probe_reranker_v2_calibrated_5h.sh
+```
+
+- Motivation: v1 used a fixed `0.5` threshold for all predicted CelebA
+  attributes. This is too crude because attributes have different priors and
+  different calibration quality.
+- v2 trains/reuses the same CelebA probe, then calibrates one threshold per
+  attribute on the validation split with multiple objectives:
+
+```text
+f1
+balanced_accuracy
+accuracy
+precision_recall_mid
+```
+
+- The JSON evaluation then compares calibrated variants:
+
+```text
+baseline q_final
+calibrated query-only filter
+calibrated query + hard predicted Hamming<=2
+calibrated soft rerank
+calibrated hybrid query-filter + soft Hamming/source rerank
+```
+
+- Expected diagnostic value: if v2 beats v1, the bottleneck was partly probe
+  threshold calibration. If not, the bottleneck is likely probe feature quality
+  or the mismatch between predicted attributes and official Hamming validity.
+
+## [2026-06-27] result | Calibrated probe reranker v2 improves strongly
+
+- Completed the calibrated probe reranker v2 job.
+- Best method:
+
+```text
+A_cal_query_hardh2_accuracy
+Macro Recall@10     0.47297
+Micro Recall@10     0.40884
+Macro Precision@10  0.08570
+avg kept from 500   32.70
+```
+
+- Baseline frozen hybrid vector for the same checkpoint:
+
+```text
+Macro Recall@10     0.39698
+Micro Recall@10     0.32839
+Macro Precision@10  0.06609
+```
+
+- Previous best learned-probe v1 reranker:
+
+```text
+C_hybrid_t050_lh010_ls005
+Macro Recall@10     0.42042
+Micro Recall@10     0.34682
+Macro Precision@10  0.07146
+```
+
+- v2 threshold calibration summary on validation:
+
+```text
+objective             macro_acc  macro_precision  macro_recall  macro_f1
+f1                    0.9006     0.6866           0.7828        0.7280
+balanced_accuracy     0.8637     0.5709           0.8955        0.6703
+accuracy              0.9139     0.7663           0.6517        0.6911
+precision_recall_mid  0.9089     0.7181           0.7261        0.7219
+```
+
+- Finding: per-attribute threshold calibration was the missing ingredient. A
+  fixed threshold of `0.5` made hard filtering brittle; calibrated thresholds,
+  especially accuracy-optimized thresholds, made query satisfaction plus
+  predicted Hamming `<= 2` strong enough to beat both v1 and the frozen hybrid
+  vector by a clear margin.
+
+## [2026-06-27] implementation | Probe error-pattern bucket analysis
+
+- Added a post-hoc diagnostic script:
+
+```text
+cluster/experimental/analyze_probe_error_patterns.py
+cluster/jobs/60_analyze_probe_error_patterns_short.sh
+```
+
+- Purpose: inspect which CelebA attributes dominate probe mistakes in image
+  Hamming-error bands:
+
+```text
+0 exact errors
+1 error
+2 errors
+3 errors
+4-5 errors
+>5 errors
+```
+
+- The script also reports cumulative bands:
+
+```text
+exact_0, <=1, <=2, <=3, <=5, >5
+```
+
+- Outputs per split (`valid`, `test`):
+
+```text
+image_error_counts.csv
+cumulative_bucket_summary.csv
+overall_attribute_errors.csv
+bucket_attribute_errors.csv
+bucket_attribute_error_heatmap.png
+README_error_patterns.txt
+```
+
+- This should reveal whether probe failures are concentrated in known weak
+  attributes such as `Chubby`, `Double_Chin`, subtle hair color, makeup, or
+  facial-hair attributes, and whether future filtering should use
+  attribute-specific confidence margins or weaker penalties for unreliable
+  attributes.
+
+## [2026-06-27] result | Probe error patterns are dominated by subjective facial-shape attributes
+
+- Ran `analyze_probe_error_patterns.py` on the calibrated v2 probe.
+- Validation split:
+
+```text
+images                 19867
+mean Hamming errors    3.4459 / 40
+exact 40/40            2.61%
+<=1 error              13.02%
+<=2 errors             32.07%
+<=3 errors             54.40%
+<=5 errors             87.51%
+>5 errors              12.49%
+```
+
+- Test split:
+
+```text
+images                 19962
+mean Hamming errors    3.6977 / 40
+exact 40/40            2.14%
+<=1 error              10.37%
+<=2 errors             27.04%
+<=3 errors             48.50%
+<=5 errors             84.20%
+>5 errors              15.80%
+```
+
+- Main finding: errors are not random. They are concentrated in subjective or
+  geometric face attributes:
+
+```text
+test worst attributes:
+Big_Lips, Oval_Face, Pointy_Nose, Arched_Eyebrows, Attractive,
+Wavy_Hair, Big_Nose, Bags_Under_Eyes, Straight_Hair, High_Cheekbones,
+Narrow_Eyes, Wearing_Necklace, Brown_Hair
+```
+
+- Many of these errors are false negatives, meaning the probe often fails to
+  mark an attribute as present even when the CelebA label says it is present:
+
+```text
+Big_Lips      mostly FN, test recall 0.128
+Oval_Face     mostly FN, test recall 0.335
+Pointy_Nose   mostly FN, test recall 0.411
+Narrow_Eyes   mostly FN, test recall 0.127
+Necklace      mostly FN, test recall 0.145
+```
+
+- Important nuance: high-frequency official-query attributes remain strong:
+
+```text
+Young              test F1 0.933
+Smiling            test F1 0.918
+Wearing_Lipstick   test F1 0.932
+Heavy_Makeup       test F1 0.887
+High_Cheekbones    test F1 0.851
+```
+
+- Interpretation for reranking: the v2 hard filter works because calibrated
+  query satisfaction is reliable enough, but predicted Hamming is still noisy
+  because weak non-query attributes inflate or distort the predicted Hamming
+  distance. A promising next ablation is reliability-weighted Hamming:
+
+```text
+predicted_hamming = sum_j reliability_j * mismatch_j
+```
+
+  where low-F1 attributes such as `Big_Lips`, `Oval_Face`, `Pointy_Nose`,
+  `Narrow_Eyes`, and `Wearing_Necklace` receive smaller weights or larger
+  tolerance margins. This should preserve the benefit of query filtering while
+  reducing false rejection caused by noisy subjective attributes.
+
+## [2026-06-27] result | Oracle component ablation: Hamming filtering drives most of the gain
+
+- Added and ran a local oracle ablation:
+
+```text
+final_best_system/code/test_oracle_filter_components.py
+```
+
+- Same `q_final` top-500, then four variants:
+
+```text
+baseline_q_final
+oracle_query_only
+oracle_hamming_only
+oracle_query_and_hamming
+```
+
+- Aggregate result:
+
+```text
+method                    Macro R@10  Macro P@10  avg kept / 500
+baseline_q_final          0.3970      0.0661      500.0
+oracle_query_only         0.5035      0.0905      279.6
+oracle_hamming_only       0.9362      0.4045       24.8
+oracle_query_and_hamming  0.9647      0.5728        8.3
+```
+
+- Interpretation:
+
+```text
+non-query Hamming<=2 is the dominant filtering signal.
+query satisfaction alone helps only modestly.
+query+hamming gives the cleanest final top-10, mostly by improving precision
+after Hamming has already found the right neighborhood.
+```
+
+- Per-query pattern: `oracle_hamming_only` already reaches very high Recall@10
+  for nearly every query, while `oracle_query_and_hamming` mostly boosts
+  Precision@10 and removes residual candidates that preserve the source but do
+  not satisfy the requested edit.
+- Implication for the fair learned filter: prioritize improving predicted
+  Hamming/source-preservation reliability, especially with reliability-weighted
+  Hamming or attribute-specific tolerances. Query filtering is still useful, but
+  it is not the main bottleneck.
+
+## [2026-06-27] implementation | Fair probe component ablation
+
+- Added the fair counterpart of the oracle component ablation:
+
+```text
+cluster/experimental/evaluate_probe_filter_components.py
+cluster/jobs/61_evaluate_probe_filter_components_short.sh
+```
+
+- It uses the best calibrated probe results, then evaluates:
+
+```text
+baseline_q_final
+probe_query_only
+probe_hamming_only
+probe_query_and_hamming
+```
+
+- Purpose: compare the oracle finding against the deployable/probe-based
+  system. The key question is whether predicted Hamming filtering or predicted
+  query filtering contributes more when the attributes are estimated by the
+  probe rather than read from ground truth.
+- The job writes summary CSVs, per-query CSVs, retrieval JSONL files, and plots:
+
+```text
+macro_recall10_components.png
+macro_precision10_components.png
+avg_kept_components.png
+```
+
+## [2026-06-27] result | Fair probe component ablation: strict predicted Hamming is brittle
+
+- Ran the fair component ablation with the calibrated probe and no fill-to-k
+  fallback. Aggregate result:
+
+```text
+method                    Macro R@10  Micro R@10  Macro P@10  avg kept / 500
+baseline_q_final          0.3970      0.3284      0.0661       10.0
+probe_query_only          0.4174      0.3446      0.0702      292.6
+probe_hamming_only        0.3632      0.3522      0.0612       68.3
+probe_query_and_hamming   0.3786      0.3649      0.0688       27.3
+```
+
+- This differs sharply from the oracle component ablation:
+
+```text
+oracle_hamming_only       Macro R@10 0.9362
+oracle_query_and_hamming  Macro R@10 0.9647
+```
+
+- Finding: true Hamming is extremely valuable, but predicted Hamming from the
+  current probe is not reliable enough to be used as a strict deletion filter.
+  The deployable probe benefits most from query-only filtering when candidates
+  are actually removed.
+- The earlier strong calibrated-probe result (`A_cal_query_hardh2_accuracy`,
+  Macro R@10 0.4730) used a safer promote-then-fill behavior: candidates that
+  pass the filter are promoted first, but if fewer than `top_k` pass, the list is
+  filled with original `q_final` candidates. That fallback prevents false
+  rejection from destroying recall.
+- Implication: future fair systems should not use predicted Hamming as a pure
+  hard filter. Use it as:
+
+```text
+1. a reranking/promotion signal with fallback;
+2. a reliability-weighted soft penalty;
+3. an adaptive gate only when enough candidates pass confidently.
+```
+
+- This confirms that learning robust source-preservation/Hamming is harder than
+  learning query satisfaction.
+
+## [2026-06-27] implementation | Weighted probe reranker follow-up
+
+- Added `cluster/experimental/evaluate_weighted_probe_reranker.py` and
+  `cluster/jobs/62_evaluate_weighted_probe_reranker_short.sh`.
+- Purpose: start from the current best complete system
+  (`q_hybrid v7 + calibrated probe v2`) and test a safer use of predicted
+  Hamming:
+
+```text
+q_hybrid = normalize(q_model + beta * (q_sum - source))
+
+score(candidate) =
+    cosine(q_hybrid, candidate)
+  + lambda_query * calibrated_query_margin(candidate)
+  - lambda_hamming * weighted_predicted_hamming(source, candidate)
+  + lambda_source * cosine(source, candidate)
+```
+
+- Important design decision: query satisfaction can be used more strongly
+  because it usually checks only the few attributes explicitly requested by the
+  query. Predicted Hamming should not be a pure deletion filter because it
+  depends on many non-query attributes and the probe often makes 3-5 image-level
+  attribute mistakes.
+- New experiment compares:
+  - frozen `q_final` baseline;
+  - current `A_cal_query_hardh2_accuracy` promote/fill behavior;
+  - query-only promotion;
+  - soft weighted-Hamming rerankers;
+  - query-hard + soft weighted-Hamming variants.
+- Reliability weighting uses per-attribute calibrated probe metrics such as F1
+  or accuracy. Noisy attributes contribute less to the Hamming penalty.
+- Smoke-tested locally on one source-query case with local final weights and
+  probe artifacts; the full run is intended for the cluster short queue.
+
+## [2026-06-27] result | Weighted probe reranker did not improve over calibrated hard promote/fill
+
+- Ran `cluster/jobs/62_evaluate_weighted_probe_reranker_short.sh` on the
+  cluster.
+- Best method remained the existing calibrated probe method:
+
+```text
+method=current_A_query_hardh2_accuracy
+kind=promote_query_hardh2
+objective=accuracy
+Macro Recall@10     0.47297151547368665
+Micro Recall@10     0.4088406147888176
+Macro Precision@10  0.08570375640709439
+avg kept from 500   27.343763653007844
+```
+
+- Best new weighted-soft candidate was lower:
+
+```text
+queryhard_soft_accuracy_f1_hard_lh0p05_ls0p05
+Macro Recall@10     0.43800192168510127
+Micro Recall@10     0.35855621444995767
+Macro Precision@10  0.07401706950895173
+```
+
+- Query-only promotion was also lower:
+
+```text
+query_promote_accuracy
+Macro Recall@10     0.41741976975143835
+Micro Recall@10     0.3445782403485417
+Macro Precision@10  0.07020008435741161
+```
+
+- Frozen `q_hybrid` baseline in the same run:
+
+```text
+baseline_q_final
+Macro Recall@10     0.39698439353876375
+Micro Recall@10     0.32839162531768123
+Macro Precision@10  0.06608954997851167
+```
+
+- Interpretation: for the current probe, the strongest deployable behavior is
+  still calibrated hard query+Hamming promotion with fallback. Soft
+  reliability-weighted Hamming does not preserve enough of the oracle Hamming
+  signal and weakens the top-10 ranking.
+- Technical note: some duplicated soft method names produced
+  `source_query_cases=66104` instead of `33052`, meaning those duplicate-named
+  variants were accidentally aggregated twice. This does not affect the winning
+  `current_A_query_hardh2_accuracy` result or the high-level conclusion, but the
+  script should deduplicate method names if reused for a paper-quality ablation.
+
+## [2026-06-27] fix | Final package made self-contained for evaluation
+
+- Found that `final_best_system/README.md` and `manifest.json` were still
+  describing the older `model_plus_generic_delta_beta_1p50` system
+  (`Macro R@10 ~= 0.391`) even though the actual best system is now
+  `current_A_query_hardh2_accuracy` (`Macro R@10 ~= 0.473`).
+- Updated both files to describe the current final system:
+
+```text
+q_hybrid = normalize(q_model + 1.25 * (q_sum - source))
+then calibrated probe query+Hamming promote/fill reranking
+```
+
+- Added the minimal local data needed to evaluate the final package without
+  reading from `cluster/data`:
+
+```text
+final_best_system/data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt
+final_best_system/data/celeba/embeddings/openai_clip_vit_b32/attribute_text_embeddings.pt
+final_best_system/data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings.pt
+final_best_system/data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt
+final_best_system/data/celeba/annotations/list_attr_celeba.txt
+final_best_system/data/celeba_evaluation.json
+```
+
+- Added package runners that print terminal output:
+
+```text
+final_best_system/code/run_current_best_smoke.sh
+final_best_system/code/run_current_best_full_eval.sh
+```
+
+- Smoke-tested `run_current_best_smoke.sh`: it now loads gate checkpoint, probe,
+  calibrated thresholds, cached probe probabilities, JSON, and packaged test
+  embeddings from `final_best_system`.
+
+## [2026-06-29] result | Local oracle/probe filtering matrix over top-500/200/100
+
+- Added and ran
+  `final_best_system/code/evaluate_filtering_matrix.py` locally on Mac using
+  packaged final-best artifacts.
+- It evaluates the frozen best hybrid system (`q_hybrid`, model + sum) and then
+  strict filters top-pool candidates by:
+  - oracle query constraint;
+  - oracle non-query Hamming `<=2`;
+  - oracle query + Hamming;
+  - learned probe query constraint;
+  - learned probe predicted Hamming `<=2`;
+  - learned probe query + predicted Hamming.
+- Output saved to:
+
+```text
+final_best_system/results/filtering_matrix/latest/summary.csv
+```
+
+- Main micro/pooled results:
+
+```text
+top-500 no filter:                  Acc/Recall@10 0.3284, Precision@10 0.0521
+top-500 oracle query only:          Acc/Recall@10 0.4240, Precision@10 0.0733
+top-500 oracle hamming only:        Acc/Recall@10 0.9349, Precision@10 0.4014
+top-500 oracle query+hamming:       Acc/Recall@10 0.9648, Precision@10 0.5789
+top-500 probe query only:           Acc/Recall@10 0.3446, Precision@10 0.0561
+top-500 probe hamming only:         Acc/Recall@10 0.3522, Precision@10 0.0581
+top-500 probe query+hamming:        Acc/Recall@10 0.3649, Precision@10 0.0643
+```
+
+- Finding: the oracle confirms again that the target-valid region is present in
+  the top-500 pool and that true non-query Hamming is the dominant missing
+  signal. The learned probe can provide a modest strict-filter improvement, but
+  it is far from the oracle because predicted Hamming is noisy.
+- The best deployed probe result remains the calibrated promote/fill method
+  (`A_cal_query_hardh2_accuracy`, Macro R@10 ~= 0.473), because fallback avoids
+  over-pruning when the probe wrongly rejects good candidates.
+
+## [2026-06-29] clarification | The 0.42/8.5% final result is promote+fill, not strict filtering
+
+- Re-ran `final_best_system/code/evaluate_filtering_matrix.py` after adding the
+  explicit `probe_query_and_hamming_fill` row. The previously confusing output
+  was comparing only strict filtering, which is not the final deployed system.
+- Correct distinction:
+
+```text
+strict learned probe query+hamming, top-500:
+  micro Recall@10    0.3649
+  micro Precision@10 0.0643
+
+final current_A_query_hardh2_accuracy style, top-500 promote+fill:
+  micro Recall@10    0.4088
+  micro Precision@10 0.0712
+
+official saved final summary:
+  macro Recall@10    0.4730
+  macro Precision@10 0.0857
+```
+
+- Interpretation for report/debugging:
+  - `0.4088` is the pooled/micro Recall@10 of the final promote+fill reranker;
+  - `0.47297` is the macro Recall@10 averaged by query;
+  - `0.0857` is the macro Precision@10, while the micro Precision@10 is
+    `0.0712`.
+- This explains why the remembered "about 0.42 recall and about 8.5% precision"
+  did not appear in the strict filtering matrix: it mixed the final
+  promote+fill recall behavior with the official macro precision value.
+
+## [2026-06-29] result | Fresh full filtering matrix rerun with the real frozen system
+
+- Re-ran the filtering matrix over the full official JSON evaluation:
+
+```text
+query entries:       14
+source-query cases:  33052
+output: final_best_system/results/filtering_matrix/real_system_rerun_20260629_114221/summary.csv
+```
+
+- The frozen retrieval vector is the real current hybrid system:
+
+```text
+q_model  = learned sequential gate(source, query)
+q_sum    = CLIP generic arithmetic sum(source, query)
+q_hybrid = normalize(q_model + 1.25 * (q_sum - source))
+```
+
+- Oracle filtering is diagnostic only: it uses true CelebA labels to simulate a
+  perfect attribute probe and is not a deployable/fair inference system.
+- Learned-probe filtering uses the trained/calibrated probe. Strict learned
+  filtering improves precision slightly but can over-prune. The deployed final
+  method remains learned probe query+Hamming promotion with fallback fill.
+
+## [2026-06-29] notebook | Added top-pool diagnostic explanation and figure
+
+- Updated `notebooks/02_learned_gate_final_pipeline.ipynb` with a report-ready
+  diagnostic section explaining why broad-pool retrieval supports the claim that
+  the hybrid system reaches the right semantic region.
+- Added a didactic figure:
+
+```text
+final_best_system/explanations/top_pool_retrieval_diagnostic.png
+```
+
+- The notebook now loads:
+
+```text
+final_best_system/results/filtering_matrix/real_system_rerun_20260629_114221/summary.csv
+```
+
+  and displays top-500/top-200/top-100 oracle/probe filtering results.
+- Important framing added to the notebook:
+  - oracle rows are **diagnostic upper bounds**, not fair deployable inference;
+  - learned probe rows are realistic but noisy;
+  - high oracle top-500 recall shows that `q_final` often reaches the right
+    candidate region;
+  - remaining improvement should focus on fair reranking/attribute-source
+    preservation estimation inside the candidate pool.
+
+## [2026-06-29] experiment plan | Probe architecture sweep v3
+
+- Motivation: oracle filtering shows that a perfect attribute/Hamming estimator
+  inside the top-500 pool would massively improve retrieval, but the current
+  CelebA probe is too noisy, especially when Hamming requires many attributes to
+  be right simultaneously.
+- Added a separate experimental script, leaving `final_best_system` untouched:
+
+```text
+cluster/experimental/probe_arch_sweep_v3.py
+cluster/jobs/63_probe_arch_sweep_v3_smoke_short.sh
+cluster/jobs/64_probe_arch_sweep_v3_long.sh
+```
+
+- Research-backed directions included in the sweep:
+  - Asymmetric Loss (ASL) for multi-label positive/negative imbalance;
+  - C-Tran-inspired label-token Transformer to model dependencies among labels;
+  - ML-GCN-inspired label graph classifier using CelebA label co-occurrence;
+  - deeper/wider residual MLP baselines to test whether capacity alone helps.
+- Each config:
+  1. trains a probe on train CLIP embeddings and CelebA labels;
+  2. calibrates per-attribute thresholds on validation;
+  3. predicts test-gallery attributes;
+  4. evaluates the frozen current hybrid system on official JSON using probe
+     query/Hamming filters;
+  5. writes `summary.csv`, `per_query_metrics.csv`, checkpoints, thresholds,
+     and a global `BEST_PROBE_ARCHITECTURE.txt`.
+- Local smoke test completed successfully at:
+
+```text
+/tmp/probe_arch_sweep_v3_smoke
+```
+
+- Important framing: this is not a replacement for the current final system yet.
+  It is a controlled search for a stronger fair probe/reranker that could close
+  part of the oracle-vs-probe gap.
+- Policy check: the new architectures are implemented from scratch using
+  standard PyTorch primitives (`Linear`, `LayerNorm`, `TransformerEncoderLayer`,
+  etc.). They are inspired by paper-level ideas (ASL, C-Tran-like label tokens,
+  ML-GCN-like label co-occurrence graph), but do not copy code from external
+  repositories or from other groups. A citation/compliance note was added at the
+  top of `cluster/experimental/probe_arch_sweep_v3.py`.
+
+## 2026-06-29 - Qualitative evaluation caveat and visualizer default
+
+- Added a qualitative caveat section to
+  `notebooks/02_learned_gate_final_pipeline.ipynb`.
+- Motivation: some retrieval examples show that the official JSON/Hamming
+  metric can penalize visually plausible results that preserve identity/style
+  well, while some official-valid targets can change non-requested visual
+  properties. This should be presented carefully as a limitation of discrete
+  annotation-based evaluation, not as a replacement for the official metrics.
+- Examples to use in the report/notebook:
+  - `query_id=5`, `source_index=3`, `+Blond_Hair`: a top retrieval can look
+    extremely similar to the source but be counted invalid if the CelebA
+    annotation/query constraint fails.
+  - `query_id=4`, `source_index=3`, `-Young`: predicted results often preserve
+    hair color, lipstick, makeup, and identity-like appearance better than some
+    official-valid JSON examples, but the official metric only counts the JSON
+    target set.
+- Updated `final_best_system/code/show_json_retrieval_example.py` so the default
+  `--method-dir` now points to the current final system:
+  `final_best_system/results/probe_reranker_v2_calibrated/A_cal_query_hardh2_accuracy`.
+- To reproduce older hybrid-core screenshots exactly, pass
+  `--method-dir final_best_system/results/final_best_model_plus_generic_delta_beta_1p50`.
+- Added a notebook cell that lists valid `source_index` values for each
+  `query_id`, because each official query has its own source set and not every
+  source index is valid for every query.
+
+## 2026-06-29 - Free-query visualizer mode
+
+- Extended `final_best_system/code/show_json_retrieval_example.py` with a free-query mode for qualitative demos outside the official JSON source/query pairs.
+- New usage example:
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 457 \
+  --free-query '+young -lipstick' \
+  --top-k 10
+```
+
+- The free mode computes the actual final system instead of reading `retrievals.jsonl`: learned gate query, generic CLIP arithmetic query, vector-delta correction, then optional calibrated probe query/Hamming filtering. It renders top-k results with blue=input, green=query satisfied according to CelebA labels, red=query fail.
+- It also accepts aliases such as `lipstick -> Wearing_Lipstick`, `glasses -> Eyeglasses`, `smile -> Smiling`, `hat -> Wearing_Hat`, and can use `--free-image` for a CelebA filename/path or numeric gallery index.
+- Important distinction: this mode is for qualitative demos. Official metrics must still be computed only on the source/query pairs present in `celeba_evaluation.json`.
+
+## 2026-06-29 - Open-vocabulary free-query attributes
+
+- Extended `final_best_system/code/show_json_retrieval_example.py` again so free-query mode no longer fails on attributes outside the 40 CelebA labels.
+- Known CelebA attributes still use cached prompt directions and can be checked/filtered by the calibrated probe.
+- Unknown/open attributes now create a CLIP text direction on the fly:
+
+```text
+d_open = normalize(CLIP_text("a portrait photo of a face with <attribute>")
+                   - CLIP_text("a portrait photo of a face without <attribute>"))
+```
+
+- The learned sequential gate can consume this vector because it operates on CLIP-space edit directions, not on hardcoded class IDs. The arithmetic correction uses the same open direction.
+- Probe filtering only applies to known CelebA parts of the query. Open attributes are visual-only and rendered in yellow as `known OK, open unchecked`, avoiding false claims of ground-truth correctness.
+- Smoke test passed:
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 457 \
+  --free-query '+orange hair -lipstick' \
+  --top-k 10 \
+  --top-pool 50 \
+  --device cpu
+```
+
+- This mode is useful to inspect whether the hybrid CLIP-space system generalizes beyond CelebA. It should not be used for official metrics unless labels/evaluation targets exist for the open attribute.
+
+## 2026-06-29 - Open-vocabulary qualitative finding: Sunglasses vs Eyeglasses
+
+- Added a final notebook qualitative section comparing the same source image with two related edits:
+  - `+Eyeglasses`, a known CelebA attribute that can be verified by the probe;
+  - `+Sunglasses`, an open CLIP attribute not present in the 40 CelebA labels.
+- Commands used:
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 47 \
+  --free-query '+Eyeglasses' \
+  --top-k 10 \
+  --top-pool 50
+
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 47 \
+  --free-query '+Sunglasses' \
+  --top-k 10 \
+  --top-pool 50
+```
+
+- Qualitative finding: the two retrieval grids differ meaningfully. `+Eyeglasses` retrieves faces with regular/prescription glasses, while `+Sunglasses` retrieves faces with darker/tinted sunglasses. This supports the claim that the hybrid system can operate on CLIP semantic directions beyond the supervised CelebA attribute list.
+- Important caveat: this is not an official quantitative result because open attributes such as `Sunglasses` have no CelebA ground truth in our evaluation. In figures, open-vocabulary conditions remain yellow/unchecked instead of green/correct.
+
+## 2026-06-29 - Open-vocabulary qualitative finding: visible teeth
+
+- Added a second open-vocabulary qualitative example to the final notebook: `+visible teeth` vs `+not visible teeth` on source index 666.
+- Commands used:
+
+```bash
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 666 \
+  --free-query '+not visible teeth' \
+  --top-k 10 \
+  --top-pool 50
+
+.venv/bin/python final_best_system/code/show_json_retrieval_example.py \
+  --free-source-index 666 \
+  --free-query '+visible teeth' \
+  --top-k 10 \
+  --top-pool 50
+```
+
+- Qualitative finding: the two grids differ coherently; `+visible teeth` tends to retrieve faces with visible teeth/open smiles, while `+not visible teeth` tends to retrieve closed-mouth/no-teeth faces. This is a stronger open-vocabulary sanity check than sunglasses alone because it probes a fine-grained facial cue rather than an accessory.
+- Caveat remains: this is visual evidence of CLIP-direction use, not official evaluation, because CelebA does not provide a `visible teeth` attribute.
+
+## 2026-06-29 - Notebook open-vocabulary section refocused on multi-attribute examples
+
+- Reworked the final notebook open-vocabulary section.
+- Removed the emphasis on several single-attribute demos; kept only one simple `+Eyeglasses` vs `+Sunglasses` comparison as an introductory sanity check.
+- Added stronger multi-attribute examples using the same source identity and queries combining known CelebA attributes with open CLIP concepts:
+  - `-visible teeth, -Eyeglasses`
+  - `+white skin, -visible teeth, -Eyeglasses`
+  - `-visible teeth, +Eyeglasses`
+- These examples better support the discussion claim that the system can handle:
+  1. queries with multiple requested edits;
+  2. attributes unknown to the supervised CelebA dataset but represented in CLIP semantic space.
+- Caveat remains: open-vocabulary examples are qualitative, not official metrics, because these attributes have no official ground truth in CelebA evaluation.
+
+## 2026-06-29 - Final notebook made Colab/submission-ready
+
+- Audited `notebooks/02_learned_gate_final_pipeline.ipynb` against the assignment delivery notes:
+  - single notebook,
+  - runnable code with heavy training/evaluation disabled by booleans,
+  - Markdown report sections for method, experimental setup, results, discussion, and qualitative caveats,
+  - output cells kept for quick inspection.
+- Fixed the final formula in the intro to use the current best correction value:
+
+```text
+q_final = normalize(q_model + 1.25 * (q_sum - source))
+```
+
+- Added a concise methodological roadmap explaining the progression:
+  1. vanilla CLIP arithmetic baseline;
+  2. contrastive/sequential prompt-direction experiments;
+  3. learned sequential gate as the hybrid compositionality core;
+  4. mixed/official-like training and Hamming-weighted objectives;
+  5. oracle top-pool diagnostic showing that the system reaches the right region;
+  6. calibrated CelebA probe reranking as an added retrieval-stage improvement.
+- Embedded all qualitative PNGs directly into the notebook as base64 data images. This avoids broken relative image links when the notebook is opened in Google Colab.
+- Cleared a stale error output from a disabled full-evaluation cell; the notebook remains valid JSON and no longer contains error outputs.
+- Important packaging caveat for future submission: figures are embedded, but model execution still needs the submitted artifacts next to the notebook (`final_best_system/`, CelebA files, and precomputed CLIP embeddings). If submitting only the notebook without the artifact folder, add a Colab setup cell that downloads or mounts those files.
+
+## 2026-06-29 - Added fourth multi-attribute open-vocabulary example
+
+- Added another qualitative figure to the final notebook's open-vocabulary section:
+  - `+visible teeth, +sunglasses`
+- The figure was generated with the final free-query visualization script on source index 66 and stored under `final_best_system/results/free_query_examples/`.
+- The example is useful because both requested attributes are open CLIP concepts rather than official CelebA labels. It further supports the qualitative claim that the hybrid CLIP-space composer can combine multiple non-supervised semantic directions.
+- As before, this remains a qualitative example only: open-vocabulary attributes are not part of the official JSON evaluation labels.
+
+## 2026-06-29 - Probe architecture fine sweep v4 prepared
+
+- The v3 probe architecture sweep finished without beating the previous final probe reranker, but several candidates were very close:
+  - previous best: macro Recall@10 `0.47297`, macro Precision@10 `0.08570`;
+  - best v3 new probe: `p05_mlp_deep_asl`, macro Recall@10 `0.47110`, macro Precision@10 `0.08350`;
+  - close candidates: `p06_mlp_lowdrop_asl`, `p03_mlp_current_asl`, `p02_mlp_current_bce`, `p14_transformer_128_l2_asl`.
+- Interpretation: the probe architecture matters, but the gap is small. Larger/structured models such as transformers did not clearly dominate MLPs, likely because the probe input is already a compact CLIP embedding and the output has only 40 attributes; label dependency modelling can help, but it can also overfit or damage calibration.
+- Prepared `cluster/experimental/probe_arch_sweep_v4_finetune.py` as a separate experimental sweep. It does not alter the current final system.
+- The v4 sweep trains 50 focused probe configurations:
+  - 20 MLP variants around the best deep/low-dropout ASL/BCE probes;
+  - 10 residual MLP variants;
+  - 8 label-wise variants;
+  - 12 compact label-transformer variants.
+- The sweep varies:
+  - hidden dimensions,
+  - dropout,
+  - learning rate,
+  - ASL/BCE/focal loss,
+  - ASL negative gamma,
+  - use/no-use of positive class weights,
+  - small embedding noise augmentation,
+  - transformer width/depth.
+- Added SLURM job `cluster/jobs/65_probe_arch_sweep_v4_finetune_long.sh`.
+- The v4 script saves:
+  - `train_metrics.csv` per config under `probes/<config_id>/`;
+  - `best_probe.pt`;
+  - calibrated thresholds and probe probabilities;
+  - full official JSON evaluation summaries for query-only, hamming-only, and query+hamming filtering modes;
+  - `aggregate_summary.csv`;
+  - `BEST_PROBE_ARCHITECTURE.txt`;
+  - training-curve PNGs under `training_curves/`, including train loss, validation selection score, validation Hamming<=2 percentage, and macro F1 curves.
+- Local smoke validation passed with the project virtualenv:
+  - `short` profile has 1 smoke config;
+  - `long` profile has exactly 50 configs;
+  - Python compilation and bash syntax check passed.
+
+## 2026-06-29 - Probe sweep v4 updated with larger transformers and live leaderboard
+
+- Updated `probe_arch_sweep_v4_finetune.py` before running the long sweep.
+- The v4 search still has exactly 50 configurations, but now includes larger label-transformer probes:
+  - `384` hidden dimension with 2/3/4 layers and 8 heads;
+  - `512` hidden dimension with 2/3/4 layers and 8 heads;
+  - one larger focal-loss transformer variant.
+- Rationale: v3 showed compact transformers close to MLPs but not better. The updated v4 explicitly tests whether higher label-attention capacity can close the gap.
+- Added a live leaderboard regenerated after every completed config:
+  - `live_ranked_systems.csv`;
+  - `live_ranked_systems.txt`.
+- The live leaderboard includes:
+  - the previous best final system as fixed reference;
+  - every completed v4 config evaluated with `only_query`, `only_hamming`, and `both` filtering modes;
+  - only fill-based methods, so all systems return 10 results.
+- Local validation passed:
+  - exactly 50 long configs;
+  - 6 large transformer configs;
+  - Python compile ok;
+  - bash syntax ok;
+  - live table writer smoke-tested.
+
+## 2026-06-29 - Final package portability and free-query output policy
+
+- Updated the final package documentation so the canonical runnable system is clear:
+  - official JSON visualization via `show_json_retrieval_example.py --query-id ... --source-index ...`;
+  - arbitrary known-CelebA queries via `--free-query`;
+  - open-vocabulary CLIP queries via `--free-query` with unknown attributes.
+- Important repository hygiene decision:
+  - do **not** push `final_best_system/results/free_query_examples/`;
+  - this folder contains local qualitative experiments and should be regenerated from scratch when needed;
+  - the final notebook embeds the selected qualitative figures directly, so the report does not depend on this folder.
+- Added `.gitignore` rule for `final_best_system/results/free_query_examples/`.
+- Portability cleanup:
+  - final runner scripts now use `final_best_system/data/...` as the package data root;
+  - the final evaluation runner calls the actual final system (`learned gate + CLIP delta correction + calibrated probe filter`) rather than an older beta-sweep diagnostic;
+  - diagnostic oracle scripts now default to the packaged final-system data instead of the cluster data path.
+- Reminder for future agents: after updating wiki/code/notebook, remind the user to push changes; do not stage generated free-query images unless explicitly requested.

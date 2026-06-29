@@ -157,5 +157,5 @@
   ],
   "num_valid_targets_for_source": 55,
   "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
-  "output_png": "final_best_system/results/qualitative_examples/query_05_source_3_top10.png"
+  "output_png": "/Users/kuba/deep_learning/final_best_system/results/qualitative_examples/query_05_source_3_top10.png"
 }

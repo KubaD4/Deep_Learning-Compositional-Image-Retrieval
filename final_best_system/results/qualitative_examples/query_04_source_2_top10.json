@@ -1,0 +1,152 @@
+{
+  "query_id": 4,
+  "query": "-Young",
+  "source_index": 2,
+  "source_filename": "182640.jpg",
+  "top_indices": [
+    17172,
+    14870,
+    4119,
+    12640,
+    15697,
+    15178,
+    3623,
+    16147,
+    16379,
+    1484
+  ],
+  "top_filenames": [
+    "199810.jpg",
+    "197508.jpg",
+    "186757.jpg",
+    "195278.jpg",
+    "198335.jpg",
+    "197816.jpg",
+    "186261.jpg",
+    "198785.jpg",
+    "199017.jpg",
+    "184122.jpg"
+  ],
+  "top_status": [
+    {
+      "index": 17172,
+      "filename": "199810.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 14870,
+      "filename": "197508.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 4119,
+      "filename": "186757.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 12640,
+      "filename": "195278.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 15697,
+      "filename": "198335.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 15178,
+      "filename": "197816.jpg",
+      "status": "query_fail",
+      "official_valid": false,
+      "query_ok": false,
+      "failed_query_conditions": [
+        "-Young"
+      ],
+      "short_label": "query FAIL"
+    },
+    {
+      "index": 3623,
+      "filename": "186261.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 16147,
+      "filename": "198785.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 16379,
+      "filename": "199017.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    },
+    {
+      "index": 1484,
+      "filename": "184122.jpg",
+      "status": "query_ok_not_json",
+      "official_valid": false,
+      "query_ok": true,
+      "failed_query_conditions": [],
+      "short_label": "query OK, not JSON"
+    }
+  ],
+  "valid_targets_in_top_k": [],
+  "shown_valid_targets": [
+    2103,
+    2712,
+    2969,
+    3986,
+    6603,
+    6637,
+    6864,
+    7227,
+    7246,
+    7307
+  ],
+  "shown_valid_filenames": [
+    "184741.jpg",
+    "185350.jpg",
+    "185607.jpg",
+    "186624.jpg",
+    "189241.jpg",
+    "189275.jpg",
+    "189502.jpg",
+    "189865.jpg",
+    "189884.jpg",
+    "189945.jpg"
+  ],
+  "num_valid_targets_for_source": 33,
+  "method_dir": "/Users/kuba/deep_learning/final_best_system/results/probe_reranker_v2_calibrated/A_cal_query_hardh2_accuracy",
+  "output_png": "/Users/kuba/deep_learning/final_best_system/results/qualitative_examples/query_04_source_2_top10.png"
+}

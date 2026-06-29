@@ -148,6 +148,6 @@
     "197460.jpg"
   ],
   "num_valid_targets_for_source": 14,
-  "method_dir": "final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
-  "output_png": "final_best_system/results/qualitative_examples/query_12_source_37_top10.png"
+  "method_dir": "/Users/kuba/deep_learning/final_best_system/results/final_best_model_plus_generic_delta_beta_1p50",
+  "output_png": "/Users/kuba/deep_learning/final_best_system/results/qualitative_examples/query_12_source_37_top10.png"
 }

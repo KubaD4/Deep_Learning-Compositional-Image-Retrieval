@@ -128,3 +128,43 @@ The final notebook should read like a paper/report:
 - Results tables and plots.
 - Qualitative retrieval examples.
 - Error analysis and conclusions.
+
+### Report Framing Reminder: Hybrid Compositionality vs Full Retrieval System
+
+When preparing the final notebook/report, separate the contribution into two
+levels.
+
+Level 1 is the assignment-facing hybrid compositionality method:
+
+```text
+q_model  = learned gate / sequential composer(source, signed query)
+q_sum    = explicit CLIP arithmetic composition(source, signed query)
+q_hybrid = normalize(q_model + beta * (q_sum - source))
+```
+
+This is the clean answer to the requested hybrid compositionality: the system
+combines a learned source-conditioned composer with explicit semantic CLIP
+directions, so multi-attribute queries are not handled by a single naive sum.
+This is the result to report as the hybrid-compositionality model, with its
+official Recall@K and Precision@K.
+
+Level 2 is the full retrieval system built on top of that hybrid query vector:
+
+```text
+q_hybrid -> retrieve broad candidate pool -> optional probe/filter/reranker
+```
+
+Probe-based filters, CLIP prompt filters, oracle top-pool diagnostics, or future
+rerankers should be described as optional system-level extensions built on top
+of hybrid compositionality. Do not present those as replacing the core method
+unless we decide to include them in the final submission after seeing their
+results. If included, report both:
+
+```text
+1. hybrid compositionality alone
+2. complete hybrid + reranker/filter system
+```
+
+This prevents the report from blurring the assignment requirement with later
+engineering improvements aimed at filling the final top-k with cleaner valid
+targets.

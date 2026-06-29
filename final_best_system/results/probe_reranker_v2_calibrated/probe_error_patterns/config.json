@@ -1,0 +1,10 @@
+{
+  "results": "artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152",
+  "threshold_objective": "accuracy",
+  "splits": [
+    "valid",
+    "test"
+  ],
+  "output_dir": "artifacts/results/probe_reranker_v2_calibrated/probe_reranker_v2_calibrated_20260627_020152/probe_error_patterns",
+  "top_n": 15
+}

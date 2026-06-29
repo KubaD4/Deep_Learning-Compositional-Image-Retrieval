@@ -33,9 +33,10 @@ import torch.nn.functional as F
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGE_ROOT = ROOT.parent
 SCRIPTS = ROOT / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-os.environ.setdefault("DL_PROJECT_ROOT", str(ROOT))
+os.environ.setdefault("DL_PROJECT_ROOT", str(PACKAGE_ROOT))
 
 from learned_gate_core import condition_embeddings, load_model_checkpoint, load_prompt_embedding_cache
 from project_core import (
@@ -144,7 +145,8 @@ def resolve_project_path(path_value: str | Path | None) -> Path | None:
     if not path_value:
         return None
     path = Path(path_value)
-    return path if path.is_absolute() else ROOT / path
+    project_root = Path(os.environ.get("DL_PROJECT_ROOT", PACKAGE_ROOT))
+    return path if path.is_absolute() else project_root / path
 
 
 @dataclass(frozen=True)

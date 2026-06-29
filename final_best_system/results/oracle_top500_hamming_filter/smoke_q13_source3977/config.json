@@ -1,0 +1,17 @@
+{
+  "checkpoint": "final_best_system/weights/best_val_official_like_at10.pt",
+  "prompt_cache": "final_best_system/embeddings/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
+  "output_dir": "final_best_system/results/oracle_top500_hamming_filter/smoke_q13_source3977",
+  "device": "cpu",
+  "source_batch_size": 128,
+  "top_pool": 15,
+  "top_k": 10,
+  "beta": 1.5,
+  "max_hamming": 2,
+  "query_ids": [
+    13
+  ],
+  "source_index": 3977,
+  "max_sources_per_query": 0,
+  "fill_to_k": false
+}
