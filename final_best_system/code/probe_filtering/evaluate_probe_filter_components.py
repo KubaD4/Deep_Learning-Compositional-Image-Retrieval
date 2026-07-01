@@ -43,6 +43,7 @@ sys.path.insert(0, str(ORCH))
 os.environ.setdefault("DL_PROJECT_ROOT", str(PACKAGE_ROOT))
 
 import evaluate_sum_model_blends as blends  # noqa: E402
+import embedding_probe_loader as probe_loader  # noqa: E402
 import probe_reranker_v1 as v1  # noqa: E402
 import probe_reranker_v2_calibrated as v2  # noqa: E402
 from learned_gate_core import load_model_checkpoint, load_prompt_embedding_cache, progress_line  # noqa: E402
@@ -378,7 +379,7 @@ def main() -> int:
     prompt_cache = load_prompt_embedding_cache(blends.router.resolve_project_path(config.get("prompt_cache_path")))
     text_bank, _ = blends.router.load_text_banks(device)
 
-    probe, probe_attributes, _ = v1.load_probe(probe_checkpoint, device)
+    probe, probe_attributes, _ = probe_loader.load_embedding_probe(probe_checkpoint, device)
     attributes, _, _ = read_attribute_table()
     if attributes != probe_attributes:
         raise RuntimeError("Probe attributes do not match CelebA attributes")
@@ -393,7 +394,12 @@ def main() -> int:
         progress_line(progress, f"REUSE test probe probs {probs_path}")
     else:
         progress_line(progress, "PROBE predicting test attributes")
-        gallery_probs = v1.predict_probe_probs(probe, gallery_cache["embeddings"], device, int(args.probe_batch_size)).to(device)
+        gallery_probs = probe_loader.predict_embedding_probe_probs(
+            probe,
+            gallery_cache["embeddings"],
+            device,
+            int(args.probe_batch_size),
+        ).to(device)
 
     query_ids = list(range(len(annotations))) if args.query_ids is None else args.query_ids
     records: dict[str, dict[int, list[dict[str, Any]]]] = {method: {} for method in METHODS}

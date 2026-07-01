@@ -2027,3 +2027,83 @@ q_final = normalize(q_model + 1.25 * (q_sum - source))
   - the final evaluation runner calls the actual final system (`learned gate + CLIP delta correction + calibrated probe filter`) rather than an older beta-sweep diagnostic;
   - diagnostic oracle scripts now default to the packaged final-system data instead of the cluster data path.
 - Reminder for future agents: after updating wiki/code/notebook, remind the user to push changes; do not stage generated free-query images unless explicitly requested.
+
+## 2026-06-29 - Planned image-based attribute probe sweep from scratch
+
+- Motivation: the current calibrated probe reads frozen CLIP image embeddings and predicts the 40 CelebA attributes. This is fast and works reasonably well, but it may miss local visual evidence that matters for filtering, especially when the final top-k contains faces that are semantically close but fail one concrete CelebA attribute.
+- New experiment prepared as a separate, non-final-system sweep:
+  - `cluster/experimental/cnn_attribute_probe_sweep_v1.py`;
+  - `cluster/jobs/66_cnn_attribute_probe_smoke_short.sh`;
+  - `cluster/jobs/67_cnn_attribute_probe_sweep_long.sh`.
+- The experiment tests three trainable verifier families, all initialized from scratch:
+  - `simple_cnn`: plain convolutional multi-label classifier over aligned CelebA faces;
+  - `scratch_resnet`: small residual CNN implemented locally with random initialization;
+  - `cnn_clip_fusion` / `resnet_clip_fusion`: scratch CNN features fused with frozen CLIP image embeddings. The CNN and fusion head are trained from scratch; CLIP is used only as an existing frozen feature, consistent with the rest of the project.
+- Training target:
+  - input: image pixels, and optionally frozen CLIP embedding for fusion variants;
+  - output: 40 logits for the CelebA attributes;
+  - supervision: `list_attr_celeba.txt`;
+  - loss variants: BCE, ASL, focal BCE;
+  - safe augmentation: random crop/resize and horizontal flip only, avoiding color jitter because hair/skin/makeup attributes must not be changed.
+- Evaluation after every config:
+  - calibrate one threshold per attribute on validation;
+  - predict attributes for the official test gallery;
+  - keep the current hybrid retrieval model frozen;
+  - rerank/filter top-500 candidates with query-only, hamming-only, and query+hamming modes;
+  - evaluate on official JSON with Recall@1/5/10 and Precision@1/5/10.
+- This is still an optional second-stage verifier/reranker. It does not replace the core hybrid compositionality method; it tests whether a better attribute verifier can approach the oracle-filter finding that valid targets often already exist inside the broad top-pool.
+
+## 2026-06-30 - CNN probe sweep result and final-system pointer update
+
+- The long CNN/image-probe sweep completed and was compared against the previous best embedding-probe system.
+- Result:
+  - the best overall system by Macro Recall@10 is still the v4 embedding MLP probe reference:
+    - `v4_m04_deep_asl_lr2e4_d00` + `both` filtering;
+    - Macro Recall@10 about `0.4787`;
+    - Macro Precision@10 about `0.0864`;
+    - average kept from top-500 about `33.6`.
+  - the best CNN/fusion candidate came extremely close:
+    - `f05_fusion_resnet_160_asl`;
+    - Macro Recall@10 about `0.4780`;
+    - Macro Precision@10 about `0.0865`.
+- Interpretation:
+  - CNN/fusion is a useful direction and slightly helps precision in the best case, but it does not beat the embedding MLP on the primary Recall@10 metric.
+  - The final packaged system should therefore point to the v4 embedding MLP probe, not to the CNN/fusion probe.
+- Package update decision:
+  - keep `final_best_system/` as the only final-best folder;
+  - add a universal probe loader able to load both the older v2 calibrated probe and newer v3/v4 architecture-config checkpoints;
+  - make scripts prefer `final_best_system/results/probe_embedding_v4_m04/` when present and fall back to `probe_reranker_v2_calibrated/` otherwise.
+- Files that still need to be copied from the cluster to make the Mac package fully current:
+  - `probes/v4_m04_deep_asl_lr2e4_d00/best_probe.pt`;
+  - calibrated thresholds/probabilities for that probe;
+  - the saved official JSON evaluation summary/per-query metrics for `query_hamming_fill_accuracy`.
+
+## 2026-07-01 - Delivery notebook smoke execution
+
+- Created the canonical delivery notebook:
+  - `notebooks/DL26_Project_Delivery_notebook.ipynb`.
+- The notebook is based on the previous working notebook but is structured for the assignment requirement of a single Colab-style report notebook:
+  - repo-relative path explanation and expected folder tree;
+  - safe runtime flags with full training/evaluation disabled by default;
+  - lightweight smoke checks for pair construction, cached embeddings, final-system inference, and qualitative examples;
+  - loaded cluster training logs/metrics for gate v7 and probe v4 so training curves are visible without re-running hours of jobs;
+  - appendix containing the final cluster source files for embedding creation, pair construction, baselines, gate training, probe sweep, and evaluation.
+- Fixed the previous qualitative-example failure caused by relying on a missing `retrievals.jsonl`; the delivery notebook now recomputes retrievals inline from the packaged final checkpoint, CLIP caches, and v4 probe.
+- Smoke execution completed successfully with:
+  - `RUN_PAIR_CONSTRUCTION_DEMO=True`;
+  - `RUN_EMBEDDING_CACHE_SMOKE=True`;
+  - `RUN_FINAL_SYSTEM_SMOKE=True`;
+  - `RUN_QUALITATIVE_EXAMPLES=True`;
+  - heavy training/recompute flags left `False`.
+- Generated qualitative grids in:
+  - `final_best_system/results/delivery_notebook_qualitative/`.
+- README now points to `notebooks/DL26_Project_Delivery_notebook.ipynb` as the final delivery notebook.
+- Follow-up clarification added to the delivery notebook:
+  - explicit definition of `step` as one mini-batch optimizer update;
+  - source paths for gate/probe metric CSVs;
+  - tables recomputing internal best values for gate validation and probe attribute prediction directly from saved cluster outputs;
+  - notebook re-executed successfully after the update and normalized to remove missing cell-id warnings.
+- Clarified the official-results section to avoid benchmark-leakage ambiguity:
+  - `celeba_evaluation.json` is described as a held-out benchmark;
+  - the 33,052 JSON source/query cases are evaluation cases only, not training pairs;
+  - training supervision comes from synthetic CelebA annotation-derived pairs over train/validation partitions, and JSON target lists are consulted only after retrieval for Recall@K/Precision@K.

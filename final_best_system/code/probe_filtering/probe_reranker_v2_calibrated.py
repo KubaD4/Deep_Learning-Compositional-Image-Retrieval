@@ -41,6 +41,7 @@ sys.path.insert(0, str(ORCH))
 os.environ.setdefault("DL_PROJECT_ROOT", str(PACKAGE_ROOT))
 
 import evaluate_sum_model_blends as blends  # noqa: E402
+import embedding_probe_loader as probe_loader  # noqa: E402
 import probe_reranker_v1 as v1  # noqa: E402
 from learned_gate_core import load_model_checkpoint, load_prompt_embedding_cache, progress_line  # noqa: E402
 from project_core import (  # noqa: E402
@@ -148,7 +149,7 @@ def calibrate_probe_thresholds(
     device: torch.device,
     probe_path: Path,
 ) -> dict[str, torch.Tensor]:
-    probe, probe_attributes, _ = v1.load_probe(probe_path, device)
+    probe, probe_attributes, _ = probe_loader.load_embedding_probe(probe_path, device)
     valid_cache = v1.load_split_embeddings("valid")
     attributes, valid_labels = v1.attrs_for_filenames(valid_cache["filenames"])
     if attributes != probe_attributes:
@@ -160,7 +161,12 @@ def calibrate_probe_thresholds(
         progress_line(progress, f"REUSE valid probe probs {probs_path}")
     else:
         progress_line(progress, "CALIBRATION predicting validation attributes")
-        valid_probs = v1.predict_probe_probs(probe, valid_cache["embeddings"], device, int(args.probe_batch_size))
+        valid_probs = probe_loader.predict_embedding_probe_probs(
+            probe,
+            valid_cache["embeddings"],
+            device,
+            int(args.probe_batch_size),
+        )
         atomic_torch_save({"model_id": MODEL_ID, "attributes": attributes, "probs": valid_probs}, probs_path)
 
     thresholds = torch.arange(
@@ -505,7 +511,7 @@ def evaluate_calibrated(
     prompt_cache = load_prompt_embedding_cache(blends.router.resolve_project_path(config.get("prompt_cache_path")))
     text_bank, _ = blends.router.load_text_banks(device)
 
-    probe, probe_attributes, probe_checkpoint = v1.load_probe(probe_path, device)
+    probe, probe_attributes, probe_checkpoint = probe_loader.load_embedding_probe(probe_path, device)
     attributes, _, _ = read_attribute_table()
     if attributes != probe_attributes:
         raise RuntimeError("Probe attributes do not match CelebA attributes")
@@ -521,7 +527,12 @@ def evaluate_calibrated(
         progress_line(progress, f"REUSE test probe probs {probe_probs_path}")
     else:
         progress_line(progress, "PROBE predicting test attributes")
-        gallery_probs = v1.predict_probe_probs(probe, gallery_cache["embeddings"], device, int(args.probe_batch_size))
+        gallery_probs = probe_loader.predict_embedding_probe_probs(
+            probe,
+            gallery_cache["embeddings"],
+            device,
+            int(args.probe_batch_size),
+        )
         atomic_torch_save({"model_id": MODEL_ID, "attributes": attributes, "probs": gallery_probs}, probe_probs_path)
     gallery_probs_device = gallery_probs.to(device)
     methods = calibrated_methods(list(threshold_by_objective))

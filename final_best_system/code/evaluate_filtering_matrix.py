@@ -77,18 +77,23 @@ FILTERS = (
 )
 
 
+LEGACY_PROBE_RESULTS = PACKAGE_ROOT / "results" / "probe_reranker_v2_calibrated"
+V4_PROBE_RESULTS = PACKAGE_ROOT / "results" / "probe_embedding_v4_m04"
+DEFAULT_PROBE_RESULTS = V4_PROBE_RESULTS if V4_PROBE_RESULTS.exists() else LEGACY_PROBE_RESULTS
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=Path, default=PACKAGE_ROOT / "weights" / "best_val_official_like_at10.pt")
     parser.add_argument(
         "--probe-results",
         type=Path,
-        default=PACKAGE_ROOT / "results" / "probe_reranker_v2_calibrated",
+        default=DEFAULT_PROBE_RESULTS,
     )
     parser.add_argument(
         "--probe-checkpoint",
         type=Path,
-        default=PACKAGE_ROOT / "results" / "probe_reranker_v2_calibrated" / "probe" / "best_probe.pt",
+        default=DEFAULT_PROBE_RESULTS / "probe" / "best_probe.pt",
     )
     parser.add_argument("--output-root", type=Path, default=None)
     parser.add_argument("--device", choices=("auto", "cpu", "mps", "cuda"), default="auto")

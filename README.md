@@ -12,13 +12,19 @@ We address the assignment on dynamic and hybrid conditioning for compositional i
 
 ## Final Submission Notebook
 
-The notebook to read/run is:
+The final delivery notebook to read/run is:
+
+```text
+notebooks/DL26_Project_Delivery_notebook.ipynb
+```
+
+It is written as a self-contained report: method, training strategy, results, ablations, qualitative examples, runnable code cells, and an appendix with the cluster source used for the final runs. Heavy training/evaluation cells are guarded by boolean flags so the notebook can be opened and partially rerun without launching hours of computation.
+
+The older working notebook is kept for development history:
 
 ```text
 notebooks/02_learned_gate_final_pipeline.ipynb
 ```
-
-It is written as a self-contained report: method, training strategy, results, ablations, qualitative examples, and runnable code cells. Heavy training/evaluation cells are guarded by boolean flags so the notebook can be opened and partially rerun without launching hours of computation.
 
 ## Final Best System
 
@@ -31,7 +37,7 @@ final_best_system/
 Current final method:
 
 ```text
-current_A_query_hardh2_accuracy
+v4_m04_deep_asl_lr2e4_d00_query_hamming_fill_accuracy
 ```
 
 High-level pipeline:
@@ -47,13 +53,15 @@ top-500 candidates by cosine(q_hybrid, image)
 -> fill remaining top-10 with original q_hybrid order
 ```
 
-Packaged official JSON result:
+Best official JSON result found so far:
 
 ```text
-Macro Recall@10     0.47297151547368665
-Micro Recall@10     0.4088406147888176
-Macro Precision@10  0.08570375640709439
+Macro Recall@10     0.4786552757255102
+Micro Recall@10     0.4054520150066562
+Macro Precision@10  0.08641455658635512
 ```
+
+The previous packaged probe (`current_A_query_hardh2_accuracy`) scored Macro Recall@10 `0.47297`. The newer v4 embedding MLP probe should be placed in `final_best_system/results/probe_embedding_v4_m04/`; the code automatically falls back to the older packaged probe if those files are not present.
 
 The detailed package documentation is in:
 
@@ -78,7 +86,7 @@ final_best_system/data/celeba_evaluation.json
 final_best_system/data/celeba/annotations/list_attr_celeba.txt
 final_best_system/data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt
 final_best_system/weights/best_val_official_like_at10.pt
-final_best_system/results/probe_reranker_v2_calibrated/probe/best_probe.pt
+final_best_system/results/probe_embedding_v4_m04/probe/best_probe.pt
 ```
 
 The full CelebA image folder is not stored in git. To render qualitative image grids, place aligned CelebA images at:

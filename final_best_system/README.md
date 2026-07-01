@@ -5,7 +5,7 @@ This folder is the canonical final-best package for the project. It is designed 
 ## Winner
 
 ```text
-current_A_query_hardh2_accuracy
+v4_m04_deep_asl_lr2e4_d00_query_hamming_fill_accuracy
 ```
 
 The system has two stages.
@@ -32,26 +32,28 @@ Stage 2: calibrated CelebA attribute probe reranking:
 ## Current Official JSON Values
 
 ```text
-Macro Recall@10     0.47297151547368665
-Micro Recall@10     0.4088406147888176
-Macro Precision@10  0.08570375640709439
-Micro Precision@10  0.07119085078058791
-avg kept from 500   32.70156117632821
+Macro Recall@10     0.4786552757255102
+Micro Recall@10     0.4054520150066562
+Macro Precision@10  0.08641455658635512
+Micro Precision@10  0.06939065714631452
+avg kept from 500   33.64725281374803
 ```
 
 The saved aggregate is:
 
 ```text
-results/probe_reranker_v2_calibrated/A_cal_query_hardh2_accuracy/summary.csv
+results/probe_embedding_v4_m04/A_cal_query_hardh2_accuracy/summary.csv
 ```
+
+If `results/probe_embedding_v4_m04/` is not present, the runnable code falls back to the previous packaged probe in `results/probe_reranker_v2_calibrated/`, whose Macro Recall@10 is `0.47297`.
 
 ## Important Files
 
 - `weights/best_val_official_like_at10.pt`: best v7 learned gate checkpoint.
-- `weights/best_probe.pt`: copy of the final CelebA attribute probe checkpoint.
-- `results/probe_reranker_v2_calibrated/probe/best_probe.pt`: probe checkpoint used by the evaluator.
-- `results/probe_reranker_v2_calibrated/probe/calibrated_thresholds.pt`: per-attribute calibrated thresholds.
-- `results/probe_reranker_v2_calibrated/probe/test_probe_probs.pt`: cached probe probabilities for CelebA test images.
+- `results/probe_embedding_v4_m04/probe/best_probe.pt`: best embedding MLP CelebA attribute probe checkpoint.
+- `results/probe_embedding_v4_m04/probe/calibrated_thresholds.pt`: per-attribute calibrated thresholds.
+- `results/probe_embedding_v4_m04/probe/test_probe_probs.pt`: cached probe probabilities for CelebA test images.
+- `results/probe_reranker_v2_calibrated/`: older fallback probe package kept for reproducibility.
 - `data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt`: test gallery CLIP image embeddings.
 - `data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt`: prompt cache used by the learned gate.
 - `data/celeba/annotations/list_attr_celeba.txt`: CelebA attributes used by probe/Hamming checks.

@@ -1,13 +1,14 @@
 {
   "best_primary_system": {
-    "name": "current_A_query_hardh2_accuracy",
-    "reason": "Highest current official JSON Macro Recall@10 after v7 hybrid retrieval plus calibrated probe reranking.",
+    "name": "v4_m04_deep_asl_lr2e4_d00_query_hamming_fill_accuracy",
+    "reason": "Highest official JSON Macro Recall@10 so far: v7 hybrid retrieval plus v4 embedding MLP probe reranking. The later CNN/fusion probe sweep came very close but did not beat this on Macro Recall@10.",
     "stage_1_formula": "q_hybrid = normalize(q_model + 1.25 * (q_sum - source))",
     "stage_2_rule": "retrieve top-500 with q_hybrid, promote candidates satisfying calibrated query attributes and predicted non-query Hamming <= 2, then fill remaining top-10 slots with original q_hybrid ranking",
-    "macro_Recall@10": 0.47297151547368665,
-    "micro_Recall@10": 0.4088406147888176,
-    "macro_Precision@10": 0.08570375640709439,
-    "avg_kept_from_500": 32.70156117632821
+    "macro_Recall@10": 0.4786552757255102,
+    "micro_Recall@10": 0.4054520150066562,
+    "macro_Precision@10": 0.08641455658635512,
+    "micro_Precision@10": 0.06939065714631452,
+    "avg_kept_from_500": 33.64725281374803
   },
   "hybrid_compositional_core": {
     "name": "q_hybrid_v7",
@@ -30,9 +31,9 @@
   },
   "local_artifacts": {
     "gate_checkpoint": "final_best_system/weights/best_val_official_like_at10.pt",
-    "probe_checkpoint": "final_best_system/results/probe_reranker_v2_calibrated/probe/best_probe.pt",
-    "calibrated_thresholds": "final_best_system/results/probe_reranker_v2_calibrated/probe/calibrated_thresholds.pt",
-    "test_probe_probs": "final_best_system/results/probe_reranker_v2_calibrated/probe/test_probe_probs.pt",
+    "probe_checkpoint": "final_best_system/results/probe_embedding_v4_m04/probe/best_probe.pt",
+    "calibrated_thresholds": "final_best_system/results/probe_embedding_v4_m04/probe/calibrated_thresholds.pt",
+    "test_probe_probs": "final_best_system/results/probe_embedding_v4_m04/probe/test_probe_probs.pt",
     "test_image_embeddings": "final_best_system/data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt",
     "prompt_cache": "final_best_system/data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
     "evaluation_json": "final_best_system/data/celeba_evaluation.json",

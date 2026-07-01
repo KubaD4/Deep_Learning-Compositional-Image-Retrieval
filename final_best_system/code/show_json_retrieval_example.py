@@ -32,12 +32,13 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT = ROOT / "final_best_system"
 CODE_ROOT = ROOT / "final_best_system" / "code"
+LEGACY_PROBE_RESULTS = ROOT / "final_best_system" / "results" / "probe_reranker_v2_calibrated"
+V4_PROBE_RESULTS = ROOT / "final_best_system" / "results" / "probe_embedding_v4_m04"
+DEFAULT_PROBE_RESULTS = V4_PROBE_RESULTS if V4_PROBE_RESULTS.exists() else LEGACY_PROBE_RESULTS
 DEFAULT_METHOD_DIR = (
-    ROOT
-    / "final_best_system"
-    / "results"
-    / "probe_reranker_v2_calibrated"
-    / "A_cal_query_hardh2_accuracy"
+    DEFAULT_PROBE_RESULTS / "A_cal_query_hardh2_accuracy"
+    if (DEFAULT_PROBE_RESULTS / "A_cal_query_hardh2_accuracy").exists()
+    else LEGACY_PROBE_RESULTS / "A_cal_query_hardh2_accuracy"
 )
 DEFAULT_OUTPUT_DIR = ROOT / "final_best_system" / "results" / "qualitative_examples"
 DEFAULT_FREE_OUTPUT_DIR = ROOT / "final_best_system" / "results" / "free_query_examples"
@@ -60,12 +61,6 @@ DEFAULT_TEST_EMBEDDINGS = (
     / "test_image_embeddings.pt"
 )
 DEFAULT_EVALUATION_JSON = PACKAGE_ROOT / "data" / "celeba_evaluation.json"
-DEFAULT_PROBE_RESULTS = (
-    ROOT
-    / "final_best_system"
-    / "results"
-    / "probe_reranker_v2_calibrated"
-)
 DEFAULT_PROBE_CHECKPOINT = DEFAULT_PROBE_RESULTS / "probe" / "best_probe.pt"
 
 
@@ -911,7 +906,7 @@ def load_probe_filter_state(args: argparse.Namespace, device, gallery_cache: dic
     import torch.nn.functional as F
 
     setup_model_imports()
-    import probe_reranker_v1 as probe_v1  # noqa: WPS433
+    import embedding_probe_loader as probe_loader  # noqa: WPS433
 
     thresholds_cache = load_embedding_cache(args.probe_results / "probe" / "calibrated_thresholds.pt")
     thresholds = thresholds_cache["thresholds"][args.threshold_objective].float().to(device)
@@ -926,7 +921,7 @@ def load_probe_filter_state(args: argparse.Namespace, device, gallery_cache: dic
 
     probe = None
     if args.probe_checkpoint.exists():
-        probe, _, _ = probe_v1.load_probe(args.probe_checkpoint, device)
+        probe, _, _ = probe_loader.load_embedding_probe(args.probe_checkpoint, device)
 
     # Keep gallery embeddings on the same device because source similarity/Hamming
     # utilities expect local tensors in some paths.

@@ -1,64 +1,64 @@
 query_id,query,metric,best_method,best_score,second_method,second_score,absolute_margin
-0,+Smiling,Recall@1,Direct sum,0.0679063936481404,Direct sequential,0.0679063936481404,0.0
-0,+Smiling,Recall@5,Adaptive tangent sequential,0.1916005014625992,Contrastive sum,0.1913915587129126,0.00020894274968658033
-0,+Smiling,Recall@10,Learned gate,0.2649394066025909,Adaptive tangent sequential,0.2620142081069787,0.0029251984956122357
-0,+Smiling,Precision@1,Direct sum,0.0679063936481404,Direct sequential,0.0679063936481404,0.0
-0,+Smiling,Precision@5,Adaptive tangent sequential,0.051065608023401,Contrastive sum,0.0509820309235264,8.357709987460299e-05
-0,+Smiling,Precision@10,Learned gate,0.0430213121604673,Adaptive tangent sequential,0.0411826159632253,0.0018386961972420013
-1,+Eyeglasses,Recall@1,Learned gate,0.1020036429872495,Contrastive sum,0.0569216757741347,0.0450819672131148
-1,+Eyeglasses,Recall@5,Learned gate,0.2736794171220401,Contrastive sum,0.1671220400728597,0.10655737704918039
-1,+Eyeglasses,Recall@10,Learned gate,0.377959927140255,Contrastive sum,0.2518214936247723,0.1261384335154827
-1,+Eyeglasses,Precision@1,Learned gate,0.1020036429872495,Contrastive sum,0.0569216757741347,0.0450819672131148
-1,+Eyeglasses,Precision@5,Learned gate,0.0772313296903459,Contrastive sum,0.0410746812386159,0.03615664845173001
-1,+Eyeglasses,Precision@10,Learned gate,0.0642531876138428,Contrastive sum,0.0347905282331512,0.0294626593806916
-2,-Heavy_Makeup,Recall@1,Learned gate,0.0415953021776364,Contrastive sum,0.0288720332762417,0.012723268901394698
-2,-Heavy_Makeup,Recall@5,Learned gate,0.1242965500367017,Contrastive sum,0.1074137509175434,0.016882799119158298
-2,-Heavy_Makeup,Recall@10,Learned gate,0.1977000244678248,Contrastive sum,0.1685833129434793,0.0291167115243455
-2,-Heavy_Makeup,Precision@1,Learned gate,0.0415953021776364,Contrastive sum,0.0288720332762417,0.012723268901394698
-2,-Heavy_Makeup,Precision@5,Learned gate,0.0301443601663814,Contrastive sum,0.0240274039637878,0.006116956202593601
-2,-Heavy_Makeup,Precision@10,Learned gate,0.0266699290433078,Contrastive sum,0.0212870075850256,0.005382921458282199
+0,+Smiling,Recall@1,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0758462181362306,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0745925616381111,0.0012536564981195097
+0,+Smiling,Recall@5,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.2216882574174676,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.2208524864187212,0.0008357709987463768
+0,+Smiling,Recall@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.3054743000417885,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.3052653572921019,0.00020894274968658033
+0,+Smiling,Precision@1,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0758462181362306,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0745925616381111,0.0012536564981195097
+0,+Smiling,Precision@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0610948600083569,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0610530714584195,4.178854993740211e-05
+0,+Smiling,Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.050125365649811,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0500835770998737,4.1788549937304964e-05
+1,+Eyeglasses,Recall@1,Learned gate v3 seqp2_ov005,0.1252276867030965,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.1243169398907103,0.0009107468123862039
+1,+Eyeglasses,Recall@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.3479052823315118,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.3360655737704918,0.011839708561020013
+1,+Eyeglasses,Recall@10,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.4927140255009107,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.4685792349726776,0.024134790528233085
+1,+Eyeglasses,Precision@1,Learned gate v3 seqp2_ov005,0.1252276867030965,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.1243169398907103,0.0009107468123862039
+1,+Eyeglasses,Precision@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0980874316939884,Learned gate v3 seqp2_ov005,0.0957194899817844,0.0023679417122040025
+1,+Eyeglasses,Precision@10,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0846083788706728,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0801001821493615,0.0045081967213112945
+2,-Heavy_Makeup,Recall@1,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0496696843650599,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0484462931245412,0.0012233912405186995
+2,-Heavy_Makeup,Recall@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.1561047222901884,Learned gate v3 seqp2_ov005,0.1504771225838023,0.005627599706386099
+2,-Heavy_Makeup,Recall@10,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.2339124051871788,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.226082701247859,0.007829703939319782
+2,-Heavy_Makeup,Precision@1,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0496696843650599,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0484462931245412,0.0012233912405186995
+2,-Heavy_Makeup,Precision@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0369464154636653,Learned gate v3 seqp2_ov005,0.0356740885735258,0.001272326890139494
+2,-Heavy_Makeup,Precision@10,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0324688035233663,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0313188157572788,0.0011499877660874971
 3,+Male,Recall@1,Contrastive sequential,0.0438871473354232,Contrastive sum,0.0438871473354232,0.0
-3,+Male,Recall@5,Adaptive tangent sequential,0.1529780564263322,Contrastive sum,0.1517241379310344,0.0012539184952977955
-3,+Male,Recall@10,Adaptive tangent sequential,0.2394984326018809,Contrastive sum,0.2376175548589341,0.0018808777429467904
+3,+Male,Recall@5,Adaptive tangent sequential,0.1529780564263322,Contrastive sequential,0.1517241379310344,0.0012539184952977955
+3,+Male,Recall@10,Adaptive tangent sequential,0.2394984326018809,Contrastive sequential,0.2376175548589341,0.0018808777429467904
 3,+Male,Precision@1,Contrastive sequential,0.0438871473354232,Contrastive sum,0.0438871473354232,0.0
-3,+Male,Precision@5,Adaptive tangent sequential,0.0423824451410659,Contrastive sum,0.0418808777429468,0.0005015673981191016
-3,+Male,Precision@10,Adaptive tangent sequential,0.0392476489028214,Contrastive sum,0.0390595611285268,0.00018808777429459717
-4,-Young,Recall@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
-4,-Young,Recall@5,Contrastive sequential,0.0397759103641456,Contrastive sum,0.0397759103641456,0.0
-4,-Young,Recall@10,Adaptive tangent sequential,0.0698412698412698,Contrastive sum,0.0696545284780578,0.0001867413632120063
-4,-Young,Precision@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
-4,-Young,Precision@5,Contrastive sequential,0.009859943977591,Contrastive sum,0.009859943977591,0.0
-4,-Young,Precision@10,Contrastive sequential,0.0094304388422036,Contrastive sum,0.0094304388422036,0.0
-5,+Blond_Hair,Recall@1,Contrastive sequential,0.038398244651673,Contrastive sum,0.038398244651673,0.0
-5,+Blond_Hair,Recall@5,Contrastive sequential,0.1263485097824099,Contrastive sum,0.1263485097824099,0.0
-5,+Blond_Hair,Recall@10,Contrastive sequential,0.1938197110989211,Contrastive sum,0.1938197110989211,0.0
-5,+Blond_Hair,Precision@1,Contrastive sequential,0.038398244651673,Contrastive sum,0.038398244651673,0.0
-5,+Blond_Hair,Precision@5,Contrastive sequential,0.033753885536661,Contrastive sum,0.033753885536661,0.0
-5,+Blond_Hair,Precision@10,Contrastive sequential,0.0301700493691712,Contrastive sum,0.0301700493691712,0.0
+3,+Male,Precision@5,Adaptive tangent sequential,0.0423824451410659,Contrastive sequential,0.0418808777429468,0.0005015673981191016
+3,+Male,Precision@10,Adaptive tangent sequential,0.0392476489028214,Contrastive sequential,0.0390595611285268,0.00018808777429459717
+4,-Young,Recall@1,Learned gate v3 seqp2_ov005,0.0119514472455648,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0117647058823529,0.00018674136321190048
+4,-Young,Recall@5,Learned gate v3 seqp2_ov005,0.04593837535014,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0450046685340803,0.0009337068160596984
+4,-Young,Recall@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0793650793650793,Learned gate v3 seqp2_ov005,0.0782446311858076,0.0011204481792717047
+4,-Young,Precision@1,Learned gate v3 seqp2_ov005,0.0119514472455648,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0117647058823529,0.00018674136321190048
+4,-Young,Precision@5,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0109803921568627,Learned gate v3 seqp2_ov005,0.010905695611578,7.469654528470017e-05
+4,-Young,Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0111111111111111,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0107936507936508,0.0003174603174602997
+5,+Blond_Hair,Recall@1,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0391296397878954,Contrastive sequential,0.038398244651673,0.0007313951362224042
+5,+Blond_Hair,Recall@5,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.136039495337356,Learned gate v3 seqp2_ov005,0.1331139147924666,0.0029255805448893946
+5,+Blond_Hair,Recall@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.2108246480160907,Learned gate v3 seqp2_ov005,0.2069848235509233,0.0038398244651673963
+5,+Blond_Hair,Precision@1,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0391296397878954,Contrastive sequential,0.038398244651673,0.0007313951362224042
+5,+Blond_Hair,Precision@5,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0350703967818612,Learned gate v3 seqp2_ov005,0.0344487109160722,0.0006216858657889998
+5,+Blond_Hair,Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0316511245200214,Learned gate v3 seqp2_ov005,0.0311025781678547,0.0005485463521666956
 6,+Mustache,Recall@1,Contrastive sequential,0.0963455149501661,Contrastive sum,0.0963455149501661,0.0
-6,+Mustache,Recall@5,Learned gate,0.1993355481727574,Contrastive sum,0.1827242524916943,0.016611295681063093
-6,+Mustache,Recall@10,Learned gate,0.2790697674418604,Contrastive sum,0.2524916943521594,0.026578073089701004
+6,+Mustache,Recall@5,Learned gate v3 seqp2_ov005,0.2225913621262458,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.2225913621262458,0.0
+6,+Mustache,Recall@10,Learned gate v3 seqp2_ov005,0.2990033222591362,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.2990033222591362,0.0
 6,+Mustache,Precision@1,Contrastive sequential,0.0963455149501661,Contrastive sum,0.0963455149501661,0.0
-6,+Mustache,Precision@5,Learned gate,0.0518272425249169,Contrastive sum,0.0498338870431893,0.0019933554817275975
-6,+Mustache,Precision@10,Learned gate,0.0411960132890365,Contrastive sum,0.0395348837209302,0.0016611295681063024
-7,-Young,Recall@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
-7,-Young,Recall@5,Contrastive sequential,0.0397759103641456,Contrastive sum,0.0397759103641456,0.0
-7,-Young,Recall@10,Adaptive tangent sequential,0.0698412698412698,Contrastive sum,0.0696545284780578,0.0001867413632120063
-7,-Young,Precision@1,Contrastive sequential,0.0110177404295051,Contrastive sum,0.0110177404295051,0.0
-7,-Young,Precision@5,Contrastive sequential,0.009859943977591,Contrastive sum,0.009859943977591,0.0
-7,-Young,Precision@10,Contrastive sequential,0.0094304388422036,Contrastive sum,0.0094304388422036,0.0
-8,"+Eyeglasses, +Smiling",Recall@1,Contrastive sum,0.0522875816993464,Contrastive sequential,0.0490196078431372,0.003267973856209201
-8,"+Eyeglasses, +Smiling",Recall@5,Contrastive sequential,0.1879084967320261,Adaptive tangent sequential,0.1862745098039215,0.0016339869281045971
-8,"+Eyeglasses, +Smiling",Recall@10,Contrastive sequential,0.2712418300653594,Adaptive tangent sequential,0.2679738562091503,0.003267973856209083
-8,"+Eyeglasses, +Smiling",Precision@1,Contrastive sum,0.0522875816993464,Contrastive sequential,0.0490196078431372,0.003267973856209201
-8,"+Eyeglasses, +Smiling",Precision@5,Contrastive sequential,0.0444444444444443,Adaptive tangent sequential,0.0437908496732025,0.0006535947712418
-8,"+Eyeglasses, +Smiling",Precision@10,Learned gate,0.034640522875817,Contrastive sequential,0.0344771241830065,0.0001633986928105055
+6,+Mustache,Precision@5,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0598006644518272,Learned gate v3 seqp2_ov005,0.0591362126245846,0.0006644518272425973
+6,+Mustache,Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0471760797342192,Learned gate v3 seqp2_ov005,0.0461794019933554,0.0009966777408638022
+7,-Young,Recall@1,Learned gate v3 seqp2_ov005,0.0119514472455648,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0117647058823529,0.00018674136321190048
+7,-Young,Recall@5,Learned gate v3 seqp2_ov005,0.04593837535014,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0450046685340803,0.0009337068160596984
+7,-Young,Recall@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0793650793650793,Learned gate v3 seqp2_ov005,0.0782446311858076,0.0011204481792717047
+7,-Young,Precision@1,Learned gate v3 seqp2_ov005,0.0119514472455648,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0117647058823529,0.00018674136321190048
+7,-Young,Precision@5,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0109803921568627,Learned gate v3 seqp2_ov005,0.010905695611578,7.469654528470017e-05
+7,-Young,Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0111111111111111,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0107936507936508,0.0003174603174602997
+8,"+Eyeglasses, +Smiling",Recall@1,Learned gate v3 seqp2_ov005,0.1078431372549019,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.1062091503267973,0.0016339869281045971
+8,"+Eyeglasses, +Smiling",Recall@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.2892156862745098,Learned gate v3 seqp2_ov005,0.2875816993464052,0.0016339869281045694
+8,"+Eyeglasses, +Smiling",Recall@10,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.4166666666666667,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.4084967320261438,0.008169934640522902
+8,"+Eyeglasses, +Smiling",Precision@1,Learned gate v3 seqp2_ov005,0.1078431372549019,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.1062091503267973,0.0016339869281045971
+8,"+Eyeglasses, +Smiling",Precision@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0754901960784314,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0712418300653595,0.004248366013071894
+8,"+Eyeglasses, +Smiling",Precision@10,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.062091503267974,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0596405228758172,0.0024509803921568055
 9,"+Black_Hair, -Wavy_Hair",Recall@1,Contrastive sum,0.0388802488335925,Contrastive sequential,0.0381026438569206,0.0007776049766718973
-9,"+Black_Hair, -Wavy_Hair",Recall@5,Contrastive sum,0.1279160186625194,Contrastive sequential,0.1263608087091757,0.0015552099533436836
-9,"+Black_Hair, -Wavy_Hair",Recall@10,Contrastive sum,0.2107309486780715,Adaptive tangent sequential,0.2033437013996889,0.0073872472783825804
+9,"+Black_Hair, -Wavy_Hair",Recall@5,Learned gate v3 seqp2_ov005,0.1314152410575427,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.1290824261275272,0.0023328149300154977
+9,"+Black_Hair, -Wavy_Hair",Recall@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.2153965785381026,Learned gate v3 seqp2_ov005,0.2150077760497667,0.00038880248833589315
 9,"+Black_Hair, -Wavy_Hair",Precision@1,Contrastive sum,0.0388802488335925,Contrastive sequential,0.0381026438569206,0.0007776049766718973
-9,"+Black_Hair, -Wavy_Hair",Precision@5,Contrastive sum,0.0303265940902023,Contrastive sequential,0.0298600311041992,0.00046656298600309884
-9,"+Black_Hair, -Wavy_Hair",Precision@10,Contrastive sum,0.0286547433903577,Adaptive tangent sequential,0.0270217729393469,0.0016329704510108026
+9,"+Black_Hair, -Wavy_Hair",Precision@5,Learned gate v3 seqp2_ov005,0.0305598755832038,Contrastive sum,0.0303265940902023,0.00023328149300150258
+9,"+Black_Hair, -Wavy_Hair",Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0287713841368585,Contrastive sum,0.0286547433903577,0.00011664074650079986
 10,"-Male, -Mustache",Recall@1,Direct sum,0.0,Direct sequential,0.0,0.0
 10,"-Male, -Mustache",Recall@5,Contrastive sequential,0.074074074074074,Contrastive sum,0.074074074074074,0.0
 10,"-Male, -Mustache",Recall@10,Contrastive sequential,0.074074074074074,Contrastive sum,0.074074074074074,0.0
@@ -66,20 +66,20 @@ query_id,query,metric,best_method,best_score,second_method,second_score,absolute
 10,"-Male, -Mustache",Precision@5,Contrastive sequential,0.0148148148148148,Contrastive sum,0.0148148148148148,0.0
 10,"-Male, -Mustache",Precision@10,Contrastive sequential,0.0111111111111111,Contrastive sum,0.0111111111111111,0.0
 11,"+Chubby, -Young",Recall@1,Contrastive sequential,0.0136986301369863,Contrastive sum,0.0136986301369863,0.0
-11,"+Chubby, -Young",Recall@5,Adaptive tangent sequential,0.0308219178082191,Contrastive sequential,0.0308219178082191,0.0
-11,"+Chubby, -Young",Recall@10,Adaptive tangent sequential,0.0496575342465753,Contrastive sequential,0.0496575342465753,0.0
+11,"+Chubby, -Young",Recall@5,Contrastive sequential,0.0308219178082191,Adaptive tangent sequential,0.0308219178082191,0.0
+11,"+Chubby, -Young",Recall@10,Contrastive sequential,0.0496575342465753,Adaptive tangent sequential,0.0496575342465753,0.0
 11,"+Chubby, -Young",Precision@1,Contrastive sequential,0.0136986301369863,Contrastive sum,0.0136986301369863,0.0
-11,"+Chubby, -Young",Precision@5,Adaptive tangent sequential,0.0068493150684931,Contrastive sequential,0.0068493150684931,0.0
-11,"+Chubby, -Young",Precision@10,Adaptive tangent sequential,0.0059931506849315,Contrastive sequential,0.0059931506849315,0.0
-12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@1,Adaptive tangent sequential,0.1139240506329113,Contrastive sequential,0.1139240506329113,0.0
-12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@5,Adaptive tangent sequential,0.2784810126582278,Contrastive sequential,0.2784810126582278,0.0
-12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@10,Adaptive tangent sequential,0.430379746835443,Contrastive sequential,0.430379746835443,0.0
-12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@1,Adaptive tangent sequential,0.1139240506329113,Contrastive sequential,0.1139240506329113,0.0
-12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@5,Adaptive tangent sequential,0.0708860759493671,Contrastive sequential,0.0708860759493671,0.0
-12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@10,Contrastive sequential,0.0658227848101265,Adaptive tangent sequential,0.0645569620253164,0.0012658227848101056
-13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@1,Direct sequential,0.0588235294117647,Direct sum,0.0294117647058823,0.029411764705882398
-13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@5,Learned gate,0.088235294117647,Direct sum,0.0588235294117647,0.029411764705882297
-13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@10,Direct sum,0.088235294117647,Direct sequential,0.088235294117647,0.0
-13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@1,Direct sequential,0.0588235294117647,Direct sum,0.0294117647058823,0.029411764705882398
-13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@5,Learned gate,0.0176470588235294,Direct sum,0.0117647058823529,0.005882352941176502
-13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@10,Direct sequential,0.0117647058823529,Learned gate,0.0117647058823529,0.0
+11,"+Chubby, -Young",Precision@5,Contrastive sequential,0.0068493150684931,Adaptive tangent sequential,0.0068493150684931,0.0
+11,"+Chubby, -Young",Precision@10,Contrastive sequential,0.0059931506849315,Adaptive tangent sequential,0.0059931506849315,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@1,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.1645569620253164,Learned gate v2 add_l009,0.1265822784810126,0.03797468354430378
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.4430379746835443,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.3924050632911392,0.050632911392405056
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Recall@10,Learned gate v3 seqp2_ov005,0.5569620253164557,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.5569620253164557,0.0
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@1,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.1645569620253164,Learned gate v2 add_l009,0.1265822784810126,0.03797468354430378
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@5,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.1139240506329114,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.1063291139240506,0.0075949367088608
+12,"-Smiling, +Eyeglasses, +Wearing_Hat",Precision@10,Learned gate v3 hybmp_l002_w050_balanced_length_b256_lr0,0.0886075949367088,Learned gate v3 seqp2_ov005,0.0848101265822784,0.0037974683544304
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@1,Direct sequential,0.0588235294117647,Learned gate v2 add_l001,0.0588235294117647,0.0
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@5,Learned gate v2 add_l001,0.1176470588235294,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.088235294117647,0.0294117647058824
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Recall@10,Learned gate v3 seq_l007,0.1176470588235294,Learned gate v2 add_l009,0.1176470588235294,0.0
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@1,Direct sequential,0.0588235294117647,Learned gate v2 add_l001,0.0588235294117647,0.0
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@5,Learned gate v2 add_l001,0.0235294117647058,Learned gate v3 offmp_l004_widepos_balanced_length_b256_lr0,0.0176470588235294,0.005882352941176398
+13,"+Wearing_Lipstick, -Heavy_Makeup, +Smiling",Precision@10,Learned gate v2 add_l009,0.0147058823529411,Direct sequential,0.0117647058823529,0.0029411764705882006

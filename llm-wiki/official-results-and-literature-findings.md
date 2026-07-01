@@ -979,3 +979,29 @@ q_final = normalize(q_model + 1.0 * (q_sum - source))
 ```
 
 and explain the learned sequential gate, the arithmetic delta branch, the training objective, and the assignment metrics.
+
+## 2026-07-01 Delivery notebook status
+
+Canonical final notebook:
+
+```text
+notebooks/DL26_Project_Delivery_notebook.ipynb
+```
+
+This is now the notebook to use for delivery. It keeps full training/evaluation code visible but guarded by flags, loads the actual cluster-run training curves and metrics, and runs lightweight smoke checks locally.
+
+Current final packaged inference equation:
+
+```text
+q_model  = learned sequential gate(source, signed query)
+q_sum    = CLIP arithmetic composition(source, signed query)
+q_hybrid = normalize(q_model + 1.25 * (q_sum - source))
+```
+
+The official final system then retrieves a top-500 pool by cosine similarity to `q_hybrid`, applies the calibrated v4 embedding probe, promotes candidates satisfying the requested query attributes and predicted non-query Hamming distance <= 2, and fills the final top-10 with the original `q_hybrid` ranking if fewer than 10 candidates survive.
+
+The delivery notebook smoke run on 2026-07-01 succeeded and generated qualitative grids in:
+
+```text
+final_best_system/results/delivery_notebook_qualitative/
+```
