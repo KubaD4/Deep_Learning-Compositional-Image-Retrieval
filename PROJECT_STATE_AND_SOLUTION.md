@@ -2,6 +2,9 @@
 
 Status snapshot: June 13, 2026.
 
+Current update, July 1, 2026: the project has moved beyond the proposal state described below. The canonical final package is `final_best_system/`, and the professor-facing final notebook is `notebooks/DL26_Project_Final_Submission.ipynb`. The current best official system is `v4_m04_deep_asl_lr2e4_d00_query_hamming_fill_accuracy`: a v7 learned sequential gate plus generic CLIP arithmetic correction,
+`q_hybrid = normalize(q_model + 1.25 * (q_sum - source))`, followed by calibrated CelebA attribute-probe reranking over the top-500 candidates. It reaches official JSON Macro Recall@10 `0.4787`, Micro Recall@10 `0.4055`, Macro Precision@10 `0.0864`, and Micro Precision@10 `0.0694`. See `llm-wiki/official-results-and-literature-findings.md`, `final_best_system/manifest.json`, and the final notebook for the current state.
+
 This document is the current authoritative summary of the project. It explains the assignment, data, benchmark, tools, work completed so far, selected solution proposal, implementation plan, evaluation, risks, and remaining work. A reader should be able to understand the complete project without first reading the original PDFs.
 
 For a longer implementation tutorial and code skeleton, see [PROJECT_GUIDE.md](PROJECT_GUIDE.md).

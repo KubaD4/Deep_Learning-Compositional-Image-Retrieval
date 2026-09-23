@@ -1,0 +1,27 @@
+{
+  "config_id": "v4_m04_deep_asl_lr2e4_d00",
+  "arch": "mlp",
+  "loss": "asl",
+  "epochs": 14,
+  "max_steps": 0,
+  "batch_size": 2048,
+  "lr": 0.0002,
+  "weight_decay": 0.0001,
+  "dropout": 0.0,
+  "hidden_dims": [
+    1536,
+    1024,
+    512
+  ],
+  "hidden_dim": 1024,
+  "blocks": 2,
+  "label_dim": 256,
+  "layers": 2,
+  "heads": 4,
+  "use_pos_weight": true,
+  "noise_std": 0.0,
+  "asym_gamma_neg": 4.0,
+  "asym_gamma_pos": 0.0,
+  "focal_gamma": 2.0,
+  "notes": ""
+}

@@ -36,6 +36,18 @@ __pycache__/
 .DS_Store
 .ipynb_checkpoints/
 
+# Re-creatable CLIP embeddings and machine-generated experiment outputs
+**/embeddings/
+artifacts/
+cluster/artifacts/
+final_best_system/artifacts/
+final_best_system/results/**/test_probe_probs.pt
+final_best_system/results/**/valid_probe_probs.pt
+
 # Locally generated qualitative experiments. Recreate them from
 # final_best_system/code/show_json_retrieval_example.py when needed.
 final_best_system/results/free_query_examples/
+
+# Local generated knowledge and website operational logs
+llm-wiki/
+website/logs/

@@ -33,9 +33,9 @@
     "gate_checkpoint": "final_best_system/weights/best_val_official_like_at10.pt",
     "probe_checkpoint": "final_best_system/results/probe_embedding_v4_m04/probe/best_probe.pt",
     "calibrated_thresholds": "final_best_system/results/probe_embedding_v4_m04/probe/calibrated_thresholds.pt",
-    "test_probe_probs": "final_best_system/results/probe_embedding_v4_m04/probe/test_probe_probs.pt",
-    "test_image_embeddings": "final_best_system/data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt",
-    "prompt_cache": "final_best_system/data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt",
+    "test_probe_probs": "recreated locally from the probe checkpoint and test image embeddings",
+    "test_image_embeddings": "recreated locally with CLIP ViT-B/32; not stored in Git",
+    "prompt_cache": "recreated locally with CLIP ViT-B/32; not stored in Git",
     "evaluation_json": "final_best_system/data/celeba_evaluation.json",
     "attribute_annotations": "final_best_system/data/celeba/annotations/list_attr_celeba.txt"
   },

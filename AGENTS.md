@@ -13,9 +13,17 @@ Every future agent/chat working in this folder must first read:
 5. `PROJECT_GUIDE.md` for detailed implementation, experiment, or onboarding instructions
 6. Any other wiki pages linked from the index that match the task
 
+For active website work, also read `llm-wiki/website-goal.md` and
+`llm-wiki/monitoring-and-logs.md`. These are the handoff contract for the current
+product goal, verified status, outstanding decisions, and operational logs.
+
 The wiki is the persistent working memory for the project. Always keep it current whenever new files, results, decisions, experiments, or explanations are produced.
 
-`llm-wiki/` is local-only and intentionally ignored by git. Do not stage, force-add, commit, or publish it unless the user explicitly requests a policy change.
+`llm-wiki/` is local-only by policy and has an ignore rule for new files. Some
+legacy wiki files are still tracked by git; the ignore rule does not untrack
+them. Do not stage, force-add, commit, or publish wiki changes unless the user
+explicitly requests a policy change. Do not rewrite git history to resolve this
+legacy state without a separate request.
 
 ## LLM Wiki Contract
 
@@ -73,6 +81,24 @@ When new work happens:
 - Append to `llm-wiki/log.md`.
 - When findings, results, or design decisions change, update the wiki and log in the same turn before handing work back.
 - If a paper, blog post, or external reference materially informs a decision, save its link in the relevant wiki page with a one-line note explaining why it matters.
-- Periodically remind the user to push wiki/context updates to Git so future agents and collaborators see the same project state.
+- Keep the wiki local-only. Do not suggest pushing it to GitHub unless the user explicitly changes that policy.
 - If a new source file appears, add it to `llm-wiki/source-inventory.md`.
 - If a source was converted with MarkItDown, link both the raw source and generated Markdown.
+
+## Goal, Monitoring, And Run Logs
+
+- Record the current requested outcome, acceptance checks, status, and next steps
+  in the narrowest goal page, currently `llm-wiki/website-goal.md`.
+- Separate facts verified by a command/test from assumptions or proposed work.
+  Every live-status statement must say when it was checked and how to recheck it.
+- After meaningful progress, update the goal page and append a dated entry to
+  `llm-wiki/log.md` in the same turn. Keep prior log entries intact.
+- Runtime logs are machine-generated evidence, not wiki prose. The website's
+  operational log is `website/logs/app.jsonl`; it is local-only and append-only.
+- When monitoring, record only meaningful transitions, failures, results, or
+  required user decisions in the wiki. Do not turn unchanged polling into noise.
+- Do not create a background monitoring schedule merely because this schema
+  mentions monitoring. Use the app's automation mechanism only when the user
+  actually requests recurring checks, reminders, or continued monitoring.
+- Preserve raw sources, trained weights, and datasets. Do not duplicate or
+  replace the canonical `final_best_system/` as part of website work.

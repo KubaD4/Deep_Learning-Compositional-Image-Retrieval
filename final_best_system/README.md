@@ -1,6 +1,6 @@
 # Final Best System Package
 
-This folder is the canonical final-best package for the project. It is designed to run from a cloned repository without relying on `/Users/kuba/...` or the Baldo cluster path.
+This folder is the canonical final-best package for the project. It is designed to run from a cloned repository without relying on machine-specific absolute paths.
 
 ## Winner
 
@@ -52,12 +52,11 @@ If `results/probe_embedding_v4_m04/` is not present, the runnable code falls bac
 - `weights/best_val_official_like_at10.pt`: best v7 learned gate checkpoint.
 - `results/probe_embedding_v4_m04/probe/best_probe.pt`: best embedding MLP CelebA attribute probe checkpoint.
 - `results/probe_embedding_v4_m04/probe/calibrated_thresholds.pt`: per-attribute calibrated thresholds.
-- `results/probe_embedding_v4_m04/probe/test_probe_probs.pt`: cached probe probabilities for CelebA test images.
 - `results/probe_reranker_v2_calibrated/`: older fallback probe package kept for reproducibility.
-- `data/celeba/embeddings/openai_clip_vit_b32/test_image_embeddings.pt`: test gallery CLIP image embeddings.
-- `data/celeba/embeddings/openai_clip_vit_b32/signed_attribute_prompt_embeddings_v2_photo_templates.pt`: prompt cache used by the learned gate.
 - `data/celeba/annotations/list_attr_celeba.txt`: CelebA attributes used by probe/Hamming checks.
 - `data/celeba_evaluation.json`: official evaluation JSON.
+
+CLIP image and text embeddings, plus per-image probe probabilities, are generated caches and are not included in the GitHub package. Recreate them with the embedding-generation cells in `notebooks/DL26_Project_Final_Submission.ipynb`, or run the packaged cache scripts with CLIP ViT-B/32 before using the full local evaluator.
 
 ## Setup
 
@@ -97,7 +96,7 @@ or:
 bash final_best_system/code/run_final_evaluation.sh
 ```
 
-On CPU this is slower than the cluster run because it evaluates all official source-query cases.
+On CPU this is slower than the saved accelerated run because it evaluates all official source-query cases.
 
 ## Official JSON Visualization
 
